@@ -1,0 +1,63 @@
+# Engineering notes
+
+## Architecture
+
+- `Sources/FolioCore/Models.swift`: Codable data-only pack, character, and level-choice contracts. Character records pin a full pack snapshot.
+- `RulesEngine.swift`: deterministic evaluation from choices, not incremental bonuses. Replaying historical choices catches invalid earlier levels and avoids accumulated/stat-stacking state.
+- `Validation.swift`: bounded import validation and reference integrity. Separate content structure from build completeness so unfinished drafts can be saved.
+- `Persistence.swift`: atomic local save, previous-file backup, versioned documents, character export, bounded narrative prompt construction.
+- `Sources/FolioApp/`: SwiftUI library, level editor, sheet, story and optional Apple Foundation Models integration. Suggestions require explicit acceptance and never touch build choices.
+- `scripts/convert-vessel-pack.mjs`: curated adapter from existing corrected Foundry/YAML sources into private portable data, with source hashes and unresolved-reference diagnostics.
+- `Tests/FolioCoreTests/`: standalone Swift regression executable, no third-party testing dependencies.
+- `ContentCatalog.swift`: source-qualified shared choices, last-installed revisions for new snapshots, opt-in additive choices for pinned builds.
+- `PrintableSheet.swift`: pure rules-output-to-sheet projection, with untracked state blank and conditional rules in notes.
+- `Sources/FolioPDF/SheetPDF.swift`: fingerprinted local template, native editable form filling, measured overflow and selectable Core Text supplements. `SheetPDFView.swift` hosts a read-only native preview of the same export bytes.
+
+## Shared library and sheet verification (2026-10-30)
+
+- Core: 28 scenario checks, including catalog collisions/revisions/partial packs/privacy/pinning and calculated sheet fields. Presentation: 8 checks. Native PDF integration checks reopen the actual supported template, verify every populated level-five caster field, Unicode, proficiency flags, blank combat state, draft marking, long-story pagination, preservation of the blank master and rejection of invalid replacement templates.
+- Native PDF checks require a locally supplied official blank PDF; missing input is reported as SKIPPED with nonzero exit. Run `bash scripts/check-pdf.sh /path/to/blank.pdf /tmp/folio-pdf-checks`.
+- Source identity uses SHA-256 of source ID, version, record type and local ID. Different source definitions are not silently deduplicated. Source-pack schema remains unchanged because partial collections were already structurally permitted; semantic validation now permits them.
+- The supported template's URL, exact SHA-256 and widget map are in `SheetPDF.swift`. The PDF itself is not bundled. A publisher revision requires explicit mapping/compatibility review.
+- Native PDFKit prints orphan-field warnings for the official form's field tree; pypdf reports unused object offsets when reopening generated files. Populated widget values match the canonical AcroForm values and retain appearance streams/editable flags. These warnings are documented, not treated as evidence of universal PDF-reader compatibility. Acrobat/third-party editing remains unverified.
+- A fresh-context read-only reviewer found two projection issues: pre-spellcasting DC/attack numbers and missing Known/Granted classifications beyond 30 main-form rows. Both have failing-then-passing regressions and fixes. A UI-discovered whitespace-only page also has a regression.
+- Isolated native UI smoke confirmed one class picker with both sources, cross-pack species, source-disambiguated backgrounds, preserved old builds and the populated read-only PDF preview. The PDF export button initially failed to open its dialog with nested SwiftUI exporters. A single character-level export presenter now handles explicitly typed JSON/PDF payloads. After the Mac was unlocked, native checks passed for PDF save/cancel/reopen, importing the supported blank template, updating a character name and seeing it in the regenerated preview/export, and switching back to a correctly named JSON export dialog. The saved PDF reopened with the updated canonical/widget values and editable flags; the imported blank master remained byte-identical. Screenshot: `Preview/verified-sheet-export.png`.
+- User saves were not used as test fixtures. All smoke mutations used `FOLIO_LIBRARY_PATH` in an isolated temporary directory. iPhone compilation/device, Dynamic Type, VoiceOver and live AI remain unverified.
+
+The approved visual direction uses white backgrounds, black primary actions, pale gray pill rows, system sans typography, and circular portraits with safe initials fallbacks. Color stays with the characters. The library has collection/list modes and name/class search; Story uses large concept editing and non-destructive prompt hints. No externally downloaded imagery or fonts are required. Final ability totals are on Sheet; Build separates base choices from background bonuses. Portrait display is circular but the original imported image bytes are retained.
+
+## Reference-led UI verification (2026-10-30)
+
+- All 26 core checks and 8 new presentation checks pass; native Mac preview builds and its ad-hoc signature verifies.
+- The new presentation checks were run failing before the helper implementation; they cover blank, multiword and Unicode names plus trimmed, accent-insensitive name/class searching.
+- Native walkthrough at approximately 452 points wide exercised collection/list switching, empty-search recovery, existing Mara restoration, ability-score rows, calculated Sheet, Story prompts, unavailable AI feedback, and opening/cancelling character creation. Screenshots are in `Preview/reference-{library,builder,story}.png`.
+- A fresh-context read-only reviewer found no blocking regressions. Duplicate error presentation was noted and corrected. Core rules, models, persistence, content resources and AppStore are unchanged against the pre-redesign source backup.
+- This is not iPhone, Dynamic Type, VoiceOver, live generation, or distribution proof. Those gates remain unverified. No characters were created or modified during this UI walkthrough.
+
+## Verification boundaries
+
+At the initial MVP handoff:
+
+- Native macOS Swift package/app compiled with Swift 6.3.2, MacOSX26.5 SDK; ad-hoc bundle signature verified.
+- Standalone core checks exercised a complete level-1–5 build, incomplete choices, earlier-level edits, replacement rules, feat prerequisites, HP recalculation, malformed packs, persistence/backup, corruption protection, exports, bounded AI context, and the converted private Vessel pack.
+- Native UI walkthrough exercised sample creation, calculated sheet, story editor, private pack import, and persisted library restoration after restart. Apple Intelligence reported `appleIntelligenceNotEnabled`; generation was disabled cleanly. Real generated output is **not verified** on this machine.
+- Xcode project plist syntax was validated; no iOS SDK/simulator or Xcode application is installed. iPhone layout, compile, signing, model generation, and device performance remain unverified.
+- No TestFlight/App Store submission, release, push, or public deployment occurred.
+
+## Known content limitations
+
+Private conversion includes a curated Vessel level-1–5 slice, the Trickster subclass, two species, two backgrounds, supported feats, and standard spell references resolved against existing sources. It does not pretend to convert every Foundry advancement/effect. Cursed and Formless are excluded until their additional Aspect grants/choices are modeled; Flame Whip also has no resolved standard source. Some inherited descriptions have source extraction defects; these are preserved/reportable rather than silently rewritten. Review descriptions before using them as the sole rules reference.
+
+A fresh-context reviewer identified missing Cursed/Formless bonus-Aspect handling and stale-snapshot overwrites across Mac windows. The former was resolved by removing those unsupported subclasses from the selectable pack; the latter by making the Mac MVP single-window. These scope restrictions are intentional, not claims of complete rules coverage.
+
+The private output includes legacy supplementary spells when no revised 2024 source exists. `ruleset: 2024` names the builder conventions, not a guarantee that every imported description was published in 2024.
+
+## Next engineering increments
+
+1. Actual iPhone build/test, compact-width and Dynamic Type testing, local AI generation and cancellation smoke tests.
+2. Explicit class-specific choice/replacement policies, richer proficiencies, equipment and armor choices; complete remaining sheet dialog/device checks.
+3. More fully reviewed 2024 species/classes/feats; selected spell casting beyond a single uniform slot pool.
+4. Levels 6–20 and multiclass prerequisites/progression; optional migration between pack versions with a review screen.
+5. Portrait generation through an explicitly chosen on-device image API, accessible app icon, distribution/signing and public license review.
+
+Keep content adapters separate from the rules engine. Add a regression for each new calculated mechanic; never infer automation from description text or use an AI answer as the validator.

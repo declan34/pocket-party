@@ -1,0 +1,584 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Character Folio content pack v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "id",
+    "version",
+    "name",
+    "ruleset",
+    "isPrivate",
+    "attribution",
+    "coverageNotes",
+    "classes",
+    "species",
+    "backgrounds",
+    "feats",
+    "spells",
+    "languages"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "id": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "ruleset": {
+      "const": "2024"
+    },
+    "isPrivate": {
+      "type": "boolean"
+    },
+    "attribution": {
+      "type": "string"
+    },
+    "coverageNotes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "classes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/class"
+      }
+    },
+    "species": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/species"
+      }
+    },
+    "backgrounds": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/background"
+      }
+    },
+    "feats": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/feat"
+      }
+    },
+    "spells": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/spell"
+      }
+    },
+    "languages": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "feature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "text",
+        "level"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "level": {
+          "type": "integer"
+        }
+      }
+    },
+    "talent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "text",
+        "minimumLevel",
+        "exclusiveGroup",
+        "skills",
+        "requires"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "minimumLevel": {
+          "type": "integer"
+        },
+        "exclusiveGroup": {
+          "type": "string"
+        },
+        "skills": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "requires": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "spell": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "text",
+        "level",
+        "source"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "level": {
+          "type": "integer"
+        },
+        "source": {
+          "type": "string"
+        },
+        "unavailableReason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "grant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "level",
+        "spellIDs"
+      ],
+      "properties": {
+        "level": {
+          "type": "integer"
+        },
+        "spellIDs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "subclass": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "text",
+        "features",
+        "spells"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "features": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/feature"
+          }
+        },
+        "spells": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/grant"
+          }
+        }
+      }
+    },
+    "progression": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "level",
+        "talents",
+        "cantrips",
+        "spells",
+        "slots",
+        "slotLevel",
+        "improvement"
+      ],
+      "properties": {
+        "level": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "talents": {
+          "type": "integer"
+        },
+        "cantrips": {
+          "type": "integer"
+        },
+        "spells": {
+          "type": "integer"
+        },
+        "slots": {
+          "type": "integer"
+        },
+        "slotLevel": {
+          "type": "integer"
+        },
+        "improvement": {
+          "type": "boolean"
+        }
+      }
+    },
+    "class": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "summary",
+        "hitDie",
+        "primaryAbility",
+        "saves",
+        "skillCount",
+        "skillPool",
+        "subclassLevel",
+        "talentLabel",
+        "features",
+        "talents",
+        "subclasses",
+        "progression",
+        "spellIDs",
+        "equipment",
+        "armorFormula"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "summary": {
+          "type": "string"
+        },
+        "hitDie": {
+          "enum": [
+            6,
+            8,
+            10,
+            12
+          ]
+        },
+        "primaryAbility": {
+          "enum": [
+            "str",
+            "dex",
+            "con",
+            "int",
+            "wis",
+            "cha"
+          ]
+        },
+        "spellAbility": {
+          "anyOf": [
+            {
+              "enum": [
+                "str",
+                "dex",
+                "con",
+                "int",
+                "wis",
+                "cha"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "saves": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "str",
+              "dex",
+              "con",
+              "int",
+              "wis",
+              "cha"
+            ]
+          }
+        },
+        "skillCount": {
+          "type": "integer"
+        },
+        "skillPool": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "subclassLevel": {
+          "type": "integer"
+        },
+        "talentLabel": {
+          "type": "string"
+        },
+        "features": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/feature"
+          }
+        },
+        "talents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/talent"
+          }
+        },
+        "subclasses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/subclass"
+          }
+        },
+        "progression": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/progression"
+          }
+        },
+        "spellIDs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "equipment": {
+          "type": "string"
+        },
+        "armorFormula": {
+          "enum": [
+            "unarmored",
+            "vessel-mantle"
+          ]
+        }
+      }
+    },
+    "species": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "text",
+        "speed",
+        "hpPerLevel",
+        "size"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "speed": {
+          "type": "integer"
+        },
+        "hpPerLevel": {
+          "type": "integer"
+        },
+        "size": {
+          "type": "string"
+        }
+      }
+    },
+    "background": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "text",
+        "abilities",
+        "skills",
+        "tool",
+        "originFeatID",
+        "equipment"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "abilities": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "str",
+              "dex",
+              "con",
+              "int",
+              "wis",
+              "cha"
+            ]
+          }
+        },
+        "skills": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tool": {
+          "type": "string"
+        },
+        "originFeatID": {
+          "type": "string"
+        },
+        "equipment": {
+          "type": "string"
+        }
+      }
+    },
+    "feat": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "text",
+        "category",
+        "minimumLevel",
+        "abilityOptions",
+        "abilityPoints",
+        "hpPerLevel",
+        "initiativeProficiency",
+        "skills",
+        "abilityMinimums"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "category": {
+          "enum": [
+            "origin",
+            "general"
+          ]
+        },
+        "minimumLevel": {
+          "type": "integer"
+        },
+        "abilityOptions": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "str",
+              "dex",
+              "con",
+              "int",
+              "wis",
+              "cha"
+            ]
+          }
+        },
+        "abilityPoints": {
+          "type": "integer"
+        },
+        "hpPerLevel": {
+          "type": "integer"
+        },
+        "initiativeProficiency": {
+          "type": "boolean"
+        },
+        "skills": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "abilityMinimums": {
+          "type": "object",
+          "propertyNames": {
+            "enum": [
+              "str",
+              "dex",
+              "con",
+              "int",
+              "wis",
+              "cha"
+            ]
+          },
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 20
+          }
+        }
+      }
+    }
+  }
+}

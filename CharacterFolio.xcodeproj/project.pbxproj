@@ -1,0 +1,29 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {};
+	objectVersion = 77;
+	objects = {
+		A00000000000000000000001 = {isa = PBXProject; attributes = {BuildIndependentTargetsInParallel = 1; LastSwiftUpdateCheck = 2600; LastUpgradeCheck = 2600; TargetAttributes = {A00000000000000000000002 = {CreatedOnToolsVersion = 26.0; }; }; }; buildConfigurationList = A00000000000000000000007; compatibilityVersion = "Xcode 16.0"; developmentRegion = en; hasScannedForEncodings = 0; knownRegions = (en, Base); mainGroup = A00000000000000000000003; minimizedProjectReferenceProxies = 1; packageReferences = (A00000000000000000000020); preferredProjectObjectVersion = 77; productRefGroup = A00000000000000000000004; projectDirPath = ""; projectRoot = ""; targets = (A00000000000000000000002); };
+		A00000000000000000000002 = {isa = PBXNativeTarget; buildConfigurationList = A00000000000000000000008; buildPhases = (A00000000000000000000010, A00000000000000000000011, A00000000000000000000012); buildRules = (); dependencies = (); fileSystemSynchronizedGroups = (A00000000000000000000006); name = CharacterFolio; packageProductDependencies = (A00000000000000000000021, A00000000000000000000023); productName = CharacterFolio; productReference = A00000000000000000000005; productType = "com.apple.product-type.application"; };
+		A00000000000000000000003 = {isa = PBXGroup; children = (A00000000000000000000006, A00000000000000000000004); sourceTree = "<group>"; };
+		A00000000000000000000004 = {isa = PBXGroup; children = (A00000000000000000000005); name = Products; sourceTree = "<group>"; };
+		A00000000000000000000005 = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CharacterFolio.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A00000000000000000000006 = {isa = PBXFileSystemSynchronizedRootGroup; path = Sources/FolioApp; sourceTree = "<group>"; };
+		A00000000000000000000007 = {isa = XCConfigurationList; buildConfigurations = (A00000000000000000000030, A00000000000000000000031); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		A00000000000000000000008 = {isa = XCConfigurationList; buildConfigurations = (A00000000000000000000032, A00000000000000000000033); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		A00000000000000000000010 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		A00000000000000000000011 = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000022, A00000000000000000000024); runOnlyForDeploymentPostprocessing = 0; };
+		A00000000000000000000012 = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		A00000000000000000000020 = {isa = XCLocalSwiftPackageReference; relativePath = .; };
+		A00000000000000000000021 = {isa = XCSwiftPackageProductDependency; package = A00000000000000000000020; productName = FolioCore; };
+		A00000000000000000000022 = {isa = PBXBuildFile; productRef = A00000000000000000000021; };
+		A00000000000000000000023 = {isa = XCSwiftPackageProductDependency; package = A00000000000000000000020; productName = FolioPDF; };
+		A00000000000000000000024 = {isa = PBXBuildFile; productRef = A00000000000000000000023; };
+		A00000000000000000000030 = {isa = XCBuildConfiguration; buildSettings = {CLANG_ENABLE_MODULES = YES; SDKROOT = iphoneos; SWIFT_VERSION = 6.0; SWIFT_OPTIMIZATION_LEVEL = "-Onone"; }; name = Debug; };
+		A00000000000000000000031 = {isa = XCBuildConfiguration; buildSettings = {CLANG_ENABLE_MODULES = YES; SDKROOT = iphoneos; SWIFT_VERSION = 6.0; SWIFT_COMPILATION_MODE = wholemodule; }; name = Release; };
+		A00000000000000000000032 = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 1; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_CFBundleDisplayName = "Character Folio"; INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.role-playing-games"; INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES; INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES; INFOPLIST_KEY_UILaunchScreen_Generation = YES; IPHONEOS_DEPLOYMENT_TARGET = 26.0; LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks"; MARKETING_VERSION = 0.1.0; PRODUCT_BUNDLE_IDENTIFIER = dev.declan.character-folio; PRODUCT_NAME = "$(TARGET_NAME)"; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; SWIFT_EMIT_LOC_STRINGS = YES; TARGETED_DEVICE_FAMILY = "1,2"; }; name = Debug; };
+		A00000000000000000000033 = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 1; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_CFBundleDisplayName = "Character Folio"; INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.role-playing-games"; INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES; INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES; INFOPLIST_KEY_UILaunchScreen_Generation = YES; IPHONEOS_DEPLOYMENT_TARGET = 26.0; LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks"; MARKETING_VERSION = 0.1.0; PRODUCT_BUNDLE_IDENTIFIER = dev.declan.character-folio; PRODUCT_NAME = "$(TARGET_NAME)"; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; SWIFT_EMIT_LOC_STRINGS = YES; TARGETED_DEVICE_FAMILY = "1,2"; }; name = Release; };
+	};
+	rootObject = A00000000000000000000001;
+}

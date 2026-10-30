@@ -1,0 +1,441 @@
+{
+  "schemaVersion": 1,
+  "id": "folio.original-demo",
+  "version": "1.0.0",
+  "name": "The Lantern Roads",
+  "ruleset": "2024",
+  "isPrivate": false,
+  "attribution": "Original demonstration content created for Character Folio. This is homebrew sample data, not an official D&D class or spell collection.",
+  "coverageNotes": [
+    "Levels 1–5; single class; standard array; fixed-average HP.",
+    "Original demonstration content using the 2024 builder conventions. Spell effects and combat are narrative examples, not a balanced published ruleset.",
+    "Inventory, equipment purchasing, combat, multiclassing, and cantrip replacement are outside this MVP."
+  ],
+  "languages": [
+    "Dwarvish",
+    "Elvish",
+    "Giant",
+    "Gnomish",
+    "Goblin",
+    "Halfling",
+    "Orc",
+    "Draconic",
+    "Common Sign Language"
+  ],
+  "species": [
+    {
+      "id": "roadfolk",
+      "name": "Roadfolk",
+      "text": "People of the old lantern roads. You can always recall the path of a journey you have walked yourself.",
+      "speed": 30,
+      "hpPerLevel": 0,
+      "size": "Medium"
+    },
+    {
+      "id": "mosskin",
+      "name": "Mosskin",
+      "text": "Small, patient folk whose moss-soft skin carries the scent of rain. Their compact frames are unusually resilient.",
+      "speed": 25,
+      "hpPerLevel": 1,
+      "size": "Small"
+    }
+  ],
+  "backgrounds": [
+    {
+      "id": "archive-runner",
+      "name": "Archive Runner",
+      "text": "You carried fragile records between distant reading rooms. One undelivered letter still waits in your satchel.",
+      "abilities": [
+        "dex",
+        "int",
+        "cha"
+      ],
+      "skills": [
+        "History",
+        "Investigation"
+      ],
+      "tool": "Calligrapher’s supplies",
+      "originFeatID": "patient-reader",
+      "equipment": "A journal, ink, a weatherproof satchel, and a sealed letter. Inventory is a narrative note in this demo."
+    },
+    {
+      "id": "night-guide",
+      "name": "Night Guide",
+      "text": "You guided strangers home by lamplight. You remember faces better than destinations.",
+      "abilities": [
+        "con",
+        "wis",
+        "cha"
+      ],
+      "skills": [
+        "Perception",
+        "Survival"
+      ],
+      "tool": "Cartographer’s tools",
+      "originFeatID": "weathered",
+      "equipment": "A lantern, a worn map, and traveler’s clothes. Inventory is a narrative note in this demo."
+    }
+  ],
+  "feats": [
+    {
+      "id": "patient-reader",
+      "name": "Patient Reader",
+      "text": "Your patient study grants proficiency in Arcana.",
+      "category": "origin",
+      "minimumLevel": 1,
+      "abilityOptions": [],
+      "abilityPoints": 0,
+      "hpPerLevel": 0,
+      "initiativeProficiency": false,
+      "skills": [
+        "Arcana"
+      ],
+      "abilityMinimums": {}
+    },
+    {
+      "id": "weathered",
+      "name": "Weathered",
+      "text": "Your journeys grant 1 additional maximum HP for each character level.",
+      "category": "origin",
+      "minimumLevel": 1,
+      "abilityOptions": [],
+      "abilityPoints": 0,
+      "hpPerLevel": 1,
+      "initiativeProficiency": false,
+      "skills": [],
+      "abilityMinimums": {}
+    },
+    {
+      "id": "ability-improvement",
+      "name": "Ability Score Improvement",
+      "text": "Increase one ability by 2 or two abilities by 1, to a maximum of 20.",
+      "category": "general",
+      "minimumLevel": 4,
+      "abilityOptions": [
+        "str",
+        "dex",
+        "con",
+        "int",
+        "wis",
+        "cha"
+      ],
+      "abilityPoints": 2,
+      "hpPerLevel": 0,
+      "initiativeProficiency": false,
+      "skills": [],
+      "abilityMinimums": {}
+    },
+    {
+      "id": "steady-flame",
+      "name": "Steady Flame",
+      "text": "Increase Constitution or Charisma by 1. Your calm preparation grants proficiency in Insight.",
+      "category": "general",
+      "minimumLevel": 4,
+      "abilityOptions": [
+        "con",
+        "cha"
+      ],
+      "abilityPoints": 1,
+      "hpPerLevel": 0,
+      "initiativeProficiency": false,
+      "skills": [
+        "Insight"
+      ],
+      "abilityMinimums": {
+        "cha": 13
+      }
+    }
+  ],
+  "spells": [
+    {
+      "id": "ember-script",
+      "name": "Ember Script",
+      "level": 0,
+      "text": "Trace a brief, harmless message in the air with warm sparks. It fades when you finish reading it aloud.",
+      "source": "Character Folio original demonstration content"
+    },
+    {
+      "id": "little-beacon",
+      "name": "Little Beacon",
+      "level": 0,
+      "text": "A small floating light follows your hand. It illuminates a forgotten corner without giving off heat.",
+      "source": "Character Folio original demonstration content"
+    },
+    {
+      "id": "paper-bird",
+      "name": "Paper Bird",
+      "level": 0,
+      "text": "Fold a scrap of paper into a bird that glides to a creature you can see, carrying a written message.",
+      "source": "Character Folio original demonstration content"
+    },
+    {
+      "id": "quiet-thread",
+      "name": "Quiet Thread",
+      "level": 0,
+      "text": "Tie a faint thread of light around an object so you can recognize it by touch.",
+      "source": "Character Folio original demonstration content"
+    },
+    {
+      "id": "sheltering-glow",
+      "name": "Sheltering Glow",
+      "level": 1,
+      "text": "Create a pocket of warm light around a willing companion. Its exact protection is adjudicated by your GM in this demonstration setting.",
+      "source": "Character Folio original demonstration content"
+    },
+    {
+      "id": "borrowed-dawn",
+      "name": "Borrowed Dawn",
+      "level": 1,
+      "text": "Fill a small space with the light and birdsong of a remembered morning.",
+      "source": "Character Folio original demonstration content"
+    },
+    {
+      "id": "trail-whisper",
+      "name": "Trail Whisper",
+      "level": 1,
+      "text": "Ask the wind to repeat the last ordinary sound heard along a nearby path.",
+      "source": "Character Folio original demonstration content"
+    },
+    {
+      "id": "lantern-bridge",
+      "name": "Lantern Bridge",
+      "level": 2,
+      "text": "Describe a bridge of lantern light spanning a modest gap; agree on its limits with your GM.",
+      "source": "Character Folio original demonstration content"
+    },
+    {
+      "id": "echo-room",
+      "name": "Echo Room",
+      "level": 2,
+      "text": "Let companions see an impression of a room as you remember it.",
+      "source": "Character Folio original demonstration content"
+    },
+    {
+      "id": "keeper-call",
+      "name": "Keeper’s Call",
+      "level": 1,
+      "text": "Your lantern briefly shows the direction of a fellow keeper who welcomes the connection.",
+      "source": "Character Folio original demonstration content"
+    },
+    {
+      "id": "keeper-circle",
+      "name": "Keeper’s Circle",
+      "level": 2,
+      "text": "Light a ring of welcoming lamps around your campsite.",
+      "source": "Character Folio original demonstration content"
+    }
+  ],
+  "classes": [
+    {
+      "id": "lantern-keeper",
+      "name": "Lantern Keeper",
+      "summary": "Carry a little light into places the world has forgotten.",
+      "hitDie": 8,
+      "primaryAbility": "cha",
+      "spellAbility": "cha",
+      "saves": [
+        "wis",
+        "cha"
+      ],
+      "skillCount": 2,
+      "skillPool": [
+        "Arcana",
+        "Insight",
+        "Medicine",
+        "Persuasion",
+        "Religion",
+        "Survival"
+      ],
+      "subclassLevel": 3,
+      "talentLabel": "Practices",
+      "equipment": "A walking staff and a lantern. This demo records equipment as notes; it does not calculate purchases or armor.",
+      "armorFormula": "unarmored",
+      "features": [
+        {
+          "id": "lantern",
+          "name": "The lantern",
+          "level": 1,
+          "text": "Your lantern is a personal keepsake and the focus of your magic."
+        },
+        {
+          "id": "roads",
+          "name": "Lantern magic",
+          "level": 2,
+          "text": "Choose your cantrips and known spells. This example class uses a shared pool of spell slots that refreshes after a rest."
+        },
+        {
+          "id": "calling",
+          "name": "A calling",
+          "level": 3,
+          "text": "Choose which part of the lantern road you will care for."
+        },
+        {
+          "id": "two-lights",
+          "name": "Two lights",
+          "level": 5,
+          "text": "Your story now reaches beyond a single road. Record a place you promise to return to."
+        }
+      ],
+      "talents": [
+        {
+          "id": "listener",
+          "name": "Listener",
+          "text": "Learn to notice the words people leave unsaid. Gain proficiency in Insight.",
+          "skills": [
+            "Insight"
+          ],
+          "minimumLevel": 1,
+          "exclusiveGroup": "listener",
+          "requires": []
+        },
+        {
+          "id": "letter-keeper",
+          "name": "Letter Keeper",
+          "text": "You keep careful records. Gain proficiency in History.",
+          "skills": [
+            "History"
+          ],
+          "minimumLevel": 1,
+          "exclusiveGroup": "letter-keeper",
+          "requires": []
+        },
+        {
+          "id": "path-reader",
+          "name": "Path Reader",
+          "text": "You understand the traces left by travelers. Gain proficiency in Survival.",
+          "skills": [
+            "Survival"
+          ],
+          "minimumLevel": 1,
+          "exclusiveGroup": "path-reader",
+          "requires": []
+        },
+        {
+          "id": "gentle-hand",
+          "name": "Gentle Hand",
+          "text": "Your steady care grants proficiency in Medicine.",
+          "skills": [
+            "Medicine"
+          ],
+          "minimumLevel": 2,
+          "exclusiveGroup": "gentle-hand",
+          "requires": []
+        }
+      ],
+      "subclasses": [
+        {
+          "id": "waylight",
+          "name": "Waylight",
+          "text": "You lead the lost toward a place they can call home.",
+          "features": [
+            {
+              "id": "welcome",
+              "name": "A light in the window",
+              "level": 3,
+              "text": "A small lamp becomes your sign of welcome. Describe a place where a friend leaves one burning for you."
+            }
+          ],
+          "spells": [
+            {
+              "level": 3,
+              "spellIDs": [
+                "keeper-call"
+              ]
+            },
+            {
+              "level": 5,
+              "spellIDs": [
+                "keeper-circle"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "memory-keeper",
+          "name": "Memory Keeper",
+          "text": "You preserve the stories carried by abandoned places.",
+          "features": [
+            {
+              "id": "memory",
+              "name": "The remembered road",
+              "level": 3,
+              "text": "Keep a short memory of every meaningful place you visit."
+            }
+          ],
+          "spells": [
+            {
+              "level": 3,
+              "spellIDs": [
+                "keeper-call"
+              ]
+            },
+            {
+              "level": 5,
+              "spellIDs": [
+                "keeper-circle"
+              ]
+            }
+          ]
+        }
+      ],
+      "progression": [
+        {
+          "level": 1,
+          "talents": 1,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 2,
+          "talents": 2,
+          "cantrips": 2,
+          "spells": 2,
+          "slots": 2,
+          "slotLevel": 1,
+          "improvement": false
+        },
+        {
+          "level": 3,
+          "talents": 2,
+          "cantrips": 2,
+          "spells": 2,
+          "slots": 2,
+          "slotLevel": 1,
+          "improvement": false
+        },
+        {
+          "level": 4,
+          "talents": 3,
+          "cantrips": 3,
+          "spells": 3,
+          "slots": 2,
+          "slotLevel": 1,
+          "improvement": true
+        },
+        {
+          "level": 5,
+          "talents": 3,
+          "cantrips": 3,
+          "spells": 3,
+          "slots": 2,
+          "slotLevel": 2,
+          "improvement": false
+        }
+      ],
+      "spellIDs": [
+        "ember-script",
+        "little-beacon",
+        "paper-bird",
+        "quiet-thread",
+        "sheltering-glow",
+        "borrowed-dawn",
+        "trail-whisper",
+        "lantern-bridge",
+        "echo-room"
+      ]
+    }
+  ]
+}

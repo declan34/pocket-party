@@ -1,0 +1,17 @@
+.build/
+.swiftpm/
+.DS_Store
+PrivatePacks/*
+!PrivatePacks/.gitkeep
+Preview/
+*.xcuserstate
+xcuserdata/
+DerivedData/
+output/
+# Local implementation notes, imported documents, and signing/secrets stay private.
+docs/superpowers/
+*.pdf
+.env
+.env.*
+*.p12
+*.mobileprovision
