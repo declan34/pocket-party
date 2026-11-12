@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Character Folio content pack v1",
+  "title": "Pocket Party content pack v1/v2",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -21,7 +21,13 @@
   ],
   "properties": {
     "schemaVersion": {
-      "const": 1
+      "enum": [
+        1,
+        2
+      ]
+    },
+    "capabilities": {
+      "$ref": "#/$defs/packCapabilities"
     },
     "id": {
       "type": "string"
@@ -33,7 +39,10 @@
       "type": "string"
     },
     "ruleset": {
-      "const": "2024"
+      "enum": [
+        "2014",
+        "2024"
+      ]
     },
     "isPrivate": {
       "type": "boolean"
@@ -84,6 +93,38 @@
       }
     }
   },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "schemaVersion": {
+            "const": 1
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "ruleset": {
+            "const": "2024"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "schemaVersion": {
+            "const": 2
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "capabilities"
+        ]
+      }
+    }
+  ],
   "$defs": {
     "feature": {
       "type": "object",
@@ -235,6 +276,9 @@
           "items": {
             "$ref": "#/$defs/grant"
           }
+        },
+        "capabilities": {
+          "$ref": "#/$defs/definitionCapabilities"
         }
       }
     },
@@ -409,6 +453,9 @@
             "unarmored",
             "vessel-mantle"
           ]
+        },
+        "capabilities": {
+          "$ref": "#/$defs/definitionCapabilities"
         }
       }
     },
@@ -441,6 +488,9 @@
         },
         "size": {
           "type": "string"
+        },
+        "capabilities": {
+          "$ref": "#/$defs/definitionCapabilities"
         }
       }
     },
@@ -494,6 +544,9 @@
         },
         "equipment": {
           "type": "string"
+        },
+        "capabilities": {
+          "$ref": "#/$defs/definitionCapabilities"
         }
       }
     },
@@ -576,6 +629,476 @@
             "type": "integer",
             "minimum": 1,
             "maximum": 20
+          }
+        },
+        "capabilities": {
+          "$ref": "#/$defs/definitionCapabilities"
+        }
+      }
+    },
+    "ruleValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [],
+      "properties": {
+        "base": {
+          "type": "integer"
+        },
+        "abilities": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "str",
+              "dex",
+              "con",
+              "int",
+              "wis",
+              "cha"
+            ]
+          }
+        },
+        "levelMultiplier": {
+          "type": "integer"
+        },
+        "proficiencyMultiplier": {
+          "type": "integer"
+        },
+        "table": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "minimum": {
+          "type": "integer"
+        }
+      }
+    },
+    "predicate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "all",
+            "any",
+            "not",
+            "level",
+            "ability",
+            "selection",
+            "proficiency",
+            "configuration",
+            "subclass"
+          ]
+        },
+        "key": {
+          "type": "string"
+        },
+        "minimum": {
+          "type": "integer"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/predicate"
+          }
+        }
+      }
+    },
+    "capabilityGrant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "proficiency",
+            "skillAbility",
+            "skillBonus",
+            "armorFormula",
+            "armorBonus",
+            "hitPoints",
+            "initiative",
+            "speed",
+            "speedBase",
+            "abilityScore",
+            "trait",
+            "resource",
+            "spell",
+            "unsupported",
+            "manual",
+            "size",
+            "language"
+          ]
+        },
+        "target": {
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/$defs/ruleValue"
+        },
+        "rank": {
+          "enum": [
+            "none",
+            "half",
+            "proficient",
+            "expertise"
+          ]
+        },
+        "ability": {
+          "enum": [
+            "str",
+            "dex",
+            "con",
+            "int",
+            "wis",
+            "cha"
+          ]
+        },
+        "condition": {
+          "$ref": "#/$defs/predicate"
+        },
+        "level": {
+          "type": "integer"
+        },
+        "text": {
+          "type": "string"
+        },
+        "recovery": {
+          "type": "string"
+        },
+        "spellMode": {
+          "enum": [
+            "granted",
+            "prepared",
+            "atWill",
+            "limited",
+            "ritual"
+          ]
+        }
+      }
+    },
+    "option": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "text",
+        "grants"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "prerequisite": {
+          "$ref": "#/$defs/predicate"
+        },
+        "grants": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/capabilityGrant"
+          }
+        },
+        "repeatable": {
+          "type": "boolean"
+        },
+        "exclusiveGroup": {
+          "type": "string"
+        }
+      }
+    },
+    "group": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "counts",
+        "options"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "counts": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/option"
+          }
+        },
+        "replacementLimits": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "condition": {
+          "$ref": "#/$defs/predicate"
+        },
+        "locked": {
+          "type": "boolean"
+        },
+        "requiredOptionID": {
+          "type": "string"
+        },
+        "languageChoices": {
+          "type": "boolean"
+        },
+        "requiredOptionIDs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "waiveRequiredFamilyIfOwned": {
+          "type": "boolean"
+        },
+        "requirementTiming": {
+          "enum": [
+            "ongoing",
+            "acquisition"
+          ]
+        },
+        "exclusiveGroupExceptions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "configuration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "text"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "prerequisite": {
+          "$ref": "#/$defs/predicate"
+        },
+        "exclusiveGroup": {
+          "type": "string"
+        }
+      }
+    },
+    "casting": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "mode",
+        "ability",
+        "spellIDs",
+        "counts",
+        "maximumSpellLevels"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "mode": {
+          "enum": [
+            "known",
+            "prepared",
+            "book",
+            "granted",
+            "ritual",
+            "limited",
+            "atWill"
+          ]
+        },
+        "ability": {
+          "enum": [
+            "str",
+            "dex",
+            "con",
+            "int",
+            "wis",
+            "cha"
+          ]
+        },
+        "spellIDs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "counts": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "maximumSpellLevels": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "replacementLimits": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "preparedCounts": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "condition": {
+          "$ref": "#/$defs/predicate"
+        },
+        "text": {
+          "type": "string"
+        }
+      }
+    },
+    "adapter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "edition",
+        "canonicalID",
+        "label",
+        "replacementGrants"
+      ],
+      "properties": {
+        "edition": {
+          "enum": [
+            "2014",
+            "2024"
+          ]
+        },
+        "canonicalID": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "replacementGrants": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/capabilityGrant"
+          }
+        },
+        "subclassLevel": {
+          "type": "integer"
+        }
+      }
+    },
+    "definitionCapabilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "edition"
+      ],
+      "properties": {
+        "edition": {
+          "enum": [
+            "2014",
+            "2024"
+          ]
+        },
+        "grants": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/capabilityGrant"
+          }
+        },
+        "groups": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/group"
+          }
+        },
+        "configurations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/configuration"
+          }
+        },
+        "casting": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/casting"
+          }
+        },
+        "adapters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/adapter"
+          }
+        }
+      }
+    },
+    "packCapabilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "required"
+      ],
+      "properties": {
+        "version": {
+          "const": 1
+        },
+        "required": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "choices",
+              "modifiers",
+              "casting",
+              "editions",
+              "resources",
+              "traits",
+              "proficiencies",
+              "configuration",
+              "languages"
+            ]
           }
         }
       }

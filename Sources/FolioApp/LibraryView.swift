@@ -178,7 +178,7 @@ struct NewCharacterView: View {
                         Picker("Class", selection: $selectedClass) {
                             Text("Choose a class").tag("")
                             ForEach(catalog?.classes ?? []) { cls in
-                                Text((catalog?.classes.filter { $0.name == cls.name }.count ?? 0) > 1 ? "\(cls.name) · \(cls.sourceLabel)" : cls.name).tag(cls.id)
+                                Text("\(cls.name) · \(cls.edition) · \(cls.sourceLabel)").tag(cls.id)
                             }
                         }
                     }
@@ -190,6 +190,10 @@ struct NewCharacterView: View {
                             guard let catalog else { return }
                             let pack = try catalog.snapshot(for:selectedClass)
                             var build = CharacterBuild(classID: selectedClass)
+                            if let cls = pack.classes.first(where: { $0.id == selectedClass }), let capabilities = cls.capabilities {
+                                build.rulesProfile = .init(edition: capabilities.edition)
+                                build.levels[0].capabilities = .init()
+                            }
                             build.name = name.trimmingCharacters(in: .whitespacesAndNewlines)
                             let record = CharacterRecord(pack: pack, build: build)
                             if store.save(record) { dismiss(); onCreate(record.id) }

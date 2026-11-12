@@ -4,7 +4,7 @@ A native SwiftUI home for character ideas that grow into playable builds. Build 
 
 The project is now called **Pocket Party**. The current Xcode target, preview app, and local save folder still use the development name **Character Folio** to preserve existing builds and saved characters.
 
-This is a local MVP, not a complete D&D character creator yet. It checks a **single-class, level 1–5 slice** using 2024 character-creation conventions. The bundled **Lantern Roads** pack is original demonstration content, not official D&D content or a claim of game balance.
+This is a local MVP, not a complete D&D character creator yet. It checks a **single-class, level 1–5 slice**. Schema-1 saves keep their original 2024 conventions; schema-2 builds pin an explicit 2014 or 2024 profile. The bundled **Lantern Roads** and **Trail Warden capability laboratory** packs are original demonstrations, not official content or a claim of game balance.
 
 ## Try it now on this Mac
 
@@ -16,7 +16,7 @@ Open `Preview/Character Folio.app`, then choose **Explore a sample character**. 
 
 Use **Create** or **New character** for a blank build. The library can switch between circular portraits and a list; search accepts character or class names. The three-dot menu duplicates an alternate build or exports a character. Changes save locally. Exports include the character’s content pack, so treat private character exports as private too.
 
-To try your existing Vessel data, use **Import** and select `PrivatePacks/vessel-pack.json`, then choose **Vessel** from the class list. Imported packs add their classes, species, backgrounds and feats to one shared library—there is no pack-selection step. Same-name variants show their source. The private pack is deliberately not bundled into the app. **The Trickster** is the currently supported subclass. Cursed and Formless are excluded until their additional Aspect grants/choices are modeled; Cursed also has an unresolved Flame Whip source. No replacement spell was invented.
+To try your existing Vessel data, use **Import** and select `PrivatePacks/vessel-pack.json`, then choose **Vessel** from the combined class list. Same-name variants show their source. The private adapter represents all six supplied subclasses and early Aspect choices, including locked bonus alternatives, affinity branches and Ascended preparation. Unresolved standard spell references still block affected builds; LL-only class-list choices remain visibly unavailable. Neither the private pack nor its source-review evidence is bundled.
 
 Existing characters keep their saved rules. To offer newly imported choices to an older character, choose **More → Add library choices**. This preserves existing choices and their definitions. New characters use each source's most recently installed version; installing an update never silently changes a saved build.
 
@@ -35,6 +35,7 @@ Keep PDFs containing private content private. The supported blank PDF revision i
 - Standard array; background ability bonuses, skills, tool, and origin feat.
 - Level-by-level choices, subclass grants, feat prerequisites, and ability improvements.
 - Known spells, cantrips, a single slot-level pool, and spell-list validation.
+- Typed independent choices, prerequisite/replacement rules, expertise/partial proficiency, conditional defenses/skills/form size and movement, resource capacities, known/prepared/book policies and explicit cross-list eligibility.
 - Rechecking later levels after earlier edits; limited spell/feature replacement.
 - Fixed-average HP, retroactive Constitution changes, supported passive feat bonuses.
 - Local save with a previous-file backup; JSON import/export; pinned content versions.
@@ -69,7 +70,7 @@ The private converter reads adjacent checkouts by default:
 node scripts/convert-vessel-pack.mjs
 ```
 
-Or pass the module, importer, and private-content roots, in that order. It uses `js-yaml` from the existing importer’s installed `emit/node_modules`. It writes `PrivatePacks/vessel-pack.json` and a source-hash/diagnostic report. Source repositories are read-only. Legacy supplemental spells can remain legacy content within the 2024 builder; each spell records its source. Conversion is curated, not a universal Foundry-to-app translator.
+Or pass the module, importer, and private-content roots, in that order. It requires the importer's installed `js-yaml` and the ignored, visually verified `PrivatePacks/vessel-source-review.json`. It writes an ignored pack and report with revision, hashes, Wizard journal identity and PDF-review page evidence. Source repositories are read-only. Standard legacy supplemental spells remain exact sources where no revised version exists; LL suffixes are never silently removed. Conversion is curated, not a universal Foundry-to-app translator. See the [mechanism coverage and source gaps](docs/capability-coverage.md).
 
 ## Privacy and sharing
 

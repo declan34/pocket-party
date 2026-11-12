@@ -8,6 +8,18 @@ public struct BuildIssue: Identifiable, Equatable, Sendable {
 }
 
 public struct CharacterSummary: Sendable {
+    public var languages: [String] = []
+    public var size: String? = nil
+    public var activeGroupIDs: Set<String> = []
+    public var activePolicyIDs: Set<String> = []
+    public var castingAbility: Ability? = nil
+    public var proficiencyRanks: [String: ProficiencyRank] = [:]
+    public var skillModifiers: [String: Int] = [:]
+    public var traits: [String] = []
+    public var resources: [ResourceCapacity] = []
+    public var provenance: [CapabilityProvenance] = []
+    public var supportDiagnostics: [String] = []
+    public var spellLabels: [String: String] = [:]
     public var scores: [String: Int]
     public var proficiency: Int
     public var hitPoints: Int
@@ -29,6 +41,15 @@ public struct CharacterSummary: Sendable {
 }
 
 public enum RulesEngine {
+    /// Shared by replay and the editor; a legacy build never opts into an adapter implicitly.
+    public static func subclassUnlockLevel(for definition: ClassDefinition, build: CharacterBuild, in pack: ContentPack) -> Int {
+        guard build.rulesProfile != nil || (pack.schemaVersion == 2 && definition.capabilities != nil) else {
+            return definition.subclassLevel
+        }
+        let edition = build.rulesProfile?.edition ?? "2024"
+        return definition.capabilities?.adapters?.first { $0.edition == edition }?.subclassLevel ?? definition.subclassLevel
+    }
+
     public static let standardArray = [15, 14, 13, 12, 10, 8]
     public static let skillAbilities: [String: Ability] = [
         "Acrobatics": .dex, "Animal Handling": .wis, "Arcana": .int, "Athletics": .str,
@@ -39,6 +60,24 @@ public enum RulesEngine {
     ]
 
     public static func evaluate(_ build: CharacterBuild, in pack: ContentPack, through requestedLevel: Int? = nil) -> CharacterSummary {
+        if build.rulesProfile != nil || (pack.schemaVersion == 2 && pack.classes.first(where: { $0.id == build.classID })?.capabilities != nil) {
+            return CapabilityEngine.evaluate(build, in: pack, through: requestedLevel)
+        }
+        var result = evaluateLegacy(build, in: pack, through: requestedLevel)
+        if pack.schemaVersion == 2 {
+            let choices = Array(build.levels.prefix(max(1, requestedLevel ?? build.level)))
+            let background = pack.backgrounds.first { $0.id == build.backgroundID }
+            let subclass = pack.classes.first { $0.id == build.classID }?.subclasses.first { $0.id == choices.last?.subclassID }
+            let definitions = [pack.species.first { $0.id == build.speciesID }?.capabilities, background?.capabilities, subclass?.capabilities].compactMap { $0 }
+                + pack.feats.filter { feat in feat.id == background?.originFeatID || choices.contains { $0.featID == feat.id } }.compactMap(\.capabilities)
+            if definitions.contains(where: { $0.edition != "2024" || !($0.grants ?? []).isEmpty || !($0.groups ?? []).isEmpty || !($0.casting ?? []).isEmpty || !($0.configurations ?? []).isEmpty }) || choices.contains(where: { $0.capabilities != nil }) {
+                result.issues.append(.init(code: "cap-upgrade-required", message: "These selected choices require an explicit evaluator-2 review copy. Legacy rules have not been silently upgraded."))
+            }
+        }
+        return result
+    }
+
+    static func evaluateLegacy(_ build: CharacterBuild, in pack: ContentPack, through requestedLevel: Int? = nil) -> CharacterSummary {
         let level = min(max(requestedLevel ?? build.level, 1), max(build.level, 1))
         var issues: [BuildIssue] = []
         func issue(_ code: String, _ message: String, _ at: Int? = nil) {
@@ -178,6 +217,7 @@ public enum RulesEngine {
         let spellMod = definition?.spellAbility.map { Ability.modifier(scores[$0.rawValue, default: 10]) }
         let progression = definition?.at(level)
         return CharacterSummary(
+            languages: ["Common"] + build.languages,
             scores: scores, proficiency: proficiency, hitPoints: hp, armorClass: 10 + dex,
             mantleArmorClass: definition?.armorFormula == "vessel-mantle" ? 10 + con + Ability.modifier(scores["cha", default: 10]) : nil,
             initiative: dex + (feats.contains { $0.initiativeProficiency } ? proficiency : 0),

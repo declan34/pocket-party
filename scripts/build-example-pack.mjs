@@ -50,3 +50,71 @@ const pack = {
 };
 writeFileSync(new URL('../Sources/FolioCore/Resources/example-pack.json',import.meta.url), JSON.stringify(pack,null,2)+'\n');
 console.log('Built original example pack.');
+// Separate fixture keeps every old-format byte/choice contract available for characterization.
+const capable = structuredClone(pack);
+capable.schemaVersion = 2;
+capable.id = 'original.capability-lab'; capable.version = '1.2.0'; capable.name = 'Trail Warden · capability laboratory';
+capable.capabilities = {version:1,required:['choices','modifiers','casting','editions','resources','traits','proficiencies','configuration','languages']};
+capable.classes = [structuredClone(pack.classes[0])];
+const warden = capable.classes[0];
+warden.id = 'trail-warden'; warden.name = 'Trail Warden';
+const option = (id,name,grants,prerequisite) => ({id,name,text:'Original capability demonstration; not official rules.',grants,...(prerequisite?{prerequisite}:{})});
+warden.capabilities = {edition:'2024',configurations:[{id:'guard',name:'Guard stance',text:'A declared conditional stance. No action or resource expenditure is simulated.'}],
+  grants:[{id:'focus',kind:'resource',target:'Focus',value:{levelMultiplier:2},recovery:'short rest'},{id:'broad-study',kind:'proficiency',target:'all-skills',rank:'half'}],
+  groups:[
+    {id:'training',name:'Training',counts:[1,1,2,2,2],replacementLimits:[0,0,1,0,0],options:[option('scholar','Scholar',[{id:'scholar-expertise',kind:'proficiency',target:'Arcana',rank:'expertise'}]),option('runner','Runner',[{id:'runner-speed',kind:'speed',value:{base:10}}]),option('mentor','Mentor',[{id:'mentor-trait',kind:'trait',text:'You train other travelers.'}],{kind:'selection',key:'scholar'})]},
+    {id:'style',name:'Style',counts:[1,1,1,1,1],options:[option('guarded','Guarded',[{id:'guard-defense',kind:'armorFormula',value:{base:10,abilities:['con','cha']},condition:{kind:'configuration',key:'guard'}}]),option('calm','Calm',[{id:'calm-skill',kind:'skillAbility',target:'Athletics',ability:'cha'}])]}
+  ],
+  casting:[{id:'field-book',name:'Field book',mode:'book',ability:'int',spellIDs:warden.spellIDs,counts:[0,2,2,3,3],maximumSpellLevels:[0,1,1,1,2],preparedCounts:[0,1,1,2,2],replacementLimits:[0,0,0,0,0]}]
+};
+// Mechanism laboratories, not published classes or a claim about every official subclass.
+// Their names and prose are original; family keys connect them to registered acceptance.
+const familyNames={barbarian:'Stonepulse',bard:'Road Cantor',cleric:'Beacon Votary',druid:'Moss Oracle',fighter:'Bridge Sentinel',monk:'Quiet Step',paladin:'Dawn Promise',ranger:'Boundary Scout',rogue:'Archive Fox',sorcerer:'Ember Heir',warlock:'Night Bargain',wizard:'Margin Scholar',artificer:'Copper Inventor'};
+for(const [family,name] of Object.entries(familyNames)) {
+  const c=structuredClone(pack.classes[0]); c.id='lab-'+family;c.name=name;
+  c.summary='Original '+family+'-family mechanism laboratory; not official class content.';
+  c.talents=[];c.features=[];c.subclasses.forEach(s=>{s.features=[];s.spells=[];});
+  c.progression.forEach(r=>{r.talents=0;r.spells=0;r.cantrips=0;});
+  const martial=['barbarian','fighter','monk','rogue'].includes(family);
+  if(martial){c.spellAbility=null;c.progression.forEach(r=>{r.slots=0;r.slotLevel=0;});}
+  const id=x=>family+'-'+x;
+  const condition={kind:'configuration',key:id('active')};
+  const g=(key,kind,extras={})=>({id:id(key),kind,...extras});
+  const proficiency=(key,skill,rank='proficient')=>g(key,'proficiency',{target:skill,rank});
+  const resource=(key,base=0,levelMultiplier=0)=>g(key,'resource',{target:key,value:{base,levelMultiplier},recovery:'long rest'});
+  const trait=(key,text)=>g(key,'trait',{text});
+  const choice=(key,grants,prerequisite)=>option(id(key),key,grants,prerequisite);
+  const group=(key,options,counts=[1,1,1,1,1])=>({id:id(key),name:key,counts,options,replacementLimits:[0,1,0,1,0]});
+  const policy=(mode,spellIDs=['sheltering-glow','borrowed-dawn'],extras={})=>({id:id('casting'),name:name+' casting',mode,ability:'cha',spellIDs,counts:[1,1,1,1,1],maximumSpellLevels:[1,1,1,1,2],replacementLimits:[0,1,1,1,1],...extras});
+  const caps={edition:'2024',grants:[],groups:[],configurations:[{id:id('active'),name:'Active declared condition',text:'An original build-time condition, not combat simulation.'}],casting:[]};
+  const style=()=>group('style',[choice('guard',[g('guard-defense','armorBonus',{value:{base:1},condition})]),choice('swift',[g('swift-speed','speed',{value:{base:5}})])]);
+  if(family==='barbarian') caps.grants=[resource('resolve',2),g('defense','armorFormula',{value:{base:10,abilities:['dex','con']},condition}),g('strength-substitute','skillAbility',{target:'Athletics',ability:'cha',condition}),{...trait('vigorous','Declared vigorous state is active.'),condition}];
+  if(family==='bard') caps.grants=[proficiency('expert','Arcana','expertise'),proficiency('broad','all-skills','half'),proficiency('extra','Performance'),resource('inspiration',3)];
+  if(family==='cleric'||family==='druid') {
+    caps.groups=[group('order',[choice('learned',[proficiency('order-skill','History')]),choice('swift',[g('order-speed','speed',{value:{base:5}})])])];
+    caps.grants=[resource('channel',2),g('domain-spell','spell',{target:'keeper-call',level:3})];
+    caps.casting=[policy('prepared')];
+    if(family==='druid') caps.grants.push({...trait('form','Declared moss form has climbing and small-gap traits.'),condition});
+  }
+  if(family==='fighter') {caps.groups=[style()];caps.grants=[resource('recovery',2),resource('surge',1)];}
+  if(family==='monk') caps.grants=[g('defense','armorFormula',{value:{base:10,abilities:['dex','wis']},condition}),g('movement','speed',{value:{base:10},condition}),resource('focus',0,1),trait('focus-die','The calculated focus die sides follow the level table; attack rolls are not simulated.')];
+  if(family==='paladin') {caps.groups=[group('style',[choice('guard',[g('guard-defense','armorBonus',{value:{base:1},condition})]),choice('cantrips',[g('cantrip-one','spell',{target:'little-beacon'}),g('cantrip-two','spell',{target:'paper-bird'})])])];caps.grants=[resource('healing',0,5),resource('channel',1),g('oath','spell',{target:'keeper-call',level:3})];caps.casting=[policy('prepared')];}
+  if(family==='ranger'||family==='rogue') {caps.grants=[proficiency('expert','Arcana','expertise'),g('language','language',{target:'Road Cant'})];if(family==='ranger'){caps.groups=[style()];caps.grants.push({...trait('quarry','Configured quarry grants the declared tracking advantage.'),condition});caps.casting=[policy('known')];}}
+  if(family==='sorcerer') {caps.groups=[group('metamagic',[choice('distant',[trait('distant','A selected distance-altering spell option.')]),choice('quiet',[trait('quiet','A selected quiet-casting spell option.')])])];caps.grants=[resource('sorcery',0,1),g('durability','hitPoints',{value:{levelMultiplier:1}}),g('scales','armorFormula',{value:{base:13,abilities:['dex']},condition}),{...trait('affinity','Ember affinity resistance is active.'),condition},g('lineage','spell',{target:'keeper-call',level:3})];}
+  if(family==='warlock') {caps.groups=[group('invocations',[choice('root',[proficiency('root-training','History')]),choice('dependent',[g('dependent-speed','speed',{value:{base:10}})],{kind:'selection',key:id('root')}),{...choice('repeat',[g('repeat-speed','speed',{value:{base:5}})]),repeatable:true}],[1,2,2,2,2]),group('pact',[choice('tome',[trait('tome','Pact book selected.')]),choice('chain',[trait('chain','Pact companion selected; turns are not simulated.')])])];caps.casting=[policy('known',['sheltering-glow','borrowed-dawn','keeper-call'])];}
+  if(family==='wizard'){caps.grants=[proficiency('expert','Arcana','expertise')];caps.casting=[policy('book',['sheltering-glow','borrowed-dawn'],{counts:[1,2,2,2,2],preparedCounts:[1,1,1,1,1],replacementLimits:[0,0,0,0,0]})];}
+  if(family==='artificer'){caps.groups=[group('recipes',[choice('foundation',[trait('foundation','Original item recipe learned.')]),choice('advanced',[trait('advanced','Dependent item recipe learned; active applications await I5.')],{kind:'selection',key:id('foundation')})],[1,2,2,2,2])];caps.casting=[policy('prepared')];}
+  if(family==='monk') caps.grants.push(g('die-sides','trait',{text:'Focus die sides',value:{table:[4,4,4,4,6]}}));
+  if(family==='warlock') caps.grants.push(g('at-will','spell',{target:'little-beacon',spellMode:'atWill',condition}),g('limited-spell','spell',{target:'keeper-circle',spellMode:'limited',level:5}),resource('limited-casts',1));
+  if(!martial && !caps.casting.length) caps.casting=[policy('known',family==='bard'?['sheltering-glow','borrowed-dawn','keeper-call']:undefined)];
+  c.capabilities=caps;capable.classes.push(c);
+}
+const olderClass=structuredClone(pack.classes[0]);
+olderClass.id='lab-2014-wayfarer';olderClass.name='Old Road Wayfarer';olderClass.capabilities={edition:'2014'};
+olderClass.subclasses.forEach(s=>s.capabilities={edition:'2014'});
+capable.classes.push(olderClass);
+capable.species.push({...structuredClone(pack.species[0]),id:'roadfolk-2014',name:'Old Roadfolk',capabilities:{edition:'2014',grants:[{id:'old-road-common',kind:'language',target:'Common'},{id:'old-road-cant',kind:'language',target:'Road Cant'}]}});
+capable.backgrounds.push({...structuredClone(pack.backgrounds[1]),id:'guide-2014',name:'Old Road Guide',abilities:[],originFeatID:'',capabilities:{edition:'2014',groups:[{id:'guide-language',name:'Guide language',languageChoices:true,counts:[1,1,1,1,1],locked:true,options:['Harbor Speech','Trade Sign'].map((name,i)=>option('guide-language-'+i,name,[{id:'guide-language-grant-'+i,kind:'language',target:name}]))}]}});
+capable.coverageNotes=['Original mechanism fixtures for the early family matrix; names do not certify official subclasses.','Levels 1–5, one class and uniform spell pool only. Tiered pools, high levels, multiclass and equipment remain pending.'];
+writeFileSync(new URL('../Sources/FolioCore/Resources/capability-pack.json',import.meta.url), JSON.stringify(capable,null,2)+'\n');
+console.log('Built original schema-2 capability fixture.');

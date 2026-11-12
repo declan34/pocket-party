@@ -3,6 +3,7 @@ import Foundation
 public enum PackValidator {
     public static func decode(_ data: Data) throws -> ContentPack {
         guard data.count <= 10_000_000 else { throw FolioError.invalid("Content packs must be smaller than 10 MB.") }
+        try CapabilityValidation.preflight(data)
         let pack = try JSONDecoder().decode(ContentPack.self, from: data)
         try validate(pack)
         return pack
@@ -15,8 +16,9 @@ public enum PackValidator {
         func unique(_ ids: [String], _ label: String) throws {
             try require(ids.count == Set(ids).count && ids.allSatisfy { !$0.isEmpty && $0.count <= 120 }, "\(label) must have unique, nonempty IDs of at most 120 characters.")
         }
-        try require(pack.schemaVersion == 1, "This pack uses an unsupported schema version.")
-        try require(pack.ruleset == "2024", "This MVP accepts 2024 content packs only.")
+        try require([1, 2].contains(pack.schemaVersion), "This pack uses an unsupported schema version.")
+        try require(pack.schemaVersion == 1 ? pack.ruleset == "2024" : ["2014", "2024"].contains(pack.ruleset), "Unsupported rules edition.")
+        if pack.schemaVersion == 2 { try CapabilityValidation.validate(pack) }
         try require(!pack.id.isEmpty && !pack.version.isEmpty && !pack.name.isEmpty, "Pack ID, version, and name are required.")
         let combined = pack.sources != nil
         try require(pack.classes.count <= (combined ? 100 : 20) && pack.species.count <= (combined ? 1000 : 100) && pack.backgrounds.count <= (combined ? 2000 : 200) && pack.spells.count <= (combined ? 10000 : 2000) && pack.feats.count <= (combined ? 5000 : 500), "This content exceeds supported limits.")
@@ -44,9 +46,10 @@ public enum PackValidator {
             try require(feat.abilityMinimums.allSatisfy { Ability(rawValue: $0.key) != nil && (1...20).contains($0.value) }, "\(feat.name) has invalid prerequisites.")
         }
         for background in pack.backgrounds {
-            try require(background.abilities.count == 3 && Set(background.abilities).count == 3, "\(background.name) must define three distinct background abilities.")
+            let revised = (background.capabilities?.edition ?? pack.ruleset) == "2024"
+            try require(!revised || background.abilities.count == 3 && Set(background.abilities).count == 3, "\(background.name) must define three distinct background abilities.")
             try require(background.skills.count == 2 && Set(background.skills).count == 2 && background.skills.allSatisfy { RulesEngine.skillAbilities[$0] != nil }, "\(background.name) must grant two distinct known skills.")
-            try require(pack.feats.contains { $0.id == background.originFeatID && $0.category == "origin" }, "\(background.name) references a missing origin feat.")
+            try require(!revised || pack.feats.contains { $0.id == background.originFeatID && $0.category == "origin" }, "\(background.name) references a missing origin feat.")
         }
         for cls in pack.classes {
             try require([6, 8, 10, 12].contains(cls.hitDie) && (0...4).contains(cls.skillCount), "\(cls.name) has unsupported hit dice or skill counts.")
@@ -79,6 +82,24 @@ public enum PackValidator {
         try validate(record.pack)
         guard try LibraryStorage.encoder.encode(record).count <= 20_000_000 else { throw FolioError.invalid("Character files must be smaller than 20 MB.") }
         let b = record.build
+        if b.rulesProfile != nil {
+            guard b.levels.enumerated().allSatisfy({ $0.element.level == $0.offset + 1 }) else { throw FolioError.invalid("Capability history must contain consecutive levels starting at one.") }
+        }
+        if let profile = b.rulesProfile {
+            guard record.pack.schemaVersion == 2, profile.evaluator == 2, ["2014", "2024"].contains(profile.edition) else {
+                throw FolioError.invalid("Unsupported pinned rules profile or evaluator.")
+            }
+        } else if record.pack.classes.first(where: { $0.id == b.classID })?.capabilities != nil || b.levels.contains(where: { $0.capabilities != nil }) {
+            throw FolioError.invalid("Capability choices require an explicit rules profile.")
+        }
+        for level in b.levels {
+            guard let choices = level.capabilities else { continue }
+            let dictionaries = [choices.groups ?? [:], choices.spells ?? [:], choices.prepared ?? [:]]
+            guard (choices.configurations?.count ?? 0) <= 64,
+                  dictionaries.allSatisfy({ $0.count <= 64 && $0.allSatisfy { $0.key.count <= 120 && $0.value.count <= 100 && $0.value.allSatisfy { $0.count <= 120 } } }) else {
+                throw FolioError.invalid("Saved capability selections exceed supported bounds.")
+            }
+        }
         guard record.schemaVersion == 1, (1...5).contains(b.levels.count),
               b.baseScores.values.allSatisfy({ (1...30).contains($0) }),
               b.backgroundBoosts.values.allSatisfy({ (0...2).contains($0) }),

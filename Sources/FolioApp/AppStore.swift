@@ -20,10 +20,14 @@ final class AppStore {
         storage = LibraryStorage(directory: base)
         do {
             library = try storage.load()
+            var installed = false
             if library.packs.isEmpty {
                 library.packs = [try ContentPack.sample()]
-                try storage.save(library)
+                installed = true
             }
+            let capabilityExample = try ContentPack.capabilitySample()
+            if !library.packs.contains(where: { $0.id == capabilityExample.id }) { library.packs.append(capabilityExample); installed = true }
+            if installed { try storage.save(library) }
         } catch {
             self.error = "Could not open your library. Your existing file has not been changed. \(error.localizedDescription)"
             readOnly = true
@@ -48,6 +52,10 @@ final class AppStore {
     func duplicate(_ record: CharacterRecord) -> CharacterRecord? {
         var copy = record; copy.build.id = UUID(); copy.build.name += " · alternate"; copy.build.updatedAt = Date()
         return save(copy) ? copy : nil
+    }
+    func upgradeCopy(_ record: CharacterRecord) -> CharacterRecord? {
+        do { let copy = try RulesUpgrade.copy(record); return save(copy) ? copy : nil }
+        catch { self.error = error.localizedDescription; return nil }
     }
     func importFile(_ data: Data) throws -> String {
         if let object = try JSONSerialization.jsonObject(with: data) as? [String: Any], object["build"] != nil {

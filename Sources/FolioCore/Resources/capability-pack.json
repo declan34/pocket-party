@@ -1,0 +1,3519 @@
+{
+  "schemaVersion": 2,
+  "id": "original.capability-lab",
+  "version": "1.2.0",
+  "name": "Trail Warden · capability laboratory",
+  "ruleset": "2024",
+  "isPrivate": false,
+  "attribution": "Original demonstration content created for Character Folio. This is homebrew sample data, not an official D&D class or spell collection.",
+  "coverageNotes": [
+    "Original mechanism fixtures for the early family matrix; names do not certify official subclasses.",
+    "Levels 1–5, one class and uniform spell pool only. Tiered pools, high levels, multiclass and equipment remain pending."
+  ],
+  "languages": [
+    "Dwarvish",
+    "Elvish",
+    "Giant",
+    "Gnomish",
+    "Goblin",
+    "Halfling",
+    "Orc",
+    "Draconic",
+    "Common Sign Language"
+  ],
+  "species": [
+    {
+      "id": "roadfolk",
+      "name": "Roadfolk",
+      "text": "People of the old lantern roads. You can always recall the path of a journey you have walked yourself.",
+      "speed": 30,
+      "hpPerLevel": 0,
+      "size": "Medium"
+    },
+    {
+      "id": "mosskin",
+      "name": "Mosskin",
+      "text": "Small, patient folk whose moss-soft skin carries the scent of rain. Their compact frames are unusually resilient.",
+      "speed": 25,
+      "hpPerLevel": 1,
+      "size": "Small"
+    },
+    {
+      "id": "roadfolk-2014",
+      "name": "Old Roadfolk",
+      "text": "People of the old lantern roads. You can always recall the path of a journey you have walked yourself.",
+      "speed": 30,
+      "hpPerLevel": 0,
+      "size": "Medium",
+      "capabilities": {
+        "edition": "2014",
+        "grants": [
+          {
+            "id": "old-road-common",
+            "kind": "language",
+            "target": "Common"
+          },
+          {
+            "id": "old-road-cant",
+            "kind": "language",
+            "target": "Road Cant"
+          }
+        ]
+      }
+    }
+  ],
+  "backgrounds": [
+    {
+      "id": "archive-runner",
+      "name": "Archive Runner",
+      "text": "You carried fragile records between distant reading rooms. One undelivered letter still waits in your satchel.",
+      "abilities": [
+        "dex",
+        "int",
+        "cha"
+      ],
+      "skills": [
+        "History",
+        "Investigation"
+      ],
+      "tool": "Calligrapher’s supplies",
+      "originFeatID": "patient-reader",
+      "equipment": "A journal, ink, a weatherproof satchel, and a sealed letter. Inventory is a narrative note in this demo."
+    },
+    {
+      "id": "night-guide",
+      "name": "Night Guide",
+      "text": "You guided strangers home by lamplight. You remember faces better than destinations.",
+      "abilities": [
+        "con",
+        "wis",
+        "cha"
+      ],
+      "skills": [
+        "Perception",
+        "Survival"
+      ],
+      "tool": "Cartographer’s tools",
+      "originFeatID": "weathered",
+      "equipment": "A lantern, a worn map, and traveler’s clothes. Inventory is a narrative note in this demo."
+    },
+    {
+      "id": "guide-2014",
+      "name": "Old Road Guide",
+      "text": "You guided strangers home by lamplight. You remember faces better than destinations.",
+      "abilities": [],
+      "skills": [
+        "Perception",
+        "Survival"
+      ],
+      "tool": "Cartographer’s tools",
+      "originFeatID": "",
+      "equipment": "A lantern, a worn map, and traveler’s clothes. Inventory is a narrative note in this demo.",
+      "capabilities": {
+        "edition": "2014",
+        "groups": [
+          {
+            "id": "guide-language",
+            "name": "Guide language",
+            "languageChoices": true,
+            "counts": [
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "locked": true,
+            "options": [
+              {
+                "id": "guide-language-0",
+                "name": "Harbor Speech",
+                "text": "Original capability demonstration; not official rules.",
+                "grants": [
+                  {
+                    "id": "guide-language-grant-0",
+                    "kind": "language",
+                    "target": "Harbor Speech"
+                  }
+                ]
+              },
+              {
+                "id": "guide-language-1",
+                "name": "Trade Sign",
+                "text": "Original capability demonstration; not official rules.",
+                "grants": [
+                  {
+                    "id": "guide-language-grant-1",
+                    "kind": "language",
+                    "target": "Trade Sign"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "feats": [
+    {
+      "id": "patient-reader",
+      "name": "Patient Reader",
+      "text": "Your patient study grants proficiency in Arcana.",
+      "category": "origin",
+      "minimumLevel": 1,
+      "abilityOptions": [],
+      "abilityPoints": 0,
+      "hpPerLevel": 0,
+      "initiativeProficiency": false,
+      "skills": [
+        "Arcana"
+      ],
+      "abilityMinimums": {}
+    },
+    {
+      "id": "weathered",
+      "name": "Weathered",
+      "text": "Your journeys grant 1 additional maximum HP for each character level.",
+      "category": "origin",
+      "minimumLevel": 1,
+      "abilityOptions": [],
+      "abilityPoints": 0,
+      "hpPerLevel": 1,
+      "initiativeProficiency": false,
+      "skills": [],
+      "abilityMinimums": {}
+    },
+    {
+      "id": "ability-improvement",
+      "name": "Ability Score Improvement",
+      "text": "Increase one ability by 2 or two abilities by 1, to a maximum of 20.",
+      "category": "general",
+      "minimumLevel": 4,
+      "abilityOptions": [
+        "str",
+        "dex",
+        "con",
+        "int",
+        "wis",
+        "cha"
+      ],
+      "abilityPoints": 2,
+      "hpPerLevel": 0,
+      "initiativeProficiency": false,
+      "skills": [],
+      "abilityMinimums": {}
+    },
+    {
+      "id": "steady-flame",
+      "name": "Steady Flame",
+      "text": "Increase Constitution or Charisma by 1. Your calm preparation grants proficiency in Insight.",
+      "category": "general",
+      "minimumLevel": 4,
+      "abilityOptions": [
+        "con",
+        "cha"
+      ],
+      "abilityPoints": 1,
+      "hpPerLevel": 0,
+      "initiativeProficiency": false,
+      "skills": [
+        "Insight"
+      ],
+      "abilityMinimums": {
+        "cha": 13
+      }
+    }
+  ],
+  "spells": [
+    {
+      "id": "ember-script",
+      "name": "Ember Script",
+      "level": 0,
+      "text": "Trace a brief, harmless message in the air with warm sparks. It fades when you finish reading it aloud.",
+      "source": "Character Folio original demonstration content"
+    },
+    {
+      "id": "little-beacon",
+      "name": "Little Beacon",
+      "level": 0,
+      "text": "A small floating light follows your hand. It illuminates a forgotten corner without giving off heat.",
+      "source": "Character Folio original demonstration content"
+    },
+    {
+      "id": "paper-bird",
+      "name": "Paper Bird",
+      "level": 0,
+      "text": "Fold a scrap of paper into a bird that glides to a creature you can see, carrying a written message.",
+      "source": "Character Folio original demonstration content"
+    },
+    {
+      "id": "quiet-thread",
+      "name": "Quiet Thread",
+      "level": 0,
+      "text": "Tie a faint thread of light around an object so you can recognize it by touch.",
+      "source": "Character Folio original demonstration content"
+    },
+    {
+      "id": "sheltering-glow",
+      "name": "Sheltering Glow",
+      "level": 1,
+      "text": "Create a pocket of warm light around a willing companion. Its exact protection is adjudicated by your GM in this demonstration setting.",
+      "source": "Character Folio original demonstration content"
+    },
+    {
+      "id": "borrowed-dawn",
+      "name": "Borrowed Dawn",
+      "level": 1,
+      "text": "Fill a small space with the light and birdsong of a remembered morning.",
+      "source": "Character Folio original demonstration content"
+    },
+    {
+      "id": "trail-whisper",
+      "name": "Trail Whisper",
+      "level": 1,
+      "text": "Ask the wind to repeat the last ordinary sound heard along a nearby path.",
+      "source": "Character Folio original demonstration content"
+    },
+    {
+      "id": "lantern-bridge",
+      "name": "Lantern Bridge",
+      "level": 2,
+      "text": "Describe a bridge of lantern light spanning a modest gap; agree on its limits with your GM.",
+      "source": "Character Folio original demonstration content"
+    },
+    {
+      "id": "echo-room",
+      "name": "Echo Room",
+      "level": 2,
+      "text": "Let companions see an impression of a room as you remember it.",
+      "source": "Character Folio original demonstration content"
+    },
+    {
+      "id": "keeper-call",
+      "name": "Keeper’s Call",
+      "level": 1,
+      "text": "Your lantern briefly shows the direction of a fellow keeper who welcomes the connection.",
+      "source": "Character Folio original demonstration content"
+    },
+    {
+      "id": "keeper-circle",
+      "name": "Keeper’s Circle",
+      "level": 2,
+      "text": "Light a ring of welcoming lamps around your campsite.",
+      "source": "Character Folio original demonstration content"
+    }
+  ],
+  "classes": [
+    {
+      "id": "trail-warden",
+      "name": "Trail Warden",
+      "summary": "Carry a little light into places the world has forgotten.",
+      "hitDie": 8,
+      "primaryAbility": "cha",
+      "spellAbility": "cha",
+      "saves": [
+        "wis",
+        "cha"
+      ],
+      "skillCount": 2,
+      "skillPool": [
+        "Arcana",
+        "Insight",
+        "Medicine",
+        "Persuasion",
+        "Religion",
+        "Survival"
+      ],
+      "subclassLevel": 3,
+      "talentLabel": "Practices",
+      "equipment": "A walking staff and a lantern. This demo records equipment as notes; it does not calculate purchases or armor.",
+      "armorFormula": "unarmored",
+      "features": [
+        {
+          "id": "lantern",
+          "name": "The lantern",
+          "level": 1,
+          "text": "Your lantern is a personal keepsake and the focus of your magic."
+        },
+        {
+          "id": "roads",
+          "name": "Lantern magic",
+          "level": 2,
+          "text": "Choose your cantrips and known spells. This example class uses a shared pool of spell slots that refreshes after a rest."
+        },
+        {
+          "id": "calling",
+          "name": "A calling",
+          "level": 3,
+          "text": "Choose which part of the lantern road you will care for."
+        },
+        {
+          "id": "two-lights",
+          "name": "Two lights",
+          "level": 5,
+          "text": "Your story now reaches beyond a single road. Record a place you promise to return to."
+        }
+      ],
+      "talents": [
+        {
+          "id": "listener",
+          "name": "Listener",
+          "text": "Learn to notice the words people leave unsaid. Gain proficiency in Insight.",
+          "skills": [
+            "Insight"
+          ],
+          "minimumLevel": 1,
+          "exclusiveGroup": "listener",
+          "requires": []
+        },
+        {
+          "id": "letter-keeper",
+          "name": "Letter Keeper",
+          "text": "You keep careful records. Gain proficiency in History.",
+          "skills": [
+            "History"
+          ],
+          "minimumLevel": 1,
+          "exclusiveGroup": "letter-keeper",
+          "requires": []
+        },
+        {
+          "id": "path-reader",
+          "name": "Path Reader",
+          "text": "You understand the traces left by travelers. Gain proficiency in Survival.",
+          "skills": [
+            "Survival"
+          ],
+          "minimumLevel": 1,
+          "exclusiveGroup": "path-reader",
+          "requires": []
+        },
+        {
+          "id": "gentle-hand",
+          "name": "Gentle Hand",
+          "text": "Your steady care grants proficiency in Medicine.",
+          "skills": [
+            "Medicine"
+          ],
+          "minimumLevel": 2,
+          "exclusiveGroup": "gentle-hand",
+          "requires": []
+        }
+      ],
+      "subclasses": [
+        {
+          "id": "waylight",
+          "name": "Waylight",
+          "text": "You lead the lost toward a place they can call home.",
+          "features": [
+            {
+              "id": "welcome",
+              "name": "A light in the window",
+              "level": 3,
+              "text": "A small lamp becomes your sign of welcome. Describe a place where a friend leaves one burning for you."
+            }
+          ],
+          "spells": [
+            {
+              "level": 3,
+              "spellIDs": [
+                "keeper-call"
+              ]
+            },
+            {
+              "level": 5,
+              "spellIDs": [
+                "keeper-circle"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "memory-keeper",
+          "name": "Memory Keeper",
+          "text": "You preserve the stories carried by abandoned places.",
+          "features": [
+            {
+              "id": "memory",
+              "name": "The remembered road",
+              "level": 3,
+              "text": "Keep a short memory of every meaningful place you visit."
+            }
+          ],
+          "spells": [
+            {
+              "level": 3,
+              "spellIDs": [
+                "keeper-call"
+              ]
+            },
+            {
+              "level": 5,
+              "spellIDs": [
+                "keeper-circle"
+              ]
+            }
+          ]
+        }
+      ],
+      "progression": [
+        {
+          "level": 1,
+          "talents": 1,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 2,
+          "talents": 2,
+          "cantrips": 2,
+          "spells": 2,
+          "slots": 2,
+          "slotLevel": 1,
+          "improvement": false
+        },
+        {
+          "level": 3,
+          "talents": 2,
+          "cantrips": 2,
+          "spells": 2,
+          "slots": 2,
+          "slotLevel": 1,
+          "improvement": false
+        },
+        {
+          "level": 4,
+          "talents": 3,
+          "cantrips": 3,
+          "spells": 3,
+          "slots": 2,
+          "slotLevel": 1,
+          "improvement": true
+        },
+        {
+          "level": 5,
+          "talents": 3,
+          "cantrips": 3,
+          "spells": 3,
+          "slots": 2,
+          "slotLevel": 2,
+          "improvement": false
+        }
+      ],
+      "spellIDs": [
+        "ember-script",
+        "little-beacon",
+        "paper-bird",
+        "quiet-thread",
+        "sheltering-glow",
+        "borrowed-dawn",
+        "trail-whisper",
+        "lantern-bridge",
+        "echo-room"
+      ],
+      "capabilities": {
+        "edition": "2024",
+        "configurations": [
+          {
+            "id": "guard",
+            "name": "Guard stance",
+            "text": "A declared conditional stance. No action or resource expenditure is simulated."
+          }
+        ],
+        "grants": [
+          {
+            "id": "focus",
+            "kind": "resource",
+            "target": "Focus",
+            "value": {
+              "levelMultiplier": 2
+            },
+            "recovery": "short rest"
+          },
+          {
+            "id": "broad-study",
+            "kind": "proficiency",
+            "target": "all-skills",
+            "rank": "half"
+          }
+        ],
+        "groups": [
+          {
+            "id": "training",
+            "name": "Training",
+            "counts": [
+              1,
+              1,
+              2,
+              2,
+              2
+            ],
+            "replacementLimits": [
+              0,
+              0,
+              1,
+              0,
+              0
+            ],
+            "options": [
+              {
+                "id": "scholar",
+                "name": "Scholar",
+                "text": "Original capability demonstration; not official rules.",
+                "grants": [
+                  {
+                    "id": "scholar-expertise",
+                    "kind": "proficiency",
+                    "target": "Arcana",
+                    "rank": "expertise"
+                  }
+                ]
+              },
+              {
+                "id": "runner",
+                "name": "Runner",
+                "text": "Original capability demonstration; not official rules.",
+                "grants": [
+                  {
+                    "id": "runner-speed",
+                    "kind": "speed",
+                    "value": {
+                      "base": 10
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "mentor",
+                "name": "Mentor",
+                "text": "Original capability demonstration; not official rules.",
+                "grants": [
+                  {
+                    "id": "mentor-trait",
+                    "kind": "trait",
+                    "text": "You train other travelers."
+                  }
+                ],
+                "prerequisite": {
+                  "kind": "selection",
+                  "key": "scholar"
+                }
+              }
+            ]
+          },
+          {
+            "id": "style",
+            "name": "Style",
+            "counts": [
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "options": [
+              {
+                "id": "guarded",
+                "name": "Guarded",
+                "text": "Original capability demonstration; not official rules.",
+                "grants": [
+                  {
+                    "id": "guard-defense",
+                    "kind": "armorFormula",
+                    "value": {
+                      "base": 10,
+                      "abilities": [
+                        "con",
+                        "cha"
+                      ]
+                    },
+                    "condition": {
+                      "kind": "configuration",
+                      "key": "guard"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "calm",
+                "name": "Calm",
+                "text": "Original capability demonstration; not official rules.",
+                "grants": [
+                  {
+                    "id": "calm-skill",
+                    "kind": "skillAbility",
+                    "target": "Athletics",
+                    "ability": "cha"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "casting": [
+          {
+            "id": "field-book",
+            "name": "Field book",
+            "mode": "book",
+            "ability": "int",
+            "spellIDs": [
+              "ember-script",
+              "little-beacon",
+              "paper-bird",
+              "quiet-thread",
+              "sheltering-glow",
+              "borrowed-dawn",
+              "trail-whisper",
+              "lantern-bridge",
+              "echo-room"
+            ],
+            "counts": [
+              0,
+              2,
+              2,
+              3,
+              3
+            ],
+            "maximumSpellLevels": [
+              0,
+              1,
+              1,
+              1,
+              2
+            ],
+            "preparedCounts": [
+              0,
+              1,
+              1,
+              2,
+              2
+            ],
+            "replacementLimits": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "lab-barbarian",
+      "name": "Stonepulse",
+      "summary": "Original barbarian-family mechanism laboratory; not official class content.",
+      "hitDie": 8,
+      "primaryAbility": "cha",
+      "spellAbility": null,
+      "saves": [
+        "wis",
+        "cha"
+      ],
+      "skillCount": 2,
+      "skillPool": [
+        "Arcana",
+        "Insight",
+        "Medicine",
+        "Persuasion",
+        "Religion",
+        "Survival"
+      ],
+      "subclassLevel": 3,
+      "talentLabel": "Practices",
+      "equipment": "A walking staff and a lantern. This demo records equipment as notes; it does not calculate purchases or armor.",
+      "armorFormula": "unarmored",
+      "features": [],
+      "talents": [],
+      "subclasses": [
+        {
+          "id": "waylight",
+          "name": "Waylight",
+          "text": "You lead the lost toward a place they can call home.",
+          "features": [],
+          "spells": []
+        },
+        {
+          "id": "memory-keeper",
+          "name": "Memory Keeper",
+          "text": "You preserve the stories carried by abandoned places.",
+          "features": [],
+          "spells": []
+        }
+      ],
+      "progression": [
+        {
+          "level": 1,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 2,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 3,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 4,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": true
+        },
+        {
+          "level": 5,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        }
+      ],
+      "spellIDs": [
+        "ember-script",
+        "little-beacon",
+        "paper-bird",
+        "quiet-thread",
+        "sheltering-glow",
+        "borrowed-dawn",
+        "trail-whisper",
+        "lantern-bridge",
+        "echo-room"
+      ],
+      "capabilities": {
+        "edition": "2024",
+        "grants": [
+          {
+            "id": "barbarian-resolve",
+            "kind": "resource",
+            "target": "resolve",
+            "value": {
+              "base": 2,
+              "levelMultiplier": 0
+            },
+            "recovery": "long rest"
+          },
+          {
+            "id": "barbarian-defense",
+            "kind": "armorFormula",
+            "value": {
+              "base": 10,
+              "abilities": [
+                "dex",
+                "con"
+              ]
+            },
+            "condition": {
+              "kind": "configuration",
+              "key": "barbarian-active"
+            }
+          },
+          {
+            "id": "barbarian-strength-substitute",
+            "kind": "skillAbility",
+            "target": "Athletics",
+            "ability": "cha",
+            "condition": {
+              "kind": "configuration",
+              "key": "barbarian-active"
+            }
+          },
+          {
+            "id": "barbarian-vigorous",
+            "kind": "trait",
+            "text": "Declared vigorous state is active.",
+            "condition": {
+              "kind": "configuration",
+              "key": "barbarian-active"
+            }
+          }
+        ],
+        "groups": [],
+        "configurations": [
+          {
+            "id": "barbarian-active",
+            "name": "Active declared condition",
+            "text": "An original build-time condition, not combat simulation."
+          }
+        ],
+        "casting": []
+      }
+    },
+    {
+      "id": "lab-bard",
+      "name": "Road Cantor",
+      "summary": "Original bard-family mechanism laboratory; not official class content.",
+      "hitDie": 8,
+      "primaryAbility": "cha",
+      "spellAbility": "cha",
+      "saves": [
+        "wis",
+        "cha"
+      ],
+      "skillCount": 2,
+      "skillPool": [
+        "Arcana",
+        "Insight",
+        "Medicine",
+        "Persuasion",
+        "Religion",
+        "Survival"
+      ],
+      "subclassLevel": 3,
+      "talentLabel": "Practices",
+      "equipment": "A walking staff and a lantern. This demo records equipment as notes; it does not calculate purchases or armor.",
+      "armorFormula": "unarmored",
+      "features": [],
+      "talents": [],
+      "subclasses": [
+        {
+          "id": "waylight",
+          "name": "Waylight",
+          "text": "You lead the lost toward a place they can call home.",
+          "features": [],
+          "spells": []
+        },
+        {
+          "id": "memory-keeper",
+          "name": "Memory Keeper",
+          "text": "You preserve the stories carried by abandoned places.",
+          "features": [],
+          "spells": []
+        }
+      ],
+      "progression": [
+        {
+          "level": 1,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 2,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 2,
+          "slotLevel": 1,
+          "improvement": false
+        },
+        {
+          "level": 3,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 2,
+          "slotLevel": 1,
+          "improvement": false
+        },
+        {
+          "level": 4,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 2,
+          "slotLevel": 1,
+          "improvement": true
+        },
+        {
+          "level": 5,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 2,
+          "slotLevel": 2,
+          "improvement": false
+        }
+      ],
+      "spellIDs": [
+        "ember-script",
+        "little-beacon",
+        "paper-bird",
+        "quiet-thread",
+        "sheltering-glow",
+        "borrowed-dawn",
+        "trail-whisper",
+        "lantern-bridge",
+        "echo-room"
+      ],
+      "capabilities": {
+        "edition": "2024",
+        "grants": [
+          {
+            "id": "bard-expert",
+            "kind": "proficiency",
+            "target": "Arcana",
+            "rank": "expertise"
+          },
+          {
+            "id": "bard-broad",
+            "kind": "proficiency",
+            "target": "all-skills",
+            "rank": "half"
+          },
+          {
+            "id": "bard-extra",
+            "kind": "proficiency",
+            "target": "Performance",
+            "rank": "proficient"
+          },
+          {
+            "id": "bard-inspiration",
+            "kind": "resource",
+            "target": "inspiration",
+            "value": {
+              "base": 3,
+              "levelMultiplier": 0
+            },
+            "recovery": "long rest"
+          }
+        ],
+        "groups": [],
+        "configurations": [
+          {
+            "id": "bard-active",
+            "name": "Active declared condition",
+            "text": "An original build-time condition, not combat simulation."
+          }
+        ],
+        "casting": [
+          {
+            "id": "bard-casting",
+            "name": "Road Cantor casting",
+            "mode": "known",
+            "ability": "cha",
+            "spellIDs": [
+              "sheltering-glow",
+              "borrowed-dawn",
+              "keeper-call"
+            ],
+            "counts": [
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "maximumSpellLevels": [
+              1,
+              1,
+              1,
+              1,
+              2
+            ],
+            "replacementLimits": [
+              0,
+              1,
+              1,
+              1,
+              1
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "lab-cleric",
+      "name": "Beacon Votary",
+      "summary": "Original cleric-family mechanism laboratory; not official class content.",
+      "hitDie": 8,
+      "primaryAbility": "cha",
+      "spellAbility": "cha",
+      "saves": [
+        "wis",
+        "cha"
+      ],
+      "skillCount": 2,
+      "skillPool": [
+        "Arcana",
+        "Insight",
+        "Medicine",
+        "Persuasion",
+        "Religion",
+        "Survival"
+      ],
+      "subclassLevel": 3,
+      "talentLabel": "Practices",
+      "equipment": "A walking staff and a lantern. This demo records equipment as notes; it does not calculate purchases or armor.",
+      "armorFormula": "unarmored",
+      "features": [],
+      "talents": [],
+      "subclasses": [
+        {
+          "id": "waylight",
+          "name": "Waylight",
+          "text": "You lead the lost toward a place they can call home.",
+          "features": [],
+          "spells": []
+        },
+        {
+          "id": "memory-keeper",
+          "name": "Memory Keeper",
+          "text": "You preserve the stories carried by abandoned places.",
+          "features": [],
+          "spells": []
+        }
+      ],
+      "progression": [
+        {
+          "level": 1,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 2,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 2,
+          "slotLevel": 1,
+          "improvement": false
+        },
+        {
+          "level": 3,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 2,
+          "slotLevel": 1,
+          "improvement": false
+        },
+        {
+          "level": 4,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 2,
+          "slotLevel": 1,
+          "improvement": true
+        },
+        {
+          "level": 5,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 2,
+          "slotLevel": 2,
+          "improvement": false
+        }
+      ],
+      "spellIDs": [
+        "ember-script",
+        "little-beacon",
+        "paper-bird",
+        "quiet-thread",
+        "sheltering-glow",
+        "borrowed-dawn",
+        "trail-whisper",
+        "lantern-bridge",
+        "echo-room"
+      ],
+      "capabilities": {
+        "edition": "2024",
+        "grants": [
+          {
+            "id": "cleric-channel",
+            "kind": "resource",
+            "target": "channel",
+            "value": {
+              "base": 2,
+              "levelMultiplier": 0
+            },
+            "recovery": "long rest"
+          },
+          {
+            "id": "cleric-domain-spell",
+            "kind": "spell",
+            "target": "keeper-call",
+            "level": 3
+          }
+        ],
+        "groups": [
+          {
+            "id": "cleric-order",
+            "name": "order",
+            "counts": [
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "options": [
+              {
+                "id": "cleric-learned",
+                "name": "learned",
+                "text": "Original capability demonstration; not official rules.",
+                "grants": [
+                  {
+                    "id": "cleric-order-skill",
+                    "kind": "proficiency",
+                    "target": "History",
+                    "rank": "proficient"
+                  }
+                ]
+              },
+              {
+                "id": "cleric-swift",
+                "name": "swift",
+                "text": "Original capability demonstration; not official rules.",
+                "grants": [
+                  {
+                    "id": "cleric-order-speed",
+                    "kind": "speed",
+                    "value": {
+                      "base": 5
+                    }
+                  }
+                ]
+              }
+            ],
+            "replacementLimits": [
+              0,
+              1,
+              0,
+              1,
+              0
+            ]
+          }
+        ],
+        "configurations": [
+          {
+            "id": "cleric-active",
+            "name": "Active declared condition",
+            "text": "An original build-time condition, not combat simulation."
+          }
+        ],
+        "casting": [
+          {
+            "id": "cleric-casting",
+            "name": "Beacon Votary casting",
+            "mode": "prepared",
+            "ability": "cha",
+            "spellIDs": [
+              "sheltering-glow",
+              "borrowed-dawn"
+            ],
+            "counts": [
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "maximumSpellLevels": [
+              1,
+              1,
+              1,
+              1,
+              2
+            ],
+            "replacementLimits": [
+              0,
+              1,
+              1,
+              1,
+              1
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "lab-druid",
+      "name": "Moss Oracle",
+      "summary": "Original druid-family mechanism laboratory; not official class content.",
+      "hitDie": 8,
+      "primaryAbility": "cha",
+      "spellAbility": "cha",
+      "saves": [
+        "wis",
+        "cha"
+      ],
+      "skillCount": 2,
+      "skillPool": [
+        "Arcana",
+        "Insight",
+        "Medicine",
+        "Persuasion",
+        "Religion",
+        "Survival"
+      ],
+      "subclassLevel": 3,
+      "talentLabel": "Practices",
+      "equipment": "A walking staff and a lantern. This demo records equipment as notes; it does not calculate purchases or armor.",
+      "armorFormula": "unarmored",
+      "features": [],
+      "talents": [],
+      "subclasses": [
+        {
+          "id": "waylight",
+          "name": "Waylight",
+          "text": "You lead the lost toward a place they can call home.",
+          "features": [],
+          "spells": []
+        },
+        {
+          "id": "memory-keeper",
+          "name": "Memory Keeper",
+          "text": "You preserve the stories carried by abandoned places.",
+          "features": [],
+          "spells": []
+        }
+      ],
+      "progression": [
+        {
+          "level": 1,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 2,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 2,
+          "slotLevel": 1,
+          "improvement": false
+        },
+        {
+          "level": 3,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 2,
+          "slotLevel": 1,
+          "improvement": false
+        },
+        {
+          "level": 4,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 2,
+          "slotLevel": 1,
+          "improvement": true
+        },
+        {
+          "level": 5,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 2,
+          "slotLevel": 2,
+          "improvement": false
+        }
+      ],
+      "spellIDs": [
+        "ember-script",
+        "little-beacon",
+        "paper-bird",
+        "quiet-thread",
+        "sheltering-glow",
+        "borrowed-dawn",
+        "trail-whisper",
+        "lantern-bridge",
+        "echo-room"
+      ],
+      "capabilities": {
+        "edition": "2024",
+        "grants": [
+          {
+            "id": "druid-channel",
+            "kind": "resource",
+            "target": "channel",
+            "value": {
+              "base": 2,
+              "levelMultiplier": 0
+            },
+            "recovery": "long rest"
+          },
+          {
+            "id": "druid-domain-spell",
+            "kind": "spell",
+            "target": "keeper-call",
+            "level": 3
+          },
+          {
+            "id": "druid-form",
+            "kind": "trait",
+            "text": "Declared moss form has climbing and small-gap traits.",
+            "condition": {
+              "kind": "configuration",
+              "key": "druid-active"
+            }
+          }
+        ],
+        "groups": [
+          {
+            "id": "druid-order",
+            "name": "order",
+            "counts": [
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "options": [
+              {
+                "id": "druid-learned",
+                "name": "learned",
+                "text": "Original capability demonstration; not official rules.",
+                "grants": [
+                  {
+                    "id": "druid-order-skill",
+                    "kind": "proficiency",
+                    "target": "History",
+                    "rank": "proficient"
+                  }
+                ]
+              },
+              {
+                "id": "druid-swift",
+                "name": "swift",
+                "text": "Original capability demonstration; not official rules.",
+                "grants": [
+                  {
+                    "id": "druid-order-speed",
+                    "kind": "speed",
+                    "value": {
+                      "base": 5
+                    }
+                  }
+                ]
+              }
+            ],
+            "replacementLimits": [
+              0,
+              1,
+              0,
+              1,
+              0
+            ]
+          }
+        ],
+        "configurations": [
+          {
+            "id": "druid-active",
+            "name": "Active declared condition",
+            "text": "An original build-time condition, not combat simulation."
+          }
+        ],
+        "casting": [
+          {
+            "id": "druid-casting",
+            "name": "Moss Oracle casting",
+            "mode": "prepared",
+            "ability": "cha",
+            "spellIDs": [
+              "sheltering-glow",
+              "borrowed-dawn"
+            ],
+            "counts": [
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "maximumSpellLevels": [
+              1,
+              1,
+              1,
+              1,
+              2
+            ],
+            "replacementLimits": [
+              0,
+              1,
+              1,
+              1,
+              1
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "lab-fighter",
+      "name": "Bridge Sentinel",
+      "summary": "Original fighter-family mechanism laboratory; not official class content.",
+      "hitDie": 8,
+      "primaryAbility": "cha",
+      "spellAbility": null,
+      "saves": [
+        "wis",
+        "cha"
+      ],
+      "skillCount": 2,
+      "skillPool": [
+        "Arcana",
+        "Insight",
+        "Medicine",
+        "Persuasion",
+        "Religion",
+        "Survival"
+      ],
+      "subclassLevel": 3,
+      "talentLabel": "Practices",
+      "equipment": "A walking staff and a lantern. This demo records equipment as notes; it does not calculate purchases or armor.",
+      "armorFormula": "unarmored",
+      "features": [],
+      "talents": [],
+      "subclasses": [
+        {
+          "id": "waylight",
+          "name": "Waylight",
+          "text": "You lead the lost toward a place they can call home.",
+          "features": [],
+          "spells": []
+        },
+        {
+          "id": "memory-keeper",
+          "name": "Memory Keeper",
+          "text": "You preserve the stories carried by abandoned places.",
+          "features": [],
+          "spells": []
+        }
+      ],
+      "progression": [
+        {
+          "level": 1,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 2,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 3,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 4,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": true
+        },
+        {
+          "level": 5,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        }
+      ],
+      "spellIDs": [
+        "ember-script",
+        "little-beacon",
+        "paper-bird",
+        "quiet-thread",
+        "sheltering-glow",
+        "borrowed-dawn",
+        "trail-whisper",
+        "lantern-bridge",
+        "echo-room"
+      ],
+      "capabilities": {
+        "edition": "2024",
+        "grants": [
+          {
+            "id": "fighter-recovery",
+            "kind": "resource",
+            "target": "recovery",
+            "value": {
+              "base": 2,
+              "levelMultiplier": 0
+            },
+            "recovery": "long rest"
+          },
+          {
+            "id": "fighter-surge",
+            "kind": "resource",
+            "target": "surge",
+            "value": {
+              "base": 1,
+              "levelMultiplier": 0
+            },
+            "recovery": "long rest"
+          }
+        ],
+        "groups": [
+          {
+            "id": "fighter-style",
+            "name": "style",
+            "counts": [
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "options": [
+              {
+                "id": "fighter-guard",
+                "name": "guard",
+                "text": "Original capability demonstration; not official rules.",
+                "grants": [
+                  {
+                    "id": "fighter-guard-defense",
+                    "kind": "armorBonus",
+                    "value": {
+                      "base": 1
+                    },
+                    "condition": {
+                      "kind": "configuration",
+                      "key": "fighter-active"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "fighter-swift",
+                "name": "swift",
+                "text": "Original capability demonstration; not official rules.",
+                "grants": [
+                  {
+                    "id": "fighter-swift-speed",
+                    "kind": "speed",
+                    "value": {
+                      "base": 5
+                    }
+                  }
+                ]
+              }
+            ],
+            "replacementLimits": [
+              0,
+              1,
+              0,
+              1,
+              0
+            ]
+          }
+        ],
+        "configurations": [
+          {
+            "id": "fighter-active",
+            "name": "Active declared condition",
+            "text": "An original build-time condition, not combat simulation."
+          }
+        ],
+        "casting": []
+      }
+    },
+    {
+      "id": "lab-monk",
+      "name": "Quiet Step",
+      "summary": "Original monk-family mechanism laboratory; not official class content.",
+      "hitDie": 8,
+      "primaryAbility": "cha",
+      "spellAbility": null,
+      "saves": [
+        "wis",
+        "cha"
+      ],
+      "skillCount": 2,
+      "skillPool": [
+        "Arcana",
+        "Insight",
+        "Medicine",
+        "Persuasion",
+        "Religion",
+        "Survival"
+      ],
+      "subclassLevel": 3,
+      "talentLabel": "Practices",
+      "equipment": "A walking staff and a lantern. This demo records equipment as notes; it does not calculate purchases or armor.",
+      "armorFormula": "unarmored",
+      "features": [],
+      "talents": [],
+      "subclasses": [
+        {
+          "id": "waylight",
+          "name": "Waylight",
+          "text": "You lead the lost toward a place they can call home.",
+          "features": [],
+          "spells": []
+        },
+        {
+          "id": "memory-keeper",
+          "name": "Memory Keeper",
+          "text": "You preserve the stories carried by abandoned places.",
+          "features": [],
+          "spells": []
+        }
+      ],
+      "progression": [
+        {
+          "level": 1,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 2,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 3,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 4,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": true
+        },
+        {
+          "level": 5,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        }
+      ],
+      "spellIDs": [
+        "ember-script",
+        "little-beacon",
+        "paper-bird",
+        "quiet-thread",
+        "sheltering-glow",
+        "borrowed-dawn",
+        "trail-whisper",
+        "lantern-bridge",
+        "echo-room"
+      ],
+      "capabilities": {
+        "edition": "2024",
+        "grants": [
+          {
+            "id": "monk-defense",
+            "kind": "armorFormula",
+            "value": {
+              "base": 10,
+              "abilities": [
+                "dex",
+                "wis"
+              ]
+            },
+            "condition": {
+              "kind": "configuration",
+              "key": "monk-active"
+            }
+          },
+          {
+            "id": "monk-movement",
+            "kind": "speed",
+            "value": {
+              "base": 10
+            },
+            "condition": {
+              "kind": "configuration",
+              "key": "monk-active"
+            }
+          },
+          {
+            "id": "monk-focus",
+            "kind": "resource",
+            "target": "focus",
+            "value": {
+              "base": 0,
+              "levelMultiplier": 1
+            },
+            "recovery": "long rest"
+          },
+          {
+            "id": "monk-focus-die",
+            "kind": "trait",
+            "text": "The calculated focus die sides follow the level table; attack rolls are not simulated."
+          },
+          {
+            "id": "monk-die-sides",
+            "kind": "trait",
+            "text": "Focus die sides",
+            "value": {
+              "table": [
+                4,
+                4,
+                4,
+                4,
+                6
+              ]
+            }
+          }
+        ],
+        "groups": [],
+        "configurations": [
+          {
+            "id": "monk-active",
+            "name": "Active declared condition",
+            "text": "An original build-time condition, not combat simulation."
+          }
+        ],
+        "casting": []
+      }
+    },
+    {
+      "id": "lab-paladin",
+      "name": "Dawn Promise",
+      "summary": "Original paladin-family mechanism laboratory; not official class content.",
+      "hitDie": 8,
+      "primaryAbility": "cha",
+      "spellAbility": "cha",
+      "saves": [
+        "wis",
+        "cha"
+      ],
+      "skillCount": 2,
+      "skillPool": [
+        "Arcana",
+        "Insight",
+        "Medicine",
+        "Persuasion",
+        "Religion",
+        "Survival"
+      ],
+      "subclassLevel": 3,
+      "talentLabel": "Practices",
+      "equipment": "A walking staff and a lantern. This demo records equipment as notes; it does not calculate purchases or armor.",
+      "armorFormula": "unarmored",
+      "features": [],
+      "talents": [],
+      "subclasses": [
+        {
+          "id": "waylight",
+          "name": "Waylight",
+          "text": "You lead the lost toward a place they can call home.",
+          "features": [],
+          "spells": []
+        },
+        {
+          "id": "memory-keeper",
+          "name": "Memory Keeper",
+          "text": "You preserve the stories carried by abandoned places.",
+          "features": [],
+          "spells": []
+        }
+      ],
+      "progression": [
+        {
+          "level": 1,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 2,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 2,
+          "slotLevel": 1,
+          "improvement": false
+        },
+        {
+          "level": 3,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 2,
+          "slotLevel": 1,
+          "improvement": false
+        },
+        {
+          "level": 4,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 2,
+          "slotLevel": 1,
+          "improvement": true
+        },
+        {
+          "level": 5,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 2,
+          "slotLevel": 2,
+          "improvement": false
+        }
+      ],
+      "spellIDs": [
+        "ember-script",
+        "little-beacon",
+        "paper-bird",
+        "quiet-thread",
+        "sheltering-glow",
+        "borrowed-dawn",
+        "trail-whisper",
+        "lantern-bridge",
+        "echo-room"
+      ],
+      "capabilities": {
+        "edition": "2024",
+        "grants": [
+          {
+            "id": "paladin-healing",
+            "kind": "resource",
+            "target": "healing",
+            "value": {
+              "base": 0,
+              "levelMultiplier": 5
+            },
+            "recovery": "long rest"
+          },
+          {
+            "id": "paladin-channel",
+            "kind": "resource",
+            "target": "channel",
+            "value": {
+              "base": 1,
+              "levelMultiplier": 0
+            },
+            "recovery": "long rest"
+          },
+          {
+            "id": "paladin-oath",
+            "kind": "spell",
+            "target": "keeper-call",
+            "level": 3
+          }
+        ],
+        "groups": [
+          {
+            "id": "paladin-style",
+            "name": "style",
+            "counts": [
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "options": [
+              {
+                "id": "paladin-guard",
+                "name": "guard",
+                "text": "Original capability demonstration; not official rules.",
+                "grants": [
+                  {
+                    "id": "paladin-guard-defense",
+                    "kind": "armorBonus",
+                    "value": {
+                      "base": 1
+                    },
+                    "condition": {
+                      "kind": "configuration",
+                      "key": "paladin-active"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "paladin-cantrips",
+                "name": "cantrips",
+                "text": "Original capability demonstration; not official rules.",
+                "grants": [
+                  {
+                    "id": "paladin-cantrip-one",
+                    "kind": "spell",
+                    "target": "little-beacon"
+                  },
+                  {
+                    "id": "paladin-cantrip-two",
+                    "kind": "spell",
+                    "target": "paper-bird"
+                  }
+                ]
+              }
+            ],
+            "replacementLimits": [
+              0,
+              1,
+              0,
+              1,
+              0
+            ]
+          }
+        ],
+        "configurations": [
+          {
+            "id": "paladin-active",
+            "name": "Active declared condition",
+            "text": "An original build-time condition, not combat simulation."
+          }
+        ],
+        "casting": [
+          {
+            "id": "paladin-casting",
+            "name": "Dawn Promise casting",
+            "mode": "prepared",
+            "ability": "cha",
+            "spellIDs": [
+              "sheltering-glow",
+              "borrowed-dawn"
+            ],
+            "counts": [
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "maximumSpellLevels": [
+              1,
+              1,
+              1,
+              1,
+              2
+            ],
+            "replacementLimits": [
+              0,
+              1,
+              1,
+              1,
+              1
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "lab-ranger",
+      "name": "Boundary Scout",
+      "summary": "Original ranger-family mechanism laboratory; not official class content.",
+      "hitDie": 8,
+      "primaryAbility": "cha",
+      "spellAbility": "cha",
+      "saves": [
+        "wis",
+        "cha"
+      ],
+      "skillCount": 2,
+      "skillPool": [
+        "Arcana",
+        "Insight",
+        "Medicine",
+        "Persuasion",
+        "Religion",
+        "Survival"
+      ],
+      "subclassLevel": 3,
+      "talentLabel": "Practices",
+      "equipment": "A walking staff and a lantern. This demo records equipment as notes; it does not calculate purchases or armor.",
+      "armorFormula": "unarmored",
+      "features": [],
+      "talents": [],
+      "subclasses": [
+        {
+          "id": "waylight",
+          "name": "Waylight",
+          "text": "You lead the lost toward a place they can call home.",
+          "features": [],
+          "spells": []
+        },
+        {
+          "id": "memory-keeper",
+          "name": "Memory Keeper",
+          "text": "You preserve the stories carried by abandoned places.",
+          "features": [],
+          "spells": []
+        }
+      ],
+      "progression": [
+        {
+          "level": 1,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 2,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 2,
+          "slotLevel": 1,
+          "improvement": false
+        },
+        {
+          "level": 3,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 2,
+          "slotLevel": 1,
+          "improvement": false
+        },
+        {
+          "level": 4,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 2,
+          "slotLevel": 1,
+          "improvement": true
+        },
+        {
+          "level": 5,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 2,
+          "slotLevel": 2,
+          "improvement": false
+        }
+      ],
+      "spellIDs": [
+        "ember-script",
+        "little-beacon",
+        "paper-bird",
+        "quiet-thread",
+        "sheltering-glow",
+        "borrowed-dawn",
+        "trail-whisper",
+        "lantern-bridge",
+        "echo-room"
+      ],
+      "capabilities": {
+        "edition": "2024",
+        "grants": [
+          {
+            "id": "ranger-expert",
+            "kind": "proficiency",
+            "target": "Arcana",
+            "rank": "expertise"
+          },
+          {
+            "id": "ranger-language",
+            "kind": "language",
+            "target": "Road Cant"
+          },
+          {
+            "id": "ranger-quarry",
+            "kind": "trait",
+            "text": "Configured quarry grants the declared tracking advantage.",
+            "condition": {
+              "kind": "configuration",
+              "key": "ranger-active"
+            }
+          }
+        ],
+        "groups": [
+          {
+            "id": "ranger-style",
+            "name": "style",
+            "counts": [
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "options": [
+              {
+                "id": "ranger-guard",
+                "name": "guard",
+                "text": "Original capability demonstration; not official rules.",
+                "grants": [
+                  {
+                    "id": "ranger-guard-defense",
+                    "kind": "armorBonus",
+                    "value": {
+                      "base": 1
+                    },
+                    "condition": {
+                      "kind": "configuration",
+                      "key": "ranger-active"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "ranger-swift",
+                "name": "swift",
+                "text": "Original capability demonstration; not official rules.",
+                "grants": [
+                  {
+                    "id": "ranger-swift-speed",
+                    "kind": "speed",
+                    "value": {
+                      "base": 5
+                    }
+                  }
+                ]
+              }
+            ],
+            "replacementLimits": [
+              0,
+              1,
+              0,
+              1,
+              0
+            ]
+          }
+        ],
+        "configurations": [
+          {
+            "id": "ranger-active",
+            "name": "Active declared condition",
+            "text": "An original build-time condition, not combat simulation."
+          }
+        ],
+        "casting": [
+          {
+            "id": "ranger-casting",
+            "name": "Boundary Scout casting",
+            "mode": "known",
+            "ability": "cha",
+            "spellIDs": [
+              "sheltering-glow",
+              "borrowed-dawn"
+            ],
+            "counts": [
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "maximumSpellLevels": [
+              1,
+              1,
+              1,
+              1,
+              2
+            ],
+            "replacementLimits": [
+              0,
+              1,
+              1,
+              1,
+              1
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "lab-rogue",
+      "name": "Archive Fox",
+      "summary": "Original rogue-family mechanism laboratory; not official class content.",
+      "hitDie": 8,
+      "primaryAbility": "cha",
+      "spellAbility": null,
+      "saves": [
+        "wis",
+        "cha"
+      ],
+      "skillCount": 2,
+      "skillPool": [
+        "Arcana",
+        "Insight",
+        "Medicine",
+        "Persuasion",
+        "Religion",
+        "Survival"
+      ],
+      "subclassLevel": 3,
+      "talentLabel": "Practices",
+      "equipment": "A walking staff and a lantern. This demo records equipment as notes; it does not calculate purchases or armor.",
+      "armorFormula": "unarmored",
+      "features": [],
+      "talents": [],
+      "subclasses": [
+        {
+          "id": "waylight",
+          "name": "Waylight",
+          "text": "You lead the lost toward a place they can call home.",
+          "features": [],
+          "spells": []
+        },
+        {
+          "id": "memory-keeper",
+          "name": "Memory Keeper",
+          "text": "You preserve the stories carried by abandoned places.",
+          "features": [],
+          "spells": []
+        }
+      ],
+      "progression": [
+        {
+          "level": 1,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 2,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 3,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 4,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": true
+        },
+        {
+          "level": 5,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        }
+      ],
+      "spellIDs": [
+        "ember-script",
+        "little-beacon",
+        "paper-bird",
+        "quiet-thread",
+        "sheltering-glow",
+        "borrowed-dawn",
+        "trail-whisper",
+        "lantern-bridge",
+        "echo-room"
+      ],
+      "capabilities": {
+        "edition": "2024",
+        "grants": [
+          {
+            "id": "rogue-expert",
+            "kind": "proficiency",
+            "target": "Arcana",
+            "rank": "expertise"
+          },
+          {
+            "id": "rogue-language",
+            "kind": "language",
+            "target": "Road Cant"
+          }
+        ],
+        "groups": [],
+        "configurations": [
+          {
+            "id": "rogue-active",
+            "name": "Active declared condition",
+            "text": "An original build-time condition, not combat simulation."
+          }
+        ],
+        "casting": []
+      }
+    },
+    {
+      "id": "lab-sorcerer",
+      "name": "Ember Heir",
+      "summary": "Original sorcerer-family mechanism laboratory; not official class content.",
+      "hitDie": 8,
+      "primaryAbility": "cha",
+      "spellAbility": "cha",
+      "saves": [
+        "wis",
+        "cha"
+      ],
+      "skillCount": 2,
+      "skillPool": [
+        "Arcana",
+        "Insight",
+        "Medicine",
+        "Persuasion",
+        "Religion",
+        "Survival"
+      ],
+      "subclassLevel": 3,
+      "talentLabel": "Practices",
+      "equipment": "A walking staff and a lantern. This demo records equipment as notes; it does not calculate purchases or armor.",
+      "armorFormula": "unarmored",
+      "features": [],
+      "talents": [],
+      "subclasses": [
+        {
+          "id": "waylight",
+          "name": "Waylight",
+          "text": "You lead the lost toward a place they can call home.",
+          "features": [],
+          "spells": []
+        },
+        {
+          "id": "memory-keeper",
+          "name": "Memory Keeper",
+          "text": "You preserve the stories carried by abandoned places.",
+          "features": [],
+          "spells": []
+        }
+      ],
+      "progression": [
+        {
+          "level": 1,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 2,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 2,
+          "slotLevel": 1,
+          "improvement": false
+        },
+        {
+          "level": 3,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 2,
+          "slotLevel": 1,
+          "improvement": false
+        },
+        {
+          "level": 4,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 2,
+          "slotLevel": 1,
+          "improvement": true
+        },
+        {
+          "level": 5,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 2,
+          "slotLevel": 2,
+          "improvement": false
+        }
+      ],
+      "spellIDs": [
+        "ember-script",
+        "little-beacon",
+        "paper-bird",
+        "quiet-thread",
+        "sheltering-glow",
+        "borrowed-dawn",
+        "trail-whisper",
+        "lantern-bridge",
+        "echo-room"
+      ],
+      "capabilities": {
+        "edition": "2024",
+        "grants": [
+          {
+            "id": "sorcerer-sorcery",
+            "kind": "resource",
+            "target": "sorcery",
+            "value": {
+              "base": 0,
+              "levelMultiplier": 1
+            },
+            "recovery": "long rest"
+          },
+          {
+            "id": "sorcerer-durability",
+            "kind": "hitPoints",
+            "value": {
+              "levelMultiplier": 1
+            }
+          },
+          {
+            "id": "sorcerer-scales",
+            "kind": "armorFormula",
+            "value": {
+              "base": 13,
+              "abilities": [
+                "dex"
+              ]
+            },
+            "condition": {
+              "kind": "configuration",
+              "key": "sorcerer-active"
+            }
+          },
+          {
+            "id": "sorcerer-affinity",
+            "kind": "trait",
+            "text": "Ember affinity resistance is active.",
+            "condition": {
+              "kind": "configuration",
+              "key": "sorcerer-active"
+            }
+          },
+          {
+            "id": "sorcerer-lineage",
+            "kind": "spell",
+            "target": "keeper-call",
+            "level": 3
+          }
+        ],
+        "groups": [
+          {
+            "id": "sorcerer-metamagic",
+            "name": "metamagic",
+            "counts": [
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "options": [
+              {
+                "id": "sorcerer-distant",
+                "name": "distant",
+                "text": "Original capability demonstration; not official rules.",
+                "grants": [
+                  {
+                    "id": "sorcerer-distant",
+                    "kind": "trait",
+                    "text": "A selected distance-altering spell option."
+                  }
+                ]
+              },
+              {
+                "id": "sorcerer-quiet",
+                "name": "quiet",
+                "text": "Original capability demonstration; not official rules.",
+                "grants": [
+                  {
+                    "id": "sorcerer-quiet",
+                    "kind": "trait",
+                    "text": "A selected quiet-casting spell option."
+                  }
+                ]
+              }
+            ],
+            "replacementLimits": [
+              0,
+              1,
+              0,
+              1,
+              0
+            ]
+          }
+        ],
+        "configurations": [
+          {
+            "id": "sorcerer-active",
+            "name": "Active declared condition",
+            "text": "An original build-time condition, not combat simulation."
+          }
+        ],
+        "casting": [
+          {
+            "id": "sorcerer-casting",
+            "name": "Ember Heir casting",
+            "mode": "known",
+            "ability": "cha",
+            "spellIDs": [
+              "sheltering-glow",
+              "borrowed-dawn"
+            ],
+            "counts": [
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "maximumSpellLevels": [
+              1,
+              1,
+              1,
+              1,
+              2
+            ],
+            "replacementLimits": [
+              0,
+              1,
+              1,
+              1,
+              1
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "lab-warlock",
+      "name": "Night Bargain",
+      "summary": "Original warlock-family mechanism laboratory; not official class content.",
+      "hitDie": 8,
+      "primaryAbility": "cha",
+      "spellAbility": "cha",
+      "saves": [
+        "wis",
+        "cha"
+      ],
+      "skillCount": 2,
+      "skillPool": [
+        "Arcana",
+        "Insight",
+        "Medicine",
+        "Persuasion",
+        "Religion",
+        "Survival"
+      ],
+      "subclassLevel": 3,
+      "talentLabel": "Practices",
+      "equipment": "A walking staff and a lantern. This demo records equipment as notes; it does not calculate purchases or armor.",
+      "armorFormula": "unarmored",
+      "features": [],
+      "talents": [],
+      "subclasses": [
+        {
+          "id": "waylight",
+          "name": "Waylight",
+          "text": "You lead the lost toward a place they can call home.",
+          "features": [],
+          "spells": []
+        },
+        {
+          "id": "memory-keeper",
+          "name": "Memory Keeper",
+          "text": "You preserve the stories carried by abandoned places.",
+          "features": [],
+          "spells": []
+        }
+      ],
+      "progression": [
+        {
+          "level": 1,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 2,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 2,
+          "slotLevel": 1,
+          "improvement": false
+        },
+        {
+          "level": 3,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 2,
+          "slotLevel": 1,
+          "improvement": false
+        },
+        {
+          "level": 4,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 2,
+          "slotLevel": 1,
+          "improvement": true
+        },
+        {
+          "level": 5,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 2,
+          "slotLevel": 2,
+          "improvement": false
+        }
+      ],
+      "spellIDs": [
+        "ember-script",
+        "little-beacon",
+        "paper-bird",
+        "quiet-thread",
+        "sheltering-glow",
+        "borrowed-dawn",
+        "trail-whisper",
+        "lantern-bridge",
+        "echo-room"
+      ],
+      "capabilities": {
+        "edition": "2024",
+        "grants": [
+          {
+            "id": "warlock-at-will",
+            "kind": "spell",
+            "target": "little-beacon",
+            "spellMode": "atWill",
+            "condition": {
+              "kind": "configuration",
+              "key": "warlock-active"
+            }
+          },
+          {
+            "id": "warlock-limited-spell",
+            "kind": "spell",
+            "target": "keeper-circle",
+            "spellMode": "limited",
+            "level": 5
+          },
+          {
+            "id": "warlock-limited-casts",
+            "kind": "resource",
+            "target": "limited-casts",
+            "value": {
+              "base": 1,
+              "levelMultiplier": 0
+            },
+            "recovery": "long rest"
+          }
+        ],
+        "groups": [
+          {
+            "id": "warlock-invocations",
+            "name": "invocations",
+            "counts": [
+              1,
+              2,
+              2,
+              2,
+              2
+            ],
+            "options": [
+              {
+                "id": "warlock-root",
+                "name": "root",
+                "text": "Original capability demonstration; not official rules.",
+                "grants": [
+                  {
+                    "id": "warlock-root-training",
+                    "kind": "proficiency",
+                    "target": "History",
+                    "rank": "proficient"
+                  }
+                ]
+              },
+              {
+                "id": "warlock-dependent",
+                "name": "dependent",
+                "text": "Original capability demonstration; not official rules.",
+                "grants": [
+                  {
+                    "id": "warlock-dependent-speed",
+                    "kind": "speed",
+                    "value": {
+                      "base": 10
+                    }
+                  }
+                ],
+                "prerequisite": {
+                  "kind": "selection",
+                  "key": "warlock-root"
+                }
+              },
+              {
+                "id": "warlock-repeat",
+                "name": "repeat",
+                "text": "Original capability demonstration; not official rules.",
+                "grants": [
+                  {
+                    "id": "warlock-repeat-speed",
+                    "kind": "speed",
+                    "value": {
+                      "base": 5
+                    }
+                  }
+                ],
+                "repeatable": true
+              }
+            ],
+            "replacementLimits": [
+              0,
+              1,
+              0,
+              1,
+              0
+            ]
+          },
+          {
+            "id": "warlock-pact",
+            "name": "pact",
+            "counts": [
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "options": [
+              {
+                "id": "warlock-tome",
+                "name": "tome",
+                "text": "Original capability demonstration; not official rules.",
+                "grants": [
+                  {
+                    "id": "warlock-tome",
+                    "kind": "trait",
+                    "text": "Pact book selected."
+                  }
+                ]
+              },
+              {
+                "id": "warlock-chain",
+                "name": "chain",
+                "text": "Original capability demonstration; not official rules.",
+                "grants": [
+                  {
+                    "id": "warlock-chain",
+                    "kind": "trait",
+                    "text": "Pact companion selected; turns are not simulated."
+                  }
+                ]
+              }
+            ],
+            "replacementLimits": [
+              0,
+              1,
+              0,
+              1,
+              0
+            ]
+          }
+        ],
+        "configurations": [
+          {
+            "id": "warlock-active",
+            "name": "Active declared condition",
+            "text": "An original build-time condition, not combat simulation."
+          }
+        ],
+        "casting": [
+          {
+            "id": "warlock-casting",
+            "name": "Night Bargain casting",
+            "mode": "known",
+            "ability": "cha",
+            "spellIDs": [
+              "sheltering-glow",
+              "borrowed-dawn",
+              "keeper-call"
+            ],
+            "counts": [
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "maximumSpellLevels": [
+              1,
+              1,
+              1,
+              1,
+              2
+            ],
+            "replacementLimits": [
+              0,
+              1,
+              1,
+              1,
+              1
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "lab-wizard",
+      "name": "Margin Scholar",
+      "summary": "Original wizard-family mechanism laboratory; not official class content.",
+      "hitDie": 8,
+      "primaryAbility": "cha",
+      "spellAbility": "cha",
+      "saves": [
+        "wis",
+        "cha"
+      ],
+      "skillCount": 2,
+      "skillPool": [
+        "Arcana",
+        "Insight",
+        "Medicine",
+        "Persuasion",
+        "Religion",
+        "Survival"
+      ],
+      "subclassLevel": 3,
+      "talentLabel": "Practices",
+      "equipment": "A walking staff and a lantern. This demo records equipment as notes; it does not calculate purchases or armor.",
+      "armorFormula": "unarmored",
+      "features": [],
+      "talents": [],
+      "subclasses": [
+        {
+          "id": "waylight",
+          "name": "Waylight",
+          "text": "You lead the lost toward a place they can call home.",
+          "features": [],
+          "spells": []
+        },
+        {
+          "id": "memory-keeper",
+          "name": "Memory Keeper",
+          "text": "You preserve the stories carried by abandoned places.",
+          "features": [],
+          "spells": []
+        }
+      ],
+      "progression": [
+        {
+          "level": 1,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 2,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 2,
+          "slotLevel": 1,
+          "improvement": false
+        },
+        {
+          "level": 3,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 2,
+          "slotLevel": 1,
+          "improvement": false
+        },
+        {
+          "level": 4,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 2,
+          "slotLevel": 1,
+          "improvement": true
+        },
+        {
+          "level": 5,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 2,
+          "slotLevel": 2,
+          "improvement": false
+        }
+      ],
+      "spellIDs": [
+        "ember-script",
+        "little-beacon",
+        "paper-bird",
+        "quiet-thread",
+        "sheltering-glow",
+        "borrowed-dawn",
+        "trail-whisper",
+        "lantern-bridge",
+        "echo-room"
+      ],
+      "capabilities": {
+        "edition": "2024",
+        "grants": [
+          {
+            "id": "wizard-expert",
+            "kind": "proficiency",
+            "target": "Arcana",
+            "rank": "expertise"
+          }
+        ],
+        "groups": [],
+        "configurations": [
+          {
+            "id": "wizard-active",
+            "name": "Active declared condition",
+            "text": "An original build-time condition, not combat simulation."
+          }
+        ],
+        "casting": [
+          {
+            "id": "wizard-casting",
+            "name": "Margin Scholar casting",
+            "mode": "book",
+            "ability": "cha",
+            "spellIDs": [
+              "sheltering-glow",
+              "borrowed-dawn"
+            ],
+            "counts": [
+              1,
+              2,
+              2,
+              2,
+              2
+            ],
+            "maximumSpellLevels": [
+              1,
+              1,
+              1,
+              1,
+              2
+            ],
+            "replacementLimits": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "preparedCounts": [
+              1,
+              1,
+              1,
+              1,
+              1
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "lab-artificer",
+      "name": "Copper Inventor",
+      "summary": "Original artificer-family mechanism laboratory; not official class content.",
+      "hitDie": 8,
+      "primaryAbility": "cha",
+      "spellAbility": "cha",
+      "saves": [
+        "wis",
+        "cha"
+      ],
+      "skillCount": 2,
+      "skillPool": [
+        "Arcana",
+        "Insight",
+        "Medicine",
+        "Persuasion",
+        "Religion",
+        "Survival"
+      ],
+      "subclassLevel": 3,
+      "talentLabel": "Practices",
+      "equipment": "A walking staff and a lantern. This demo records equipment as notes; it does not calculate purchases or armor.",
+      "armorFormula": "unarmored",
+      "features": [],
+      "talents": [],
+      "subclasses": [
+        {
+          "id": "waylight",
+          "name": "Waylight",
+          "text": "You lead the lost toward a place they can call home.",
+          "features": [],
+          "spells": []
+        },
+        {
+          "id": "memory-keeper",
+          "name": "Memory Keeper",
+          "text": "You preserve the stories carried by abandoned places.",
+          "features": [],
+          "spells": []
+        }
+      ],
+      "progression": [
+        {
+          "level": 1,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 2,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 2,
+          "slotLevel": 1,
+          "improvement": false
+        },
+        {
+          "level": 3,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 2,
+          "slotLevel": 1,
+          "improvement": false
+        },
+        {
+          "level": 4,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 2,
+          "slotLevel": 1,
+          "improvement": true
+        },
+        {
+          "level": 5,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 2,
+          "slotLevel": 2,
+          "improvement": false
+        }
+      ],
+      "spellIDs": [
+        "ember-script",
+        "little-beacon",
+        "paper-bird",
+        "quiet-thread",
+        "sheltering-glow",
+        "borrowed-dawn",
+        "trail-whisper",
+        "lantern-bridge",
+        "echo-room"
+      ],
+      "capabilities": {
+        "edition": "2024",
+        "grants": [],
+        "groups": [
+          {
+            "id": "artificer-recipes",
+            "name": "recipes",
+            "counts": [
+              1,
+              2,
+              2,
+              2,
+              2
+            ],
+            "options": [
+              {
+                "id": "artificer-foundation",
+                "name": "foundation",
+                "text": "Original capability demonstration; not official rules.",
+                "grants": [
+                  {
+                    "id": "artificer-foundation",
+                    "kind": "trait",
+                    "text": "Original item recipe learned."
+                  }
+                ]
+              },
+              {
+                "id": "artificer-advanced",
+                "name": "advanced",
+                "text": "Original capability demonstration; not official rules.",
+                "grants": [
+                  {
+                    "id": "artificer-advanced",
+                    "kind": "trait",
+                    "text": "Dependent item recipe learned; active applications await I5."
+                  }
+                ],
+                "prerequisite": {
+                  "kind": "selection",
+                  "key": "artificer-foundation"
+                }
+              }
+            ],
+            "replacementLimits": [
+              0,
+              1,
+              0,
+              1,
+              0
+            ]
+          }
+        ],
+        "configurations": [
+          {
+            "id": "artificer-active",
+            "name": "Active declared condition",
+            "text": "An original build-time condition, not combat simulation."
+          }
+        ],
+        "casting": [
+          {
+            "id": "artificer-casting",
+            "name": "Copper Inventor casting",
+            "mode": "prepared",
+            "ability": "cha",
+            "spellIDs": [
+              "sheltering-glow",
+              "borrowed-dawn"
+            ],
+            "counts": [
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "maximumSpellLevels": [
+              1,
+              1,
+              1,
+              1,
+              2
+            ],
+            "replacementLimits": [
+              0,
+              1,
+              1,
+              1,
+              1
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "lab-2014-wayfarer",
+      "name": "Old Road Wayfarer",
+      "summary": "Carry a little light into places the world has forgotten.",
+      "hitDie": 8,
+      "primaryAbility": "cha",
+      "spellAbility": "cha",
+      "saves": [
+        "wis",
+        "cha"
+      ],
+      "skillCount": 2,
+      "skillPool": [
+        "Arcana",
+        "Insight",
+        "Medicine",
+        "Persuasion",
+        "Religion",
+        "Survival"
+      ],
+      "subclassLevel": 3,
+      "talentLabel": "Practices",
+      "equipment": "A walking staff and a lantern. This demo records equipment as notes; it does not calculate purchases or armor.",
+      "armorFormula": "unarmored",
+      "features": [
+        {
+          "id": "lantern",
+          "name": "The lantern",
+          "level": 1,
+          "text": "Your lantern is a personal keepsake and the focus of your magic."
+        },
+        {
+          "id": "roads",
+          "name": "Lantern magic",
+          "level": 2,
+          "text": "Choose your cantrips and known spells. This example class uses a shared pool of spell slots that refreshes after a rest."
+        },
+        {
+          "id": "calling",
+          "name": "A calling",
+          "level": 3,
+          "text": "Choose which part of the lantern road you will care for."
+        },
+        {
+          "id": "two-lights",
+          "name": "Two lights",
+          "level": 5,
+          "text": "Your story now reaches beyond a single road. Record a place you promise to return to."
+        }
+      ],
+      "talents": [
+        {
+          "id": "listener",
+          "name": "Listener",
+          "text": "Learn to notice the words people leave unsaid. Gain proficiency in Insight.",
+          "skills": [
+            "Insight"
+          ],
+          "minimumLevel": 1,
+          "exclusiveGroup": "listener",
+          "requires": []
+        },
+        {
+          "id": "letter-keeper",
+          "name": "Letter Keeper",
+          "text": "You keep careful records. Gain proficiency in History.",
+          "skills": [
+            "History"
+          ],
+          "minimumLevel": 1,
+          "exclusiveGroup": "letter-keeper",
+          "requires": []
+        },
+        {
+          "id": "path-reader",
+          "name": "Path Reader",
+          "text": "You understand the traces left by travelers. Gain proficiency in Survival.",
+          "skills": [
+            "Survival"
+          ],
+          "minimumLevel": 1,
+          "exclusiveGroup": "path-reader",
+          "requires": []
+        },
+        {
+          "id": "gentle-hand",
+          "name": "Gentle Hand",
+          "text": "Your steady care grants proficiency in Medicine.",
+          "skills": [
+            "Medicine"
+          ],
+          "minimumLevel": 2,
+          "exclusiveGroup": "gentle-hand",
+          "requires": []
+        }
+      ],
+      "subclasses": [
+        {
+          "id": "waylight",
+          "name": "Waylight",
+          "text": "You lead the lost toward a place they can call home.",
+          "features": [
+            {
+              "id": "welcome",
+              "name": "A light in the window",
+              "level": 3,
+              "text": "A small lamp becomes your sign of welcome. Describe a place where a friend leaves one burning for you."
+            }
+          ],
+          "spells": [
+            {
+              "level": 3,
+              "spellIDs": [
+                "keeper-call"
+              ]
+            },
+            {
+              "level": 5,
+              "spellIDs": [
+                "keeper-circle"
+              ]
+            }
+          ],
+          "capabilities": {
+            "edition": "2014"
+          }
+        },
+        {
+          "id": "memory-keeper",
+          "name": "Memory Keeper",
+          "text": "You preserve the stories carried by abandoned places.",
+          "features": [
+            {
+              "id": "memory",
+              "name": "The remembered road",
+              "level": 3,
+              "text": "Keep a short memory of every meaningful place you visit."
+            }
+          ],
+          "spells": [
+            {
+              "level": 3,
+              "spellIDs": [
+                "keeper-call"
+              ]
+            },
+            {
+              "level": 5,
+              "spellIDs": [
+                "keeper-circle"
+              ]
+            }
+          ],
+          "capabilities": {
+            "edition": "2014"
+          }
+        }
+      ],
+      "progression": [
+        {
+          "level": 1,
+          "talents": 1,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 2,
+          "talents": 2,
+          "cantrips": 2,
+          "spells": 2,
+          "slots": 2,
+          "slotLevel": 1,
+          "improvement": false
+        },
+        {
+          "level": 3,
+          "talents": 2,
+          "cantrips": 2,
+          "spells": 2,
+          "slots": 2,
+          "slotLevel": 1,
+          "improvement": false
+        },
+        {
+          "level": 4,
+          "talents": 3,
+          "cantrips": 3,
+          "spells": 3,
+          "slots": 2,
+          "slotLevel": 1,
+          "improvement": true
+        },
+        {
+          "level": 5,
+          "talents": 3,
+          "cantrips": 3,
+          "spells": 3,
+          "slots": 2,
+          "slotLevel": 2,
+          "improvement": false
+        }
+      ],
+      "spellIDs": [
+        "ember-script",
+        "little-beacon",
+        "paper-bird",
+        "quiet-thread",
+        "sheltering-glow",
+        "borrowed-dawn",
+        "trail-whisper",
+        "lantern-bridge",
+        "echo-room"
+      ],
+      "capabilities": {
+        "edition": "2014"
+      }
+    }
+  ],
+  "capabilities": {
+    "version": 1,
+    "required": [
+      "choices",
+      "modifiers",
+      "casting",
+      "editions",
+      "resources",
+      "traits",
+      "proficiencies",
+      "configuration",
+      "languages"
+    ]
+  }
+}

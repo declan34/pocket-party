@@ -1,5 +1,7 @@
 # Content pack contract v1
 
+Schema 1 remains supported unchanged. For schema-2 typed engine/editor authoring, see [the capability interface](capability-interface.md). The original `capability-pack.json` installs alongside the legacy example and includes thirteen family mechanism laboratories. Registered behavior checks, actual private-adapter acceptance and unresolved content are distinguished in [coverage](capability-coverage.md).
+
 Use `content-pack.schema.json` for structural tooling, and the bundled `example-pack.json` as a complete working template. Import also applies semantic checks in `PackValidator`: duplicate IDs, missing references, progression gaps, unsupported values, and content limits. Schema validity alone is not enough.
 
 ## Identity and versions
@@ -16,6 +18,8 @@ An existing character's **Add library choices** action appends previously absent
 
 Combined snapshots are bounded at 100 source revisions, 100 classes, 1,000 species, 2,000 backgrounds, 5,000 feats, 10,000 spells and 12 MB encoded content. Character records, including portraits, remain limited to 20 MB. Oversized combinations fail before saving. A snapshot containing any private source is conservatively marked private, even when that source is not currently selected.
 
+New combined snapshots also retain `sourceCoverageNotes` by selectable definition identity. Sheet support notes follow selected class/species/background/feats/spells rather than every installed source. Older snapshots without this metadata retain their existing notes; diagnostics from evaluation are never hidden. This metadata is snapshot-only, not a source-pack authoring field.
+
 ## Supported records
 
 | Record | Meaning |
@@ -28,7 +32,7 @@ Combined snapshots are bounded at 100 source revisions, 100 classes, 1,000 speci
 | `backgrounds` | Exactly three eligible ability types, two skills, a tool, an origin feat ID, equipment notes. Player assigns +2/+1 or three +1 bonuses. |
 | `feats` | Origin/general category, minimum level, eligible ability improvements/point budget, ability prerequisites for selected general feats (all must hold), HP per level, initiative proficiency flag, skill grants. Origin feats requiring prerequisites are unsupported: use minimum level 1 and empty `abilityMinimums`. No repeatable feats or arbitrary effect expressions. |
 | `spells` | ID, name, spell level (0 = cantrip), plain description, provenance. Optional `unavailableReason` makes selection/grant fail build checks instead of silently using incomplete content. |
-| `languages` | Additional language choices; do not include Common, which is granted automatically. |
+| `languages` | Standard additional creation choices for schema-1/2024; do not include Common, which is automatic only under those conventions. Schema-2 2014 languages come from authored semantic grants/choice groups instead; fixed or exotic grants never enlarge this pool. See the capability interface. |
 
 `armorFormula` is `unarmored` or `vessel-mantle`. The latter displays an additional `10 + CON modifier + CHA modifier` option; it does not equip armor, track cloak state, or perform transformations. Baseline AC is `10 + DEX modifier`.
 

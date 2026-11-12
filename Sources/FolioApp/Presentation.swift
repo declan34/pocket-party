@@ -1,6 +1,9 @@
 import Foundation
 
 enum CharacterPresentation {
+    static func showsFeat(_ id: String, originID: String?, selectedIDs: [String], edition: String?) -> Bool {
+        (edition != "2014" && id == originID) || selectedIDs.contains(id)
+    }
     static func initials(for name: String) -> String {
         let words = name.split(whereSeparator: \.isWhitespace)
         guard let first = words.first?.first else { return "?" }

@@ -14,17 +14,21 @@ public struct LibraryStorage: Sendable {
     public func load() throws -> LibraryDocument {
         guard FileManager.default.fileExists(atPath: file.path) else { return LibraryDocument() }
         let data = try Data(contentsOf: file)
+        try CapabilityValidation.preflightLibrary(data)
         let library = try Self.decoder.decode(LibraryDocument.self, from: data)
+        try Self.validate(library)
+        return library
+    }
+    private static func validate(_ library: LibraryDocument) throws {
         guard library.schemaVersion == 1 else { throw FolioError.invalid("This library was saved by an unsupported version. The file has been preserved.") }
         for pack in library.packs { try PackValidator.validate(pack) }
         for record in library.characters { try PackValidator.validateRecord(record) }
         guard Set(library.characters.map(\.id)).count == library.characters.count else { throw FolioError.invalid("The library has duplicate character IDs. Its file has been preserved.") }
-        return library
     }
     public func save(_ library: LibraryDocument) throws {
-        for pack in library.packs { try PackValidator.validate(pack) }
-        for record in library.characters { try PackValidator.validateRecord(record) }
+        try Self.validate(library)
         let data = try Self.encoder.encode(library)
+        try CapabilityValidation.preflightLibrary(data)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         if FileManager.default.fileExists(atPath: file.path) {
             let previous = try Data(contentsOf: file)
@@ -43,6 +47,7 @@ public struct LibraryStorage: Sendable {
     }
     public static func decodeCharacter(_ data: Data) throws -> CharacterRecord {
         guard data.count <= 20_000_000 else { throw FolioError.invalid("Character files must be smaller than 20 MB.") }
+        try CapabilityValidation.preflight(data)
         let record = try decoder.decode(CharacterRecord.self, from: data)
         try PackValidator.validateRecord(record)
         return record

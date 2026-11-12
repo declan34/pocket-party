@@ -196,12 +196,15 @@ struct FolioCoreTests {
     func privateVesselConversionWhenPresent() throws {
         let root = URL(fileURLWithPath:#filePath).deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
         let url = root.appendingPathComponent("PrivatePacks/vessel-pack.json")
-        guard FileManager.default.fileExists(atPath:url.path) else { return }
+        guard FileManager.default.fileExists(atPath:url.path) else { print("SKIP privateVesselConversionWhenPresent: private input absent"); return }
         let p = try PackValidator.decode(Data(contentsOf:url))
         let cls = try require(p.classes.first)
         try expect(cls.primaryAbility == .cha)
         try expect(cls.hitDie == 10)
         try expect(cls.at(5)?.slots == 2 && cls.at(5)?.slotLevel == 2)
+        // Historical schema-1 behavior remains characterized below; schema-2 actual
+        // adapter behavior is registered separately in vesselCapabilityChecks.
+        if p.schemaVersion == 2 { return }
         var b = CharacterBuild(classID:"vessel")
         b.name="Vessel fixture"; b.speciesID="dwarf"; b.backgroundID="farmer"
         b.backgroundBoosts=["con":2,"wis":1]; b.classSkills=["Acrobatics","Insight"]; b.languages=["Elvish","Dwarvish"]
@@ -242,6 +245,48 @@ private func expectThrows<T>(_ body: () throws -> T) throws {
     static func main() {
         let tests = FolioCoreTests()
         let checks: [(String, () throws -> Void)] = [
+            ("capabilityLanguageCreationChecks", capabilityLanguageCreationChecks),
+            ("capabilityLanguageContractChecks", capabilityLanguageContractChecks),
+            ("capabilityLanguageReplayChecks", capabilityLanguageReplayChecks),
+            ("capabilityLanguageChoiceChecks", capabilityLanguageChoiceChecks),
+            ("capabilityLibraryRoundTripChecks", capabilityLibraryRoundTripChecks),
+            ("capabilityFeatIntegrationChecks", capabilityFeatIntegrationChecks),
+            ("capabilityFeatHistoricalScalingChecks", capabilityFeatHistoricalScalingChecks),
+            ("capabilitySubclassEditorIntegrationChecks", capabilitySubclassEditorIntegrationChecks),
+            ("vesselCapabilityChecks", vesselCapabilityChecks),
+            ("capabilityBonusFamilyAlternativeChecks", capabilityBonusFamilyAlternativeChecks),
+            ("capabilityMovementBaseChecks", capabilityMovementBaseChecks),
+            ("capabilitySelectedCoverageChecks", capabilitySelectedCoverageChecks),
+            ("capabilityFormSizeChecks", capabilityFormSizeChecks),
+            ("capabilityFamilyMatrixChecks", capabilityFamilyMatrixChecks),
+            ("capabilityComputedTraitChecks", capabilityComputedTraitChecks),
+            ("capabilityAdditionalSpellGrantChecks", capabilityAdditionalSpellGrantChecks),
+            ("capabilityAcquisitionRequirementChecks", capabilityAcquisitionRequirementChecks),
+            ("capabilityTrackExclusivityChecks", capabilityTrackExclusivityChecks),
+            ("legacyCapabilityCharacterization", legacyCapabilityCharacterization),
+            ("capabilityContractChecks", capabilityContractChecks),
+            ("capabilityReviewReplacementChecks", capabilityReviewReplacementChecks),
+            ("capabilityReviewOwnershipChecks", capabilityReviewOwnershipChecks),
+            ("capabilityDerivedChecks", capabilityDerivedChecks),
+            ("capabilityValidationHardeningChecks", capabilityValidationHardeningChecks),
+            ("capabilityRepeatChecks", capabilityRepeatChecks),
+            ("capabilityFamilyAndConfigurationChecks", capabilityFamilyAndConfigurationChecks),
+            ("capabilityHistoricalPrerequisiteChecks", capabilityHistoricalPrerequisiteChecks),
+            ("capabilityCatalogAndPolicyChecks", capabilityCatalogAndPolicyChecks),
+            ("capabilityQualifiedIdentityChecks", capabilityQualifiedIdentityChecks),
+            ("capabilityReplayMutationChecks", capabilityReplayMutationChecks),
+            ("capabilityRuntimeSequenceChecks", capabilityRuntimeSequenceChecks),
+            ("capabilityGrantedPrerequisiteChecks", capabilityGrantedPrerequisiteChecks),
+            ("capabilityBoundedContractChecks", capabilityBoundedContractChecks),
+            ("capabilityMartialChecks", capabilityMartialChecks),
+            ("capabilityLegacySelectionBoundaryChecks", capabilityLegacySelectionBoundaryChecks),
+            ("capabilityReplayChecks", capabilityReplayChecks),
+            ("capabilityEditionAndSafetyChecks", capabilityEditionAndSafetyChecks),
+            ("capabilityCastingChecks", capabilityCastingChecks),
+            ("capabilityBoundaryChecks", capabilityBoundaryChecks),
+            ("capabilityLockedAndConditionChecks", capabilityLockedAndConditionChecks),
+            ("capabilityHistoricalChecks", capabilityHistoricalChecks),
+            ("capabilityCopyAndBoundsChecks", capabilityCopyAndBoundsChecks),
             ("catalogChecks", catalogChecks),
             ("sheetChecks", sheetChecks),
             ("entireLevelOneToFivePath", tests.entireLevelOneToFivePath),
@@ -271,12 +316,15 @@ private func expectThrows<T>(_ body: () throws -> T) throws {
             ("narrativePromptUsesBoundedCharacterFacts", tests.narrativePromptUsesBoundedCharacterFacts),
             ("privateVesselConversionWhenPresent", tests.privateVesselConversionWhenPresent)
         ]
+        let requested = Set(CommandLine.arguments.dropFirst())
+        let selected = requested.isEmpty ? checks : checks.filter { requested.contains($0.0) }
+        if selected.isEmpty { print("No matching checks"); exit(2) }
         var failures = 0
-        for (name, run) in checks {
+        for (name, run) in selected {
             do { try run(); print("PASS \(name)") }
             catch { failures += 1; print("FAIL \(name): \(error.localizedDescription)") }
         }
-        print("\(checks.count - failures)/\(checks.count) checks passed")
+        print("\(selected.count - failures)/\(selected.count) checks passed")
         if failures > 0 { exit(1) }
     }
 }

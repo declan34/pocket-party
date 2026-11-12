@@ -19,6 +19,26 @@ const defs = {
   background:object({...idNameText,abilities:array(ability),skills:array(string),tool:string,originFeatID:string,equipment:string}),
   feat:object({...idNameText,category:{enum:['origin','general']},minimumLevel:integer,abilityOptions:array(ability),abilityPoints:integer,hpPerLevel:integer,initiativeProficiency:bool,skills:array(string),abilityMinimums:{type:'object',propertyNames:ability,additionalProperties:{type:'integer',minimum:1,maximum:20}}})
 };
-const schema = {$schema:'https://json-schema.org/draft/2020-12/schema',title:'Character Folio content pack v1',...object({schemaVersion:{const:1},id:string,version:string,name:string,ruleset:{const:'2024'},isPrivate:bool,attribution:string,coverageNotes:array(string),classes:array(ref('class')),species:array(ref('species')),backgrounds:array(ref('background')),feats:array(ref('feat')),spells:array(ref('spell')),languages:array(string)}),$defs:defs};
+const optionalObject = properties => object(properties, Object.keys(properties));
+defs.ruleValue = optionalObject({base:integer,abilities:array(ability),levelMultiplier:integer,proficiencyMultiplier:integer,table:array(integer),minimum:integer});
+defs.predicate = object({kind:{enum:['all','any','not','level','ability','selection','proficiency','configuration','subclass']},key:string,minimum:integer,children:array(ref('predicate'))},['key','minimum','children']);
+defs.capabilityGrant = object({id:string,kind:{enum:['proficiency','skillAbility','skillBonus','armorFormula','armorBonus','hitPoints','initiative','speed','speedBase','abilityScore','trait','resource','spell','unsupported','manual']},target:string,value:ref('ruleValue'),rank:{enum:['none','half','proficient','expertise']},ability,condition:ref('predicate'),level:integer,text:string,recovery:string},['target','value','rank','ability','condition','level','text','recovery']);
+defs.option = object({...idNameText,prerequisite:ref('predicate'),grants:array(ref('capabilityGrant')),repeatable:bool,exclusiveGroup:string},['prerequisite','repeatable','exclusiveGroup']);
+defs.group = object({id:string,name:string,counts:array(integer),options:array(ref('option')),replacementLimits:array(integer),condition:ref('predicate'),locked:bool},['replacementLimits','condition','locked']);
+defs.group.properties.requiredOptionID = string;
+defs.group.properties.languageChoices = bool;
+defs.group.properties.requiredOptionIDs = array(string);
+defs.group.properties.waiveRequiredFamilyIfOwned = bool;
+defs.group.properties.requirementTiming = {enum:['ongoing','acquisition']};
+defs.group.properties.exclusiveGroupExceptions = array(string);
+defs.capabilityGrant.properties.kind.enum.push('size','language');
+defs.capabilityGrant.properties.spellMode = {enum:['granted','prepared','atWill','limited','ritual']};
+defs.configuration = object({...idNameText,prerequisite:ref('predicate'),exclusiveGroup:string},['prerequisite','exclusiveGroup']);
+defs.casting = object({id:string,name:string,mode:{enum:['known','prepared','book','granted','ritual','limited','atWill']},ability,spellIDs:array(string),counts:array(integer),maximumSpellLevels:array(integer),replacementLimits:array(integer),preparedCounts:array(integer),condition:ref('predicate'),text:string},['replacementLimits','preparedCounts','condition','text']);
+defs.adapter = object({edition:{enum:['2014','2024']},canonicalID:string,label:string,replacementGrants:array(ref('capabilityGrant')),subclassLevel:integer},['subclassLevel']);
+defs.definitionCapabilities = object({edition:{enum:['2014','2024']},grants:array(ref('capabilityGrant')),groups:array(ref('group')),configurations:array(ref('configuration')),casting:array(ref('casting')),adapters:array(ref('adapter'))},['grants','groups','configurations','casting','adapters']);
+defs.packCapabilities = object({version:{const:1},required:array({enum:['choices','modifiers','casting','editions','resources','traits','proficiencies','configuration','languages']})});
+for (const name of ['class','subclass','species','background','feat']) defs[name].properties.capabilities = ref('definitionCapabilities');
+const schema = {$schema:'https://json-schema.org/draft/2020-12/schema',title:'Pocket Party content pack v1/v2',...object({schemaVersion:{enum:[1,2]},capabilities:ref('packCapabilities'),id:string,version:string,name:string,ruleset:{enum:['2014','2024']},isPrivate:bool,attribution:string,coverageNotes:array(string),classes:array(ref('class')),species:array(ref('species')),backgrounds:array(ref('background')),feats:array(ref('feat')),spells:array(ref('spell')),languages:array(string)},['capabilities']),allOf:[{if:{properties:{schemaVersion:{const:1}}},then:{properties:{ruleset:{const:'2024'}}}},{if:{properties:{schemaVersion:{const:2}}},then:{required:['capabilities']}}],$defs:defs};
 writeFileSync(new URL('../docs/content-pack.schema.json',import.meta.url),JSON.stringify(schema,null,2)+'\n');
 console.log('Wrote content pack JSON Schema');

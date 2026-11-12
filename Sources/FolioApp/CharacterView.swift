@@ -79,6 +79,9 @@ struct CharacterView: View {
                 ToolbarItem(placement: .primaryAction) {
                     Menu {
                         Button("Add library choices", systemImage: "books.vertical") { addingLibrary = true }
+                        Button("Copy to capability rules for review", systemImage: "square.on.square") {
+                            if let copy = store.upgradeCopy(record) { message = "Created a separate review copy: \(copy.build.name). Your original is unchanged." }
+                        }
                         Button("Duplicate as an alternate build", systemImage: "square.on.square") {
                             if let copy = store.duplicate(record) { message = "Saved \(copy.build.name) in your library." }
                         }
@@ -119,6 +122,7 @@ struct CharacterView: View {
             VStack(alignment: .leading, spacing: 5) {
                 Text(record.build.name).font(.largeTitle.weight(.medium)).foregroundStyle(Palette.ink)
                 Text("Level \(record.build.level) \(definition?.name ?? "character")").foregroundStyle(Palette.muted)
+                Text(record.build.rulesProfile.map { "\($0.edition) · evaluator \($0.evaluator)" } ?? "Legacy 2024 rules · pinned").font(.caption).foregroundStyle(Palette.muted)
                 Label(summary.isValid ? "Build checks passed" : "\(summary.issues.count) choices to review", systemImage: summary.isValid ? "checkmark.seal.fill" : "pencil.line")
                     .font(.caption.weight(.medium)).foregroundStyle(summary.isValid ? Palette.sea : Palette.brass)
             }
@@ -127,28 +131,28 @@ struct CharacterView: View {
     }
     private var creation: some View {
         Group {
-            FolioPanel(title: "Identity & origin", subtitle: "Start with who they are. Your background supplies ability bonuses, skills, a tool, and an origin feat.") {
+            FolioPanel(title: "Identity & origin", subtitle: record.build.rulesProfile?.edition == "2014" ? "Start with who they are. This 2014 profile does not grant 2024 background bonuses or an origin feat." : "Start with who they are. Your background supplies ability bonuses, skills, a tool, and an origin feat.") {
                 TextField("Name", text: $record.build.name).folioInput()
                 TextField("Pronouns", text: $record.build.pronouns).folioInput()
                 TextField("A character idea in one sentence", text: $record.build.concept, axis: .vertical).folioInput()
                 FolioRow { Picker("Species", selection: $record.build.speciesID) {
                     Text("Choose species").tag("")
-                    ForEach(record.pack.species) { Text(record.pack.optionName($0.name,id:$0.id)).tag($0.id) }
+                    ForEach(record.pack.species.filter { record.build.rulesProfile == nil || CapabilityEngine.compatible($0.capabilities, edition: record.build.rulesProfile!.edition, fallback: record.pack.ruleset) }) { Text(record.pack.optionName($0.name,id:$0.id)).tag($0.id) }
                 } }
                 if let species = record.pack.species.first(where: { $0.id == record.build.speciesID }) {
                     Text(species.text).font(.subheadline).foregroundStyle(Palette.muted)
                 }
                 FolioRow { Picker("Background", selection: $record.build.backgroundID) {
                     Text("Choose background").tag("")
-                    ForEach(record.pack.backgrounds) { Text(record.pack.optionName($0.name,id:$0.id)).tag($0.id) }
+                    ForEach(record.pack.backgrounds.filter { record.build.rulesProfile == nil || CapabilityEngine.compatible($0.capabilities, edition: record.build.rulesProfile!.edition, fallback: record.pack.ruleset) }) { Text(record.pack.optionName($0.name,id:$0.id)).tag($0.id) }
                 } }
                 if let background = record.pack.backgrounds.first(where: { $0.id == record.build.backgroundID }) {
                     Text(background.text).font(.subheadline).foregroundStyle(Palette.muted)
-                    Text("Skills: \(background.skills.joined(separator: ", "))\nTool: \(background.tool)\nOrigin feat: \(record.pack.feats.first { $0.id == background.originFeatID }?.name ?? "Missing")")
+                    Text("Skills: \(background.skills.joined(separator: ", "))\nTool: \(background.tool)" + (record.build.rulesProfile?.edition == "2014" ? "" : "\nOrigin feat: \(record.pack.feats.first { $0.id == background.originFeatID }?.name ?? "Missing")"))
                         .font(.subheadline).foregroundStyle(Palette.ink)
                 }
             }
-            FolioPanel(title: "Choose ability scores", subtitle: "Assign 15, 14, 13, 12, 10, and 8 once each. Background bonuses come next.") {
+            FolioPanel(title: "Choose ability scores", subtitle: "Assign 15, 14, 13, 12, 10, and 8 once each." + (record.build.rulesProfile?.edition == "2014" ? "" : " Background bonuses come next.")) {
                 ForEach(Ability.allCases) { ability in
                     FolioRow {
                         Text(ability.name).font(.body.weight(.medium)).frame(maxWidth: .infinity, alignment: .leading)
@@ -158,7 +162,7 @@ struct CharacterView: View {
                     }
                 }
             }
-            FolioPanel(title: "Background bonuses", subtitle: "Add +2 and +1 to different eligible abilities, or +1 to all three.") {
+            if record.build.rulesProfile?.edition != "2014" { FolioPanel(title: "Background bonuses", subtitle: "Add +2 and +1 to different eligible abilities, or +1 to all three.") {
                 let allowed = record.pack.backgrounds.first { $0.id == record.build.backgroundID }?.abilities ?? []
                 if allowed.isEmpty { Text("Choose a background above to see its eligible abilities.").foregroundStyle(Palette.muted) }
                 ForEach(Ability.allCases.filter { allowed.contains($0) || record.build.backgroundBoosts[$0.rawValue, default: 0] != 0 }) { ability in
@@ -173,15 +177,19 @@ struct CharacterView: View {
                     }
                 }
                 Text("Final scores include any improvements selected at later levels.").font(.caption).foregroundStyle(Palette.muted)
-            }
+            } }
             if let definition {
-                FolioPanel(title: "Skills & languages", subtitle: "Choose \(definition.skillCount) class skills and two languages. Common is included.") {
+                FolioPanel(title: "Skills & languages", subtitle: record.build.rulesProfile?.edition == "2014" ? "Choose \(definition.skillCount) class skills. Languages come from your species, background, and authored choices below." : "Choose \(definition.skillCount) class skills and two standard languages. Common is included.") {
                     let granted = record.pack.backgrounds.first { $0.id == record.build.backgroundID }?.skills ?? []
                     ForEach(definition.skillPool, id: \.self) { skill in
                         FolioRow { Toggle(skill + (granted.contains(skill) ? " · from background" : ""), isOn: selection(skill, in: $record.build.classSkills)) }
                     }
                     Divider()
-                    ForEach(record.pack.languages, id: \.self) { language in
+                    Text("Languages: " + (summary.languages.isEmpty ? "None granted yet" : summary.languages.joined(separator: ", "))).font(.subheadline)
+                    if record.build.rulesProfile?.edition == "2014" && !record.build.languages.isEmpty {
+                        Text("Clear retained 2024 language choices; choose languages in the authored level tracks below.").font(.caption).foregroundStyle(Palette.brass)
+                    }
+                    ForEach(record.build.rulesProfile?.edition == "2014" ? record.build.languages : Array(Set(record.pack.languages + record.build.languages)).sorted(), id: \.self) { language in
                         FolioRow { Toggle(language, isOn: selection(language, in: $record.build.languages)) }
                     }
                 }
@@ -190,6 +198,10 @@ struct CharacterView: View {
     }
     private var validation: some View {
         FolioPanel(title: summary.isValid ? "Ready for the next chapter" : "Finish these choices", subtitle: "These checks cover the supported build rules. Inventory and combat are not evaluated.") {
+            if !(record.build.upgradeReview ?? []).isEmpty {
+                Text("This is an explicit rules-copy review. Check all choices and calculated values before acknowledging.")
+                Button("I reviewed this copy's rules and choices") { record.build.upgradeReview = nil }
+            }
             ForEach(summary.issues) { issue in
                 HStack(alignment: .top, spacing: 10) {
                     Image(systemName: "circle").font(.caption).padding(.top, 3).foregroundStyle(Palette.brass)
@@ -237,7 +249,7 @@ struct LevelEditor: View {
                 ForEach(definition.features.filter { $0.level == level }) { feature in
                     DisclosureGroup(feature.name) { Text(feature.text).font(.subheadline).textSelection(.enabled).padding(.vertical, 8) }
                 }
-                if level >= definition.subclassLevel {
+                if level >= RulesEngine.subclassUnlockLevel(for: definition, build: build, in: pack) || !current.subclassID.isEmpty {
                     Picker("Subclass", selection: $build.levels[index].subclassID) {
                         Text("Choose subclass").tag("")
                         ForEach(definition.subclasses) { Text($0.name).tag($0.id) }
@@ -247,18 +259,21 @@ struct LevelEditor: View {
                     }
                 }
                 if progression.talents > 0 {
+                    if definition.capabilities?.groups?.isEmpty != false {
                     Text("\(definition.talentLabel) · \(current.talentIDs.count)/\(progression.talents)").font(.headline)
                     Text("Keep your earlier choices, add new ones as granted, or replace at most one at this level.").font(.caption).foregroundStyle(Palette.muted)
                     ForEach(definition.talents.filter { $0.minimumLevel <= level }) { talent in
                         ChoiceRow(name: talent.name, text: talent.text, isSelected: selection(talent.id, in: $build.levels[index].talentIDs))
                     }
+                    }
                 }
-                if progression.cantrips > 0 {
+                if progression.cantrips > 0 && definition.capabilities?.casting?.isEmpty != false {
                     SpellPicker(title: "Cantrips", count: progression.cantrips, spells: pack.spells.filter { current.cantripIDs.contains($0.id) || (definition.spellIDs.contains($0.id) && $0.level == 0 && !summary.grantedSpellIDs.contains($0.id)) }, selection: $build.levels[index].cantripIDs)
                 }
-                if progression.spells > 0 {
+                if progression.spells > 0 && definition.capabilities?.casting?.isEmpty != false {
                     SpellPicker(title: "Known spells", count: progression.spells, spells: pack.spells.filter { current.spellIDs.contains($0.id) || (definition.spellIDs.contains($0.id) && $0.level > 0 && $0.level <= progression.slotLevel && !summary.grantedSpellIDs.contains($0.id)) }, selection: $build.levels[index].spellIDs)
                 }
+                if build.rulesProfile != nil { CapabilityEditor(build: $build, pack: pack, definition: definition, level: level) }
                 if !summary.grantedSpellIDs.isEmpty {
                     Text("Granted by your subclass").font(.headline)
                     ForEach(summary.spells.filter { summary.grantedSpellIDs.contains($0.id) }) { spell in
@@ -366,25 +381,29 @@ struct CharacterSheet: View {
                     }
                     Divider()
                 }
-                ForEach(summary.skills, id: \.self) { skill in
+                ForEach(summary.skillModifiers.isEmpty ? summary.skills : summary.skillModifiers.keys.sorted(), id: \.self) { skill in
                     let ability = RulesEngine.skillAbilities[skill] ?? .wis
-                    HStack { Text(skill); Spacer(); Text(signed(Ability.modifier(summary.scores[ability.rawValue, default: 10]) + summary.proficiency)).fontWeight(.semibold) }
+                    HStack { Text(skill + (summary.proficiencyRanks[skill] == .expertise ? " · expertise" : "")); Spacer(); Text(signed(summary.skillModifiers[skill] ?? (Ability.modifier(summary.scores[ability.rawValue, default: 10]) + summary.proficiency))).fontWeight(.semibold) }
                 }
-                Text("Common, " + record.build.languages.joined(separator: ", ")).font(.subheadline).foregroundStyle(Palette.muted)
+                Text(summary.languages.joined(separator: ", ")).font(.subheadline).foregroundStyle(Palette.muted)
                 Text("Conditional advantages and combat effects remain in their feature descriptions.").font(.caption).foregroundStyle(Palette.muted)
             }
             FolioPanel(title: "Features & choices") {
+                if let size = summary.size { Text("Configured size: \(size)") }
+                ForEach(summary.traits, id: \.self) { Text($0) }
+                ForEach(summary.resources) { resource in Text("\(resource.name): \(resource.maximum) · \(resource.recovery)") }
+                ForEach(summary.supportDiagnostics, id: \.self) { Text($0).font(.caption) }
                 if let species = record.pack.species.first(where: { $0.id == record.build.speciesID }) {
                     DisclosureGroup(species.name) { Text(species.text).font(.subheadline).padding(.vertical, 8).textSelection(.enabled) }
                 }
                 ForEach(record.pack.feats.filter { feat in
-                    record.pack.backgrounds.first(where: { $0.id == record.build.backgroundID })?.originFeatID == feat.id || record.build.levels.contains(where: { $0.featID == feat.id })
+                    CharacterPresentation.showsFeat(feat.id, originID: record.pack.backgrounds.first(where: { $0.id == record.build.backgroundID })?.originFeatID, selectedIDs: record.build.levels.map(\.featID), edition: record.build.rulesProfile?.edition)
                 }) { feat in DisclosureGroup(feat.name) { Text(feat.text).font(.subheadline).padding(.vertical, 8).textSelection(.enabled) } }
                 ForEach(summary.features) { feature in DisclosureGroup(feature.name) { Text(feature.text).font(.subheadline).padding(.vertical, 8).textSelection(.enabled) } }
                 ForEach(summary.talents) { talent in DisclosureGroup(talent.name) { Text(talent.text).font(.subheadline).padding(.vertical, 8).textSelection(.enabled) } }
             }
             FolioPanel(title: "What this build covers") {
-                ForEach(record.pack.coverageNotes, id: \.self) { Text($0).font(.subheadline).foregroundStyle(Palette.muted) }
+                ForEach(record.pack.coverageNotes(for: record.build), id: \.self) { Text($0).font(.subheadline).foregroundStyle(Palette.muted) }
                 if let cls = record.pack.classes.first(where: { $0.id == record.build.classID }) { Text(cls.equipment).font(.subheadline) }
             }
         }

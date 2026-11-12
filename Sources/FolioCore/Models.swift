@@ -48,6 +48,7 @@ public struct SpellGrant: Codable, Sendable, Hashable {
 }
 
 public struct Subclass: Codable, Sendable, Hashable, Identifiable {
+    public var capabilities: DefinitionCapabilities? = nil
     public var id: String
     public var name: String
     public var text: String
@@ -67,6 +68,7 @@ public struct Progression: Codable, Sendable, Hashable, Identifiable {
 }
 
 public struct ClassDefinition: Codable, Sendable, Hashable, Identifiable {
+    public var capabilities: DefinitionCapabilities? = nil
     public var id: String
     public var name: String
     public var summary: String
@@ -90,6 +92,7 @@ public struct ClassDefinition: Codable, Sendable, Hashable, Identifiable {
 }
 
 public struct Species: Codable, Sendable, Hashable, Identifiable {
+    public var capabilities: DefinitionCapabilities? = nil
     public var id: String
     public var name: String
     public var text: String
@@ -99,6 +102,7 @@ public struct Species: Codable, Sendable, Hashable, Identifiable {
 }
 
 public struct Background: Codable, Sendable, Hashable, Identifiable {
+    public var capabilities: DefinitionCapabilities? = nil
     public var id: String
     public var name: String
     public var text: String
@@ -110,6 +114,7 @@ public struct Background: Codable, Sendable, Hashable, Identifiable {
 }
 
 public struct Feat: Codable, Sendable, Hashable, Identifiable {
+    public var capabilities: DefinitionCapabilities? = nil
     public var id: String
     public var name: String
     public var text: String
@@ -136,6 +141,7 @@ public struct ContentSource: Codable, Sendable, Hashable {
 }
 
 public struct ContentPack: Codable, Sendable, Hashable, Identifiable {
+    public var capabilities: PackCapabilities? = nil
     public var schemaVersion: Int
     public var id: String
     public var version: String
@@ -152,16 +158,31 @@ public struct ContentPack: Codable, Sendable, Hashable, Identifiable {
     public var languages: [String]
     public var sources: [ContentSource]? = nil
     public var sourceLabels: [String: String]? = nil
+    /// Snapshot-only provenance keyed by selectable definition identity.
+    public var sourceCoverageNotes: [String: [String]]? = nil
+    public func coverageNotes(for build: CharacterBuild) -> [String] {
+        guard let scoped = sourceCoverageNotes else { return coverageNotes }
+        let background = backgrounds.first { $0.id == build.backgroundID }
+        var ids = Set([build.classID, build.speciesID, build.backgroundID] + build.levels.map(\.featID))
+        if build.rulesProfile?.edition != "2014", let origin = background?.originFeatID { ids.insert(origin) }
+        for row in build.levels {
+            ids.formUnion(row.spellIDs + row.cantripIDs)
+            ids.formUnion((row.capabilities?.spells ?? [:]).values.flatMap { $0 })
+        }
+        return Array(Set(ids.flatMap { scoped[$0] ?? [] })).sorted()
+    }
     public func optionName(_ name: String, id: String) -> String {
         let matches = classes.filter { $0.name == name }.count + species.filter { $0.name == name }.count + backgrounds.filter { $0.name == name }.count + feats.filter { $0.name == name }.count
         guard matches > 1, let label = sourceLabels?[id] else { return name }
         return "\(name) · \(label)"
     }
-    public static func sample() throws -> ContentPack {
+    public static func sample() throws -> ContentPack { try bundled("example-pack") }
+    public static func capabilitySample() throws -> ContentPack { try bundled("capability-pack") }
+    private static func bundled(_ name: String) throws -> ContentPack {
         let packagedURL = Bundle.main.resourceURL?.appendingPathComponent("CharacterFolio_FolioCore.bundle")
         let packagedBundle = packagedURL.flatMap { Bundle(url: $0) }
         let bundle = packagedBundle ?? Bundle.module
-        guard let url = bundle.url(forResource: "example-pack", withExtension: "json") else {
+        guard let url = bundle.url(forResource: name, withExtension: "json") else {
             throw FolioError.invalid("The example content pack is missing.")
         }
         return try PackValidator.decode(Data(contentsOf: url))
@@ -169,6 +190,7 @@ public struct ContentPack: Codable, Sendable, Hashable, Identifiable {
 }
 
 public struct LevelChoice: Codable, Sendable, Hashable, Identifiable {
+    public var capabilities: CapabilityChoices? = nil
     public var level: Int
     public var subclassID: String
     public var talentIDs: [String]
@@ -185,10 +207,13 @@ public struct LevelChoice: Codable, Sendable, Hashable, Identifiable {
         spellIDs = previous?.spellIDs ?? []
         featID = ""
         boosts = [:]
+        capabilities = previous?.capabilities
     }
 }
 
 public struct CharacterBuild: Codable, Sendable, Hashable, Identifiable {
+    public var rulesProfile: RulesProfile? = nil
+    public var upgradeReview: [String]? = nil
     public var id: UUID
     public var name: String
     public var pronouns: String
