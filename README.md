@@ -78,3 +78,5 @@ The app has no account, analytics, or backend. On Mac, saves are in `~/Library/A
 `PrivatePacks/`, `Preview/`, and build output are ignored by Git. Only original demonstration content is in app resources. A private flag is a label, **not encryption or permission to redistribute source material**. Check content rights before sharing any pack or export.
 
 See [engineering and verification notes](docs/engineering.md) for implementation boundaries and evidence.
+
+For repository-local Codex and Claude Code instructions and skills, see [agent setup](docs/agent-setup.md).
