@@ -114,6 +114,7 @@ public struct Background: Codable, Sendable, Hashable, Identifiable {
 }
 
 public struct Feat: Codable, Sendable, Hashable, Identifiable {
+    public var repeatable: Bool? = nil
     public var capabilities: DefinitionCapabilities? = nil
     public var id: String
     public var name: String

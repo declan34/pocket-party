@@ -245,6 +245,15 @@ private func expectThrows<T>(_ body: () throws -> T) throws {
     static func main() {
         let tests = FolioCoreTests()
         let checks: [(String, () throws -> Void)] = [
+            ("highLevelProgressionChecks", highLevelProgressionChecks),
+            ("highLevelTableChecks", highLevelTableChecks),
+            ("highLevelImprovementChecks", highLevelImprovementChecks),
+            ("highLevelCapChecks", highLevelCapChecks),
+            ("highLevelConditionalCapChecks", highLevelConditionalCapChecks),
+            ("vesselHighLevelSourceChecks", vesselHighLevelSourceChecks),
+            ("highLevelSaveAndFeatGrantChecks", highLevelSaveAndFeatGrantChecks),
+            ("highLevelPublicFixtureChecks", highLevelPublicFixtureChecks),
+            ("highLevelFamilyMatrixChecks", highLevelFamilyMatrixChecks),
             ("capabilityLanguageCreationChecks", capabilityLanguageCreationChecks),
             ("capabilityLanguageContractChecks", capabilityLanguageContractChecks),
             ("capabilityLanguageReplayChecks", capabilityLanguageReplayChecks),

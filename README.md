@@ -4,7 +4,7 @@ A native SwiftUI home for character ideas that grow into playable builds. Build 
 
 The project is now called **Pocket Party**. The current Xcode target, preview app, and local save folder still use the development name **Character Folio** to preserve existing builds and saved characters.
 
-This is a local MVP, not a complete D&D character creator yet. It checks a **single-class, level 1–5 slice**. Schema-1 saves keep their original 2024 conventions; schema-2 builds pin an explicit 2014 or 2024 profile. The bundled **Lantern Roads** and **Trail Warden capability laboratory** packs are original demonstrations, not official content or a claim of game balance.
+This is a local MVP, not a complete D&D character creator yet. Schema-2 builds support **single-class levels 1–20 where the pack supplies explicit rows**, with a pinned 2014 or 2024 profile. Schema-1 saves keep their original level-1–5 2024 conventions. The bundled **Lantern Roads** and **Trail Warden capability laboratory** packs are original demonstrations, not official content or a claim of game balance; **Summit Warden** demonstrates high-level progression.
 
 ## Try it now on this Mac
 
@@ -41,7 +41,7 @@ Keep PDFs containing private content private. The supported blank PDF revision i
 - Local save with a previous-file backup; JSON import/export; pinned content versions.
 - Original public sample content and a repeatable private converter using our already-corrected extracted sources—not the PDFs again.
 
-Not yet supported: multiclassing, levels 6–20, every class’s unique choices, multiple spell-slot tiers, equipment purchases/armor loadouts, custom rolled abilities/HP, combat/resource use, cantrip replacement, full conditional feat automation, sync, Foundry export, or AI portrait generation. Narrative feature text is readable but does not imply its mechanics are automated. “Build checks passed” means the implemented checks passed, not that every 2024 rule was evaluated.
+Not yet supported: multiclassing, every class’s unique choices, multiple spell-slot tiers, equipment purchases/armor loadouts, custom rolled abilities/HP, combat/resource use, cantrip replacement, full conditional feat automation, sync, Foundry export, or AI portrait generation. Narrative feature text is readable but does not imply its mechanics are automated. “Build checks passed” means the implemented checks passed, not that every 2024 rule was evaluated.
 
 ## Run and develop
 

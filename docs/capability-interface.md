@@ -1,6 +1,6 @@
 # Schema-2 capability foundation
 
-The early capability engine/editor contract below is exercised by registered original family scenarios and actual private adapter checks; see the precise [coverage and source blockers](capability-coverage.md). It does not certify all official subclasses. Levels 6–20, multiclass, tiered slot pools, equipment state and combat simulation remain outside this evaluator.
+The capability engine/editor contract below is exercised by registered original family scenarios and actual private adapter checks; see the precise [coverage and source blockers](capability-coverage.md). It does not certify all official subclasses. Explicit single-class progression supports levels 1–20. Multiclass, tiered slot pools, equipment state and combat simulation remain outside this evaluator.
 
 ## Version boundary
 
@@ -45,7 +45,11 @@ For actual language-selection slots, mark an ordinary capability group `language
 
 `speedBase` replaces the species walking speed before additive `speed` modifiers; use mutually exclusive predicates for alternative forms. `size` supplies a canonical size label (Tiny through Gargantuan), reflected in `CharacterSummary.size` and the printable size field. A `trait` with a `value` projects a calculated fact as `text: number`, useful for counts or secondary movement rates without claiming combat execution. Generic configuration controls activate these effects; no class-name special cases exist.
 
-`RuleValue` combines bounded `base`, ability modifiers from `abilities`, `levelMultiplier`, `proficiencyMultiplier`, a level-indexed `table`, and optional `minimum`. Ability-score grants resolve before dependent totals; HP recalculates Constitution retroactively, followed by defenses/initiative and casting values. Armor formulas select the best alternative before additive armor bonuses. Scores outside 1–20 block completion. No spending, rests or combat actions are simulated.
+`RuleValue` combines bounded `base`, ability modifiers from `abilities`, `levelMultiplier`, `proficiencyMultiplier`, a level-indexed `table`, and optional `minimum`. All level references use the current historical single-class level, not the acquisition level (class level and character level are equal in this delivery). Tables support up to 20 explicit rows. An absent active value/group/policy row blocks completion rather than extrapolating. Ability-score grants resolve before dependent totals; HP recalculates Constitution retroactively, followed by defenses/initiative and casting values. Armor formulas select the best alternative before additive armor bonuses. No spending, rests or combat actions are simulated.
+
+`abilityCap` grants declare an ability `target` and fixed `value.base` from 20 to 30; no dynamic expression is permitted for a cap. Caps use the highest applicable maximum, never add together. Every historical row checks its scores against its own active caps before continuing; a later cap cannot repair an earlier invalid score. Default maximum remains 20. Class `progression.improvement` rows are authoritative, and feat `repeatable: true` is explicit data, not inferred from its name. Repeatable feat scalar benefits and grants apply per acquisition with distinct grant identities; shared choice tracks remain canonical tracks, not automatically duplicated choices.
+
+Proficiency grants also accept `save.str` through `save.cha`, and `all-saves`. These ranks are merged with class starting saves and projected into native summary/PDF values; saving-throw keys never become skill names.
 
 Proficiency ranks are none/half/proficient/expertise; half rounds down and expertise doubles proficiency. `all-skills` is supported for proficiency grants. Resource grants expose maximum/recovery, never current expenditure. `trait` is displayed supported information; `manual` explicitly identifies unevaluated mechanics; `unsupported` blocks the selected build. A missing/unavailable spell reference is never fabricated.
 

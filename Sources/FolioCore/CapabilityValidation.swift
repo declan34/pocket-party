@@ -75,7 +75,7 @@ public enum CapabilityValidation {
                 switch p.kind {
                 case .all, .any: try require(!(p.children ?? []).isEmpty, "Empty composite predicate.")
                 case .not: try require(p.children?.count == 1, "Not requires one predicate.")
-                case .level: try require((1...5).contains(p.minimum ?? 0), "Unsupported prerequisite level.")
+                case .level: try require((1...20).contains(p.minimum ?? 0), "Unsupported prerequisite level.")
                 case .ability: try require(Ability(rawValue: p.key ?? "") != nil && (1...30).contains(p.minimum ?? 0), "Invalid ability prerequisite.")
                 case .selection: try require(known[p.key ?? ""] != nil, "Missing selection prerequisite.")
                 case .configuration: try require(configs.contains(p.key ?? ""), "Unknown configuration predicate.")
@@ -96,19 +96,23 @@ public enum CapabilityValidation {
                 completed.insert(id)
             }
             func grant(_ g: CapabilityGrant) throws {
-                try require(identity(g.id) && (1...5).contains(g.level ?? 1), "Invalid grant identity or level.")
+                try require(identity(g.id) && (1...20).contains(g.level ?? 1), "Invalid grant identity or level.")
                 try predicate(g.condition)
                 if let v = g.value {
                     try require((-1000...1000).contains(v.minimum ?? 0), "Unsafe rule minimum.")
                     try require((-1000...1000).contains(v.base ?? 0) && (-100...100).contains(v.levelMultiplier ?? 0) && (-10...10).contains(v.proficiencyMultiplier ?? 0) && (v.abilities?.count ?? 0) <= 6, "Unsafe rule value.")
-                    try require((v.table?.count ?? 0) <= 5 && (v.table ?? []).allSatisfy { (-1000...1000).contains($0) }, "Invalid resource/value table.")
+                    try require((v.table?.count ?? 0) <= 20 && (v.table ?? []).allSatisfy { (-1000...1000).contains($0) }, "Invalid resource/value table.")
                 }
                 if [.proficiency, .skillAbility, .skillBonus].contains(g.kind) {
-                    try require(RulesEngine.skillAbilities[g.target ?? ""] != nil || g.target == "all-skills", "Unknown skill target.")
+                    let saveTarget = g.kind == .proficiency && (g.target == "all-saves" || Ability.allCases.contains { "save." + $0.rawValue == g.target })
+                    try require(RulesEngine.skillAbilities[g.target ?? ""] != nil || g.target == "all-skills" || saveTarget, "Unknown skill target.")
                 }
                 if g.kind == .proficiency { try require(g.rank != nil, "Proficiency grant needs a rank.") }
                 if g.kind == .skillAbility { try require(g.ability != nil, "Skill substitution needs an ability.") }
-                if g.kind == .abilityScore { try require(Ability(rawValue: g.target ?? "") != nil, "Unknown ability target.") }
+                if g.kind == .abilityScore || g.kind == .abilityCap { try require(Ability(rawValue: g.target ?? "") != nil, "Unknown ability target.") }
+                if g.kind == .abilityCap {
+                    try require((20...30).contains(g.value?.base ?? 0) && (g.value?.abilities ?? []).isEmpty && (g.value?.levelMultiplier ?? 0) == 0 && (g.value?.proficiencyMultiplier ?? 0) == 0 && g.value?.table == nil && g.value?.minimum == nil, "Ability caps must declare a fixed maximum from 20 to 30.")
+                }
                 if g.kind == .spell { try require(pack.spells.contains { $0.id == g.target }, "Missing granted spell.") }
                 if g.spellMode != nil { try require(g.kind == .spell, "Spell classification belongs only to spell grants.") }
                 if g.kind == .size { try require(["Tiny","Small","Medium","Large","Huge","Gargantuan"].contains(g.target ?? ""), "Unknown size grant.") }
@@ -132,8 +136,8 @@ public enum CapabilityValidation {
                     let families = Set(group.options.compactMap(\.exclusiveGroup).filter { !$0.isEmpty })
                     try require(exceptions.count <= 64 && Set(exceptions).count == exceptions.count && Set(exceptions).isSubset(of: families), "Invalid track-specific exclusivity exception.")
                 }
-                try require((1...5).contains(group.counts.count) && group.counts.allSatisfy { (0...30).contains($0) }, "Invalid choice count table.")
-                try require((group.replacementLimits ?? []).allSatisfy { (0...30).contains($0) } && (group.replacementLimits?.count ?? 0) <= 5, "Invalid replacement schedule.")
+                try require((1...20).contains(group.counts.count) && group.counts.allSatisfy { (0...30).contains($0) }, "Invalid choice count table.")
+                try require((group.replacementLimits ?? []).allSatisfy { (0...30).contains($0) } && (group.replacementLimits?.count ?? 0) <= 20, "Invalid replacement schedule.")
                 try require(Set(group.options.map(\.id)).count == group.options.count, "Duplicate option in group.")
                 try predicate(group.condition)
                 for option in group.options { try require(option.grants.count <= 128, "Too many option grants."); try predicate(option.prerequisite); for g in option.grants { try grant(g) } }
@@ -161,7 +165,7 @@ public enum CapabilityValidation {
             }
             for g in definition.grants ?? [] { try grant(g) }
             for adapter in definition.adapters ?? [] {
-                try require((adapter.subclassLevel.map { (1...5).contains($0) } ?? true) && adapter.replacementGrants.count <= 128, "Invalid adapter bounds.")
+                try require((adapter.subclassLevel.map { (1...20).contains($0) } ?? true) && adapter.replacementGrants.count <= 128, "Invalid adapter bounds.")
                 try require(["2014", "2024"].contains(adapter.edition) && !adapter.canonicalID.isEmpty && !adapter.label.isEmpty, "Adapter needs explicit edition, identity and label.")
                 for g in adapter.replacementGrants { try grant(g) }
             }
@@ -171,9 +175,9 @@ public enum CapabilityValidation {
             let policies = definition.casting ?? []
             try require(policies.count <= 32 && Set(policies.map(\.id)).count == policies.count, "Invalid casting policy identities.")
             for policy in policies {
-                try require(identity(policy.id) && (policy.replacementLimits?.count ?? 0) <= 5 && (policy.preparedCounts?.count ?? 0) <= 5, "Invalid casting bounds.")
+                try require(identity(policy.id) && (policy.replacementLimits?.count ?? 0) <= 20 && (policy.preparedCounts?.count ?? 0) <= 20, "Invalid casting bounds.")
                 try predicate(policy.condition)
-                try require((1...5).contains(policy.counts.count) && policy.counts.allSatisfy { (0...100).contains($0) }, "Invalid casting counts.")
+                try require((1...20).contains(policy.counts.count) && policy.counts.allSatisfy { (0...100).contains($0) }, "Invalid casting counts.")
                 try require(policy.maximumSpellLevels.count == policy.counts.count && policy.maximumSpellLevels.allSatisfy { (0...9).contains($0) }, "Invalid casting spell-level table.")
                 try require(Set(policy.spellIDs).count == policy.spellIDs.count && Set(policy.spellIDs).isSubset(of: Set(pack.spells.map(\.id))), "Missing or duplicate casting spell.")
                 try require((policy.replacementLimits ?? []).allSatisfy { (0...100).contains($0) } && (policy.preparedCounts ?? []).allSatisfy { (0...100).contains($0) }, "Invalid casting replacement/preparation counts.")

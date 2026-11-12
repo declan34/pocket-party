@@ -121,7 +121,7 @@ func vesselCapabilityChecks() throws {
     illegal.levels[2].capabilities?.spells?["vessel-cantrips"] = Array(cantrips.suffix(2))
     try check(RulesEngine.evaluate(illegal, in: pack).issues.contains { $0.code.hasPrefix("cap-casting-replacement") }, "Cantrip replacement remains disallowed")
     let unresolvedList = cls.spellIDs.compactMap { id in pack.spells.first { $0.id == id && $0.unavailableReason != nil } }
-    try check(unresolvedList.count == 4 && unresolvedList.allSatisfy { $0.name.contains("(LL)") }, "LL-only class-list references remain distinct unavailable choices, not omissions or substitutions")
+    try check(unresolvedList.filter { $0.level <= 2 }.count == 4 && unresolvedList.allSatisfy { $0.name.contains("(LL)") }, "Early LL-only class-list references remain distinct unavailable choices, not omissions or substitutions")
     var trickster = build("the-trickster")
     try check(RulesEngine.evaluate(trickster, in: pack).spellLabels["spell.disguise-self"]?.contains("At will") == true, "Actual Trickster cloak grants at-will classification")
     trickster.levels[4].capabilities?.configurations = []

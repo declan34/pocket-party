@@ -376,8 +376,9 @@ struct CharacterSheet: View {
             }
             FolioPanel(title: "Proficiencies") {
                 if let cls = record.pack.classes.first(where: { $0.id == record.build.classID }) {
-                    ForEach(cls.saves) { ability in
-                        HStack { Text("\(ability.name) save"); Spacer(); Text(signed(Ability.modifier(summary.scores[ability.rawValue, default: 10]) + summary.proficiency)).fontWeight(.semibold) }
+                    ForEach(Ability.allCases.filter { cls.saves.contains($0) || (summary.proficiencyRanks["save."+$0.rawValue] ?? .none) != .none }) { ability in
+                        let rank = summary.proficiencyRanks["save."+ability.rawValue] ?? .proficient
+                        HStack { Text("\(ability.name) save"); Spacer(); Text(signed(Ability.modifier(summary.scores[ability.rawValue, default: 10]) + rank.bonus(summary.proficiency))).fontWeight(.semibold) }
                     }
                     Divider()
                 }

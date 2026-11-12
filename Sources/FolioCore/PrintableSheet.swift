@@ -35,10 +35,11 @@ public struct PrintableSheet: Sendable {
             fields["initiative"]=Self.signed(s.initiative); fields["speed"]="\(s.speed) ft"
             fields["size"]=s.size ?? species?.size
             for ability in Ability.allCases {
-                let score=s.scores[ability.rawValue,default:10], trained=cls.saves.contains(ability)
+                let rank=s.proficiencyRanks["save."+ability.rawValue] ?? (cls.saves.contains(ability) ? .proficient : .none)
+                let score=s.scores[ability.rawValue,default:10], trained=rank == .proficient || rank == .expertise
                 fields["\(ability.rawValue).score"]=String(score)
                 fields["\(ability.rawValue).mod"]=Self.signed(Ability.modifier(score))
-                fields["\(ability.rawValue).save"]=Self.signed(Ability.modifier(score)+(trained ? s.proficiency : 0))
+                fields["\(ability.rawValue).save"]=Self.signed(Ability.modifier(score)+rank.bonus(s.proficiency))
                 if trained { checks.insert("\(ability.rawValue).save") }
             }
             for (skill,ability) in RulesEngine.skillAbilities {

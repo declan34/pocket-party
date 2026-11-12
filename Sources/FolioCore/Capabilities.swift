@@ -56,7 +56,7 @@ public struct CapabilityGrant: Codable, Sendable, Hashable, Identifiable {
     public var spellMode: SpellMode? = nil
     public enum Kind: String, Codable, Sendable {
         case proficiency, skillAbility, skillBonus, armorFormula, armorBonus, hitPoints, initiative, speed, speedBase, abilityScore
-        case trait, resource, spell, size, language, unsupported, manual
+        case trait, resource, spell, size, language, abilityCap, unsupported, manual
     }
     public var id: String
     public var kind: Kind

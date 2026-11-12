@@ -106,6 +106,38 @@
         "properties": {
           "ruleset": {
             "const": "2024"
+          },
+          "classes": {
+            "type": "array",
+            "items": {
+              "properties": {
+                "progression": {
+                  "type": "array",
+                  "items": {
+                    "properties": {
+                      "level": {
+                        "maximum": 5
+                      }
+                    }
+                  }
+                },
+                "subclassLevel": {
+                  "minimum": 1,
+                  "maximum": 5
+                }
+              }
+            }
+          },
+          "feats": {
+            "type": "array",
+            "items": {
+              "properties": {
+                "minimumLevel": {
+                  "minimum": 1,
+                  "maximum": 5
+                }
+              }
+            }
           }
         }
       }
@@ -298,7 +330,7 @@
         "level": {
           "type": "integer",
           "minimum": 1,
-          "maximum": 5
+          "maximum": 20
         },
         "talents": {
           "type": "integer"
@@ -583,7 +615,9 @@
           ]
         },
         "minimumLevel": {
-          "type": "integer"
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
         },
         "abilityOptions": {
           "type": "array",
@@ -631,6 +665,9 @@
             "maximum": 20
           }
         },
+        "repeatable": {
+          "type": "boolean"
+        },
         "capabilities": {
           "$ref": "#/$defs/definitionCapabilities"
         }
@@ -667,7 +704,8 @@
           "type": "array",
           "items": {
             "type": "integer"
-          }
+          },
+          "maxItems": 20
         },
         "minimum": {
           "type": "integer"
@@ -737,7 +775,8 @@
             "unsupported",
             "manual",
             "size",
-            "language"
+            "language",
+            "abilityCap"
           ]
         },
         "target": {
@@ -843,7 +882,8 @@
           "type": "array",
           "items": {
             "type": "integer"
-          }
+          },
+          "maxItems": 20
         },
         "options": {
           "type": "array",
@@ -855,7 +895,8 @@
           "type": "array",
           "items": {
             "type": "integer"
-          }
+          },
+          "maxItems": 20
         },
         "condition": {
           "$ref": "#/$defs/predicate"
@@ -968,25 +1009,29 @@
           "type": "array",
           "items": {
             "type": "integer"
-          }
+          },
+          "maxItems": 20
         },
         "maximumSpellLevels": {
           "type": "array",
           "items": {
             "type": "integer"
-          }
+          },
+          "maxItems": 20
         },
         "replacementLimits": {
           "type": "array",
           "items": {
             "type": "integer"
-          }
+          },
+          "maxItems": 20
         },
         "preparedCounts": {
           "type": "array",
           "items": {
             "type": "integer"
-          }
+          },
+          "maxItems": 20
         },
         "condition": {
           "$ref": "#/$defs/predicate"

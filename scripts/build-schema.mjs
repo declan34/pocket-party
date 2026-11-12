@@ -13,7 +13,7 @@ const defs = {
   spell:object({...idNameText,level:integer,source:string,unavailableReason:{type:['string','null']}},['unavailableReason']),
   grant:object({level:integer,spellIDs:array(string)}),
   subclass:object({...idNameText,features:array(ref('feature')),spells:array(ref('grant'))}),
-  progression:object({level:{type:'integer',minimum:1,maximum:5},talents:integer,cantrips:integer,spells:integer,slots:integer,slotLevel:integer,improvement:bool}),
+  progression:object({level:{type:'integer',minimum:1,maximum:20},talents:integer,cantrips:integer,spells:integer,slots:integer,slotLevel:integer,improvement:bool}),
   class:object({id:string,name:string,summary:string,hitDie:{enum:[6,8,10,12]},primaryAbility:ability,spellAbility:{anyOf:[ability,{type:'null'}]},saves:array(ability),skillCount:integer,skillPool:array(string),subclassLevel:integer,talentLabel:string,features:array(ref('feature')),talents:array(ref('talent')),subclasses:array(ref('subclass')),progression:array(ref('progression')),spellIDs:array(string),equipment:string,armorFormula:{enum:['unarmored','vessel-mantle']}},['spellAbility']),
   species:object({...idNameText,speed:integer,hpPerLevel:integer,size:string}),
   background:object({...idNameText,abilities:array(ability),skills:array(string),tool:string,originFeatID:string,equipment:string}),
@@ -31,7 +31,8 @@ defs.group.properties.requiredOptionIDs = array(string);
 defs.group.properties.waiveRequiredFamilyIfOwned = bool;
 defs.group.properties.requirementTiming = {enum:['ongoing','acquisition']};
 defs.group.properties.exclusiveGroupExceptions = array(string);
-defs.capabilityGrant.properties.kind.enum.push('size','language');
+defs.capabilityGrant.properties.kind.enum.push('size','language','abilityCap');
+defs.feat.properties.repeatable = bool;
 defs.capabilityGrant.properties.spellMode = {enum:['granted','prepared','atWill','limited','ritual']};
 defs.configuration = object({...idNameText,prerequisite:ref('predicate'),exclusiveGroup:string},['prerequisite','exclusiveGroup']);
 defs.casting = object({id:string,name:string,mode:{enum:['known','prepared','book','granted','ritual','limited','atWill']},ability,spellIDs:array(string),counts:array(integer),maximumSpellLevels:array(integer),replacementLimits:array(integer),preparedCounts:array(integer),condition:ref('predicate'),text:string},['replacementLimits','preparedCounts','condition','text']);
@@ -40,5 +41,10 @@ defs.definitionCapabilities = object({edition:{enum:['2014','2024']},grants:arra
 defs.packCapabilities = object({version:{const:1},required:array({enum:['choices','modifiers','casting','editions','resources','traits','proficiencies','configuration','languages']})});
 for (const name of ['class','subclass','species','background','feat']) defs[name].properties.capabilities = ref('definitionCapabilities');
 const schema = {$schema:'https://json-schema.org/draft/2020-12/schema',title:'Pocket Party content pack v1/v2',...object({schemaVersion:{enum:[1,2]},capabilities:ref('packCapabilities'),id:string,version:string,name:string,ruleset:{enum:['2014','2024']},isPrivate:bool,attribution:string,coverageNotes:array(string),classes:array(ref('class')),species:array(ref('species')),backgrounds:array(ref('background')),feats:array(ref('feat')),spells:array(ref('spell')),languages:array(string)},['capabilities']),allOf:[{if:{properties:{schemaVersion:{const:1}}},then:{properties:{ruleset:{const:'2024'}}}},{if:{properties:{schemaVersion:{const:2}}},then:{required:['capabilities']}}],$defs:defs};
+// The shared definitions permit v2 high levels; v1 keeps its existing boundary.
+schema.allOf[0].then.properties.classes={type:'array',items:{properties:{progression:{type:'array',items:{properties:{level:{maximum:5}}}},subclassLevel:{minimum:1,maximum:5}}}};
+schema.allOf[0].then.properties.feats={type:'array',items:{properties:{minimumLevel:{minimum:1,maximum:5}}}};
+defs.feat.properties.minimumLevel={type:'integer',minimum:1,maximum:20};
+for(const [definition,key] of [[defs.ruleValue,'table'],[defs.group,'counts'],[defs.group,'replacementLimits'],[defs.casting,'counts'],[defs.casting,'maximumSpellLevels'],[defs.casting,'replacementLimits'],[defs.casting,'preparedCounts']]) definition.properties[key].maxItems=20;
 writeFileSync(new URL('../docs/content-pack.schema.json',import.meta.url),JSON.stringify(schema,null,2)+'\n');
 console.log('Wrote content pack JSON Schema');

@@ -1,6 +1,6 @@
 # Rules capability and content coverage
 
-This inventory was established before implementation on 2026-11-12. No row is verified merely because the class exists in a menu. I1–I5 correspond to the five approved deliveries. I1 mechanism checks and source exceptions are recorded below; I2–I5 remain pending.
+This inventory was established before implementation on 2026-11-12. No row is verified merely because the class exists in a menu. I1–I5 correspond to the five approved deliveries. I1 and I2 mechanism checks and source exceptions are recorded below; I3–I5 remain pending.
 
 ## Source inventory
 
@@ -30,6 +30,18 @@ The corrected Vessel module inventory is version 1.11.0, revision `c7b5ac9dbbc2b
 I4 owns entry prerequisites, starting versus later training, class-local advancement, canonical nonstacking identities and explicitly declared caster contributions for every family. Each relevant row must be covered by registered original scenarios before its owning delivery is complete. Unsupplied official subclasses remain unverified content even if their equivalent engine capability passes.
 
 ## Actual Vessel gate
+
+### I2 high-level mechanism evidence
+
+`HighLevelChecks.swift` is registered in the standalone runner. `highLevelProgressionChecks`, `highLevelTableChecks`, `highLevelImprovementChecks`, `highLevelCapChecks`, and `highLevelSaveAndFeatGrantChecks` exercise twenty explicit rows, historical PB, missing rows, custom improvements, repeatable/nonrepeatable feats, repeat-acquisition grants, Constitution replay, removal/re-addition, per-row score caps, and high-level saving-throw training. `highLevelFamilyMatrixChecks` probes every original family in the table above: high-level scores, expertise, alternate strike/form facts, attacks, saves, aura scaling, movement, dice, resource capacities and additional/dependent/replacement choices. These are original mechanism probes, not imported official class content or combat execution.
+
+`highLevelPublicFixtureChecks` verifies the generated Summit Warden through 20, snapshot roundtrip, and PDF projection; the older laboratories intentionally retain five-level boundaries. `vesselHighLevelSourceChecks` verifies all six actual subclasses at 20, seven Aspects, 26 choices representing 24 Aspects, the 4-by-level-5 uniform pool, four cantrips/eleven known spells, independent exact-tier Arcanum choices, repeatable Minor Magick capacities, Fallen's locked Wings, Ascended flight, and optional Huge form/AC. Source blockers are compared against an exact per-subclass list, not an arbitrary error allowlist.
+
+The private converter is 0.4.0: 240 spell identities, 24 unresolved reference diagnostics. Every unresolved spell remains explicitly unavailable. At level 20, the selected earth-affinity/source-acceptance builds have these unresolved grants: Ascended—Minute Meteors; Cataclysm—Elemental Blade/Pillars of Earth; Cursed—Flame Whip/Dominate Creature/Destructive Wave; Fallen—Ethereal Anchor/Crusader's Mantle/Circle of Power; Formless—Grasping Vine/Eldritch Tentacles; Trickster—none. Additional unresolved class-list/Aspect/other-affinity choices remain unavailable rather than silently substituted.
+
+Original PDF page 10 additionally resolved the truncated Cataclysm capstone: Cataclysmic Eruption is at will only in level-20 Archon Form. Its limited Charisma/long-rest capacity remains outside that form. The private review records the full SHA-256 and page evidence; other reviewed capstones and interleaved high-level clauses remain provenance-backed. No upstream source repository was changed.
+
+I3 owns heterogeneous slot pools and broader casting progression. I2 does **not** invent level-6 slots for the Ascended's once-per-rest level-6 Arcanum. Minor Magick is repeatable capacity with a cast-time distinct-Sealed-Magic-spell constraint, not a new spell-selection pool. Spending/rests, damage resolution, Dark Sacrifice's temporary HP-max reduction, summon statblocks/turns and other encounter state are descriptive, not simulated. Native interaction and rendered editable-PDF evidence are separate controller gates.
 
 - Class: independent Aspect track, Charisma casting, conditional mantle, no-armor/no-shield defense, Archon configuration, resource and die scaling, level-dependent improvements.
 - Ascended: prepared casting from Vessel or Wizard list instead of known spells, ritual access, conditional traits, high-level independently limited spell choices.

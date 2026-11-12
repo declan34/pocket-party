@@ -129,6 +129,9 @@ public enum RulesEngine {
         var activeTalents: [Talent] = []
         var activeSubclass: Subclass?
         for choice in build.levels.prefix(level) {
+            if choice.level > (build.rulesProfile?.evaluator == 2 ? 20 : 5) {
+                issue("unsupported-level", "This evaluator does not support level \(choice.level).", choice.level); continue
+            }
             guard let definition, let progression = definition.at(choice.level) else {
                 issue("unsupported-level", "This pack does not support level \(choice.level).", choice.level); continue
             }
@@ -188,7 +191,7 @@ public enum RulesEngine {
                     for (key, minimum) in feat.abilityMinimums where scores[key, default: 0] < minimum {
                         issue("feat-prereq-\(key)", "\(feat.name) requires \(key.uppercased()) \(minimum) before taking it.", choice.level)
                     }
-                    if feats.contains(where: { $0.id == feat.id }) { issue("feat-duplicate", "\(feat.name) is already granted.", choice.level) }
+                    if feats.contains(where: { $0.id == feat.id }) && !(build.rulesProfile?.evaluator == 2 && feat.repeatable == true) { issue("feat-duplicate", "\(feat.name) is already granted.", choice.level) }
                     let boosts = choice.boosts.filter { $0.value != 0 }
                     if boosts.values.reduce(0, +) != feat.abilityPoints || boosts.contains(where: { !feat.abilityOptions.map(\.rawValue).contains($0.key) || $0.value < 0 || $0.value > 2 }) {
                         issue("feat-boost", "Allocate \(feat.abilityPoints) ability points for \(feat.name).", choice.level)

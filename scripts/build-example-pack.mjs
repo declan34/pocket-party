@@ -53,7 +53,7 @@ console.log('Built original example pack.');
 // Separate fixture keeps every old-format byte/choice contract available for characterization.
 const capable = structuredClone(pack);
 capable.schemaVersion = 2;
-capable.id = 'original.capability-lab'; capable.version = '1.2.0'; capable.name = 'Trail Warden · capability laboratory';
+capable.id = 'original.capability-lab'; capable.version = '1.3.0'; capable.name = 'Trail Warden · capability laboratory';
 capable.capabilities = {version:1,required:['choices','modifiers','casting','editions','resources','traits','proficiencies','configuration','languages']};
 capable.classes = [structuredClone(pack.classes[0])];
 const warden = capable.classes[0];
@@ -115,6 +115,20 @@ olderClass.subclasses.forEach(s=>s.capabilities={edition:'2014'});
 capable.classes.push(olderClass);
 capable.species.push({...structuredClone(pack.species[0]),id:'roadfolk-2014',name:'Old Roadfolk',capabilities:{edition:'2014',grants:[{id:'old-road-common',kind:'language',target:'Common'},{id:'old-road-cant',kind:'language',target:'Road Cant'}]}});
 capable.backgrounds.push({...structuredClone(pack.backgrounds[1]),id:'guide-2014',name:'Old Road Guide',abilities:[],originFeatID:'',capabilities:{edition:'2014',groups:[{id:'guide-language',name:'Guide language',languageChoices:true,counts:[1,1,1,1,1],locked:true,options:['Harbor Speech','Trade Sign'].map((name,i)=>option('guide-language-'+i,name,[{id:'guide-language-grant-'+i,kind:'language',target:name}]))}]}});
-capable.coverageNotes=['Original mechanism fixtures for the early family matrix; names do not certify official subclasses.','Levels 1–5, one class and uniform spell pool only. Tiered pools, high levels, multiclass and equipment remain pending.'];
+const summit=structuredClone(pack.classes[0]);
+summit.id='summit-warden';summit.name='Summit Warden';summit.summary='Original level-20 martial progression laboratory.';
+summit.spellAbility=null;summit.spellIDs=[];summit.talents=[];summit.features=[];
+summit.subclasses.forEach(s=>{s.spells=[];s.features=[];});
+const summitLevels=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20];
+summit.progression=summitLevels.map(level=>({level,talents:0,cantrips:0,spells:0,slots:0,slotLevel:0,improvement:[4,6,10,14,19].includes(level)}));
+summit.capabilities={edition:'2024',grants:[
+  {id:'summit-resolve',kind:'resource',target:'Resolve',value:{table:[1,1,2,2,2,3,3,3,4,4,4,5,5,5,6,6,6,7,7,8]},recovery:'long rest'},
+  {id:'summit-wisdom-save',kind:'proficiency',target:'save.wis',rank:'proficient',level:14},
+  {id:'summit-strength-cap',kind:'abilityCap',target:'str',value:{base:24},level:20},
+  {id:'summit-strength',kind:'abilityScore',target:'str',value:{base:4},level:20}
+]};
+capable.classes.push(summit);
+capable.feats.find(f=>f.id==='ability-improvement').repeatable=true;
+capable.coverageNotes=['Original mechanism fixtures; names do not certify official subclasses.','Summit Warden supports explicit levels 1–20. Early laboratories retain their authored 1–5 limits.','One class and uniform spell pool only. Tiered pools, multiclass and equipment remain pending.'];
 writeFileSync(new URL('../Sources/FolioCore/Resources/capability-pack.json',import.meta.url), JSON.stringify(capable,null,2)+'\n');
 console.log('Built original schema-2 capability fixture.');

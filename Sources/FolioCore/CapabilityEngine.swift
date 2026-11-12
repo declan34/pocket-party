@@ -38,7 +38,7 @@ public enum CapabilityEngine {
         var result = RulesEngine.evaluateLegacy(baseBuild, in: basePack, through: level)
         // Replay these below against historical capability-adjusted, pre-choice scores.
         // All other feat checks (level, duplication, allocation) remain legacy-owned.
-        result.issues.removeAll { $0.code.hasPrefix("feat-prereq-") }
+        result.issues.removeAll { $0.code.hasPrefix("feat-prereq-") || $0.code.hasPrefix("score-cap-") }
         if edition == "2014" {
             result.issues.removeAll { $0.code.hasPrefix("background-boosts") || $0.code == "languages" }
             result.languages = []
@@ -47,13 +47,14 @@ public enum CapabilityEngine {
         result.issues.removeAll { $0.code.hasPrefix("high-grant-") }
         func issue(_ code: String, _ message: String, _ at: Int? = nil) { result.issues.append(.init(code: "cap-" + code, message: message, level: at)) }
         if build.rulesProfile?.evaluator != 2 || !["2014", "2024"].contains(edition) { issue("profile", "Choose an explicit supported rules profile (evaluator 2).") }
-        if level > 5 { issue("level", "Capability evaluator 2 currently supports levels 1–5.") }
+        if level > 20 { issue("level", "Capability evaluator 2 supports levels 1–20.") }
         if edition == "2014" && build.backgroundBoosts.values.contains(where: { $0 != 0 }) { issue("creation", "2014 does not use 2024 background ability bonuses.") }
         if edition == "2014" && !build.languages.isEmpty { issue("creation-languages", "2014 languages come from authored grants and choices. Clear retained 2024 standard-language selections after reviewing them.") }
         for message in build.upgradeReview ?? [] { issue("upgrade-\(message)", message) }
         let chosenFeats = pack.feats.filter { feat in build.levels.prefix(level).contains { $0.featID == feat.id } || (edition == "2024" && background?.originFeatID == feat.id) }
         var definitions: [(String, DefinitionCapabilities)] = []
         var unlocks: [String:Int] = [:]
+        var featOwners: [String:String] = [:]
         for (id, data) in [(cls?.id, cls?.capabilities), (species?.id, species?.capabilities), (background?.id, background?.capabilities)] {
             guard let id else { continue }
             if !compatible(data, edition: edition, fallback: pack.ruleset) { issue("edition-\(id)", "This definition requires an explicit \(edition) adapter.") }
@@ -63,6 +64,20 @@ public enum CapabilityEngine {
             if !compatible(feat.capabilities, edition: edition, fallback: pack.ruleset) { issue("edition-\(feat.id)", "The selected feat is incompatible with the rules profile.") }
             if let data = feat.capabilities { definitions.append((feat.id, data)) }
             unlocks[feat.id] = background?.originFeatID == feat.id ? 1 : (build.levels.first { $0.featID == feat.id }?.level ?? 1)
+            featOwners[feat.id] = feat.id
+            if feat.repeatable == true, let data = feat.capabilities {
+                for acquisition in build.levels.prefix(level).filter({ $0.featID == feat.id }).dropFirst() {
+                    let owner = feat.id + "@" + String(acquisition.level)
+                    var repeated = DefinitionCapabilities(edition:data.edition)
+                    repeated.grants = (data.grants ?? []).map { grant in var copy=grant; copy.id += "@" + String(acquisition.level); return copy }
+                    repeated.adapters = (data.adapters ?? []).map { adapter in
+                        var copy=adapter; copy.canonicalID += "@" + String(acquisition.level)
+                        copy.replacementGrants = adapter.replacementGrants.map { grant in var value=grant; value.id += "@" + String(acquisition.level); return value }
+                        return copy
+                    }
+                    definitions.append((owner,repeated)); unlocks[owner]=acquisition.level; featOwners[owner]=feat.id
+                }
+            }
         }
         if let sub = currentSubclass, let data = sub.capabilities {
             definitions.append((sub.id, data)); unlocks[sub.id] = basePack.classes.first { $0.id == build.classID }?.subclassLevel ?? 3
@@ -92,6 +107,8 @@ public enum CapabilityEngine {
         let policyUnlocks = Dictionary(definitions.flatMap { owner, data in (data.casting ?? []).map { ($0.id, unlocks[owner] ?? 1) } }, uniquingKeysWith: max)
         let configIDs = Set(definitions.flatMap { ($0.1.configurations ?? []).map(\.id) })
         var finalGrants: [(String, CapabilityGrant)] = []
+        var finalScores = result.scores
+        var finalScoreProvenance: [CapabilityProvenance] = []
         var finalSelections = Set<String>()
         var previousGroups: [String:[String]] = [:], previousSpells: [String:[String]] = [:]
         var finalConfig = Set<String>()
@@ -100,6 +117,11 @@ public enum CapabilityEngine {
         var prerequisiteScores = result.scores
         var castingAbility = cls?.spellAbility
         var selectedCastingAbilities = Set<Ability>()
+        func proficiencyTargets(_ target: String?) -> [String] {
+            if target == "all-skills" { return Array(RulesEngine.skillAbilities.keys) }
+            if target == "all-saves" { return Ability.allCases.map { "save." + $0.rawValue } }
+            return [target ?? ""]
+        }
 
         func matches(_ predicate: RulePredicate?, at: Int, selections: Set<String>, config: Set<String>, subclass: String) -> Bool {
             guard let p = predicate else { return true }
@@ -122,6 +144,7 @@ public enum CapabilityEngine {
             let beforeChoiceSummary = RulesEngine.evaluateLegacy(beforeChoice, in: basePack, through: at)
             prerequisiteScores = beforeChoiceSummary.scores
             ranks = Dictionary(uniqueKeysWithValues: beforeChoiceSummary.skills.map { ($0, ProficiencyRank.proficient) })
+            for ability in cls?.saves ?? [] { ranks["save." + ability.rawValue] = .proficient }
             let baselineRanks = ranks
             var config = Set(choice.capabilities?.configurations ?? [])
             if !config.isSubset(of: configIDs) { issue("configuration", "Unknown configuration value.", at) }
@@ -153,7 +176,7 @@ public enum CapabilityEngine {
             let beforeGrantScores = prerequisiteScores
             var scoreGrants = Set<String>()
             let priorOptionGrants = finalGrants.filter { selectionSet.contains($0.0) }
-            for (owner, grant) in grants + priorOptionGrants where grant.kind == .abilityScore && owner != choice.featID {
+            for (owner, grant) in grants + priorOptionGrants where grant.kind == .abilityScore && !(featOwners[owner] == choice.featID && unlocks[owner] == at) {
                 guard matches(grant.condition, at: at, selections: selectionSet, config: config, subclass: choice.subclassID), scoreGrants.insert(grant.id).inserted else { continue }
                 prerequisiteScores[grant.target ?? "", default: 10] += grant.value?.resolve(level: at, scores: beforeGrantScores, proficiency: beforeChoiceSummary.proficiency) ?? 0
             }
@@ -168,7 +191,7 @@ public enum CapabilityEngine {
             let allOptions = groups.flatMap(\.options)
             func deriveRanks(_ candidates: [(String, CapabilityGrant)], selections: Set<String>) {
                 for (_, grant) in candidates where grant.kind == .proficiency && matches(grant.condition, at: at, selections: selections, config: config, subclass: choice.subclassID) {
-                    let targets = grant.target == "all-skills" ? Array(RulesEngine.skillAbilities.keys) : [grant.target ?? ""]
+                    let targets = proficiencyTargets(grant.target)
                     for target in targets { if let rank = grant.rank, rank.bonus(result.proficiency) > (ranks[target] ?? .none).bonus(result.proficiency) { ranks[target] = rank } }
                 }
             }
@@ -213,6 +236,7 @@ public enum CapabilityEngine {
             for group in groups {
                 let active = at >= groupUnlocks[group.id, default: 1] && matches(group.condition, at: at, selections: eligibleSelections, config: config, subclass: choice.subclassID)
                 if at == level && active { result.activeGroupIDs.insert(group.id) }
+                if active && (!group.counts.indices.contains(at - 1) || (group.replacementLimits.map { !$0.indices.contains(at - 1) } ?? false)) { issue("group-row-\(group.id)", "\(group.name) has no explicit row for this level.", at) }
                 let ids = selected[group.id] ?? []
                 if ids.count != (active ? group.count(at: at) : 0) { issue("count-\(group.id)", "Choose \(active ? group.count(at: at) : 0) for \(group.name).", at) }
                 let checkRequirement = group.requirementTiming != .acquisition || (previousGroups[group.id] ?? []).isEmpty
@@ -267,6 +291,7 @@ public enum CapabilityEngine {
             for policy in policies {
                 let active = at >= policyUnlocks[policy.id, default: 1] && matches(policy.condition, at: at, selections: eligibleSelections, config: config, subclass: choice.subclassID)
                 if at == level && active { result.activePolicyIDs.insert(policy.id) }
+                if active && (!policy.counts.indices.contains(at - 1) || (policy.replacementLimits.map { !$0.indices.contains(at - 1) } ?? false) || (policy.preparedCounts.map { !$0.indices.contains(at - 1) } ?? false)) { issue("policy-row-\(policy.id)", "\(policy.name) has no explicit row for this level.", at) }
                 let ids = choice.capabilities?.spells?[policy.id] ?? []
                 let count = active && policy.counts.indices.contains(at - 1) ? policy.counts[at - 1] : 0
                 if ids.count != count || Set(ids).count != ids.count { issue("casting-count-\(policy.id)", "\(policy.name) requires \(count) distinct choices.", at) }
@@ -297,23 +322,44 @@ public enum CapabilityEngine {
                     }
                 }
             }
+            // Selection and feat prerequisites above retain their pre-choice context.
+            // Effects and caps share the post-improvement, pre-grant score snapshot.
+            let historical = RulesEngine.evaluateLegacy(baseBuild, in: basePack, through: at)
+            prerequisiteScores = historical.scores
+            for (_, grant) in grants where matches(grant.condition, at: at, selections: eligibleSelections, config: config, subclass: choice.subclassID) {
+                if let table = grant.value?.table, !table.indices.contains(at - 1) { issue("value-row-\(grant.id)", "\(grant.target ?? grant.id) has no explicit value at this level.", at) }
+            }
+            // Check each historical row, not just the final score. A later cap cannot
+            // legalize an earlier overspend; current-level caps precede score grants.
+            var rowScores = historical.scores, rowCaps: [String:Int] = [:], rowApplied = Set<String>()
+            var rowScoreProvenance: [CapabilityProvenance] = []
+            for (owner, grant) in grants where matches(grant.condition, at: at, selections: eligibleSelections, config: config, subclass: choice.subclassID) {
+                guard rowApplied.insert(grant.id).inserted else { continue }
+                let key = grant.target ?? ""
+                if grant.kind == .abilityCap { rowCaps[key] = max(rowCaps[key, default: 20], grant.value?.base ?? 20) }
+                if grant.kind == .abilityScore {
+                    rowScores[key, default: 10] += grant.value?.resolve(level: at, scores: historical.scores, proficiency: historical.proficiency) ?? 0
+                    rowScoreProvenance.append(.init(grantID:grant.id,sourceID:owner,level:grant.level ?? 1))
+                }
+            }
+            for (key, value) in rowScores where value < 1 || value > rowCaps[key, default: 20] {
+                issue("score-cap-\(key)", "\(key.uppercased()) must be between 1 and \(rowCaps[key, default: 20]) at this level.", at)
+            }
             previousGroups = selected; previousSpells = choice.capabilities?.spells ?? [:]
             finalGrants = grants; finalSelections = eligibleSelections; finalConfig = config
+            finalScores = rowScores; finalScoreProvenance = rowScoreProvenance
         }
         var skillAbilities = RulesEngine.skillAbilities, skillBonuses: [String:Int] = [:]
         if selectedCastingAbilities.count > 1 { issue("casting-abilities", "Simultaneous policies with different casting abilities require a per-policy sheet projection not supported by this evaluator.") }
         prerequisiteScores = result.scores
         let originalScores = result.scores
-        var applied: Set<String> = []
+        var applied = Set(finalScoreProvenance.map(\.grantID))
+        result.scores = finalScores
+        result.provenance.append(contentsOf:finalScoreProvenance)
         // Alternative formulas resolve before additive bonuses, independent of author ordering.
         let orderedGrants = finalGrants.sorted { lhs, rhs in
             let order: [CapabilityGrant.Kind:Int] = [.abilityScore:0, .armorFormula:1, .speedBase:1, .armorBonus:3]
             return (order[lhs.1.kind] ?? 2, lhs.1.id) < (order[rhs.1.kind] ?? 2, rhs.1.id)
-        }
-        for (owner, grant) in orderedGrants where grant.kind == .abilityScore {
-            guard matches(grant.condition, at: level, selections: finalSelections, config: finalConfig, subclass: build.levels.prefix(level).last?.subclassID ?? ""), applied.insert(grant.id).inserted else { continue }
-            result.scores[grant.target ?? "", default: 10] += grant.value?.resolve(level: level, scores: originalScores, proficiency: result.proficiency) ?? 0
-            result.provenance.append(.init(grantID: grant.id, sourceID: owner, level: grant.level ?? 1))
         }
         let con = Ability.modifier(result.scores["con", default: 10]), oldCon = Ability.modifier(originalScores["con", default: 10])
         let die = cls?.hitDie ?? 8
@@ -323,7 +369,6 @@ public enum CapabilityEngine {
         if result.mantleArmorClass != nil { result.mantleArmorClass = 10 + con + Ability.modifier(result.scores["cha", default: 10]) }
         if let ability = castingAbility { let modifier = Ability.modifier(result.scores[ability.rawValue, default: 10]); result.spellDC = 8 + result.proficiency + modifier; result.spellAttack = result.proficiency + modifier }
         result.castingAbility = castingAbility
-        for (key, value) in result.scores where !(1...20).contains(value) { issue("score-cap-\(key)", "Ability grants must leave scores between 1 and 20.") }
         for (owner, grant) in orderedGrants where grant.kind != .abilityScore {
             guard matches(grant.condition, at: level, selections: finalSelections, config: finalConfig, subclass: build.levels.prefix(level).last?.subclassID ?? "") else { continue }
             // Same canonical grant does not stack from two ownership paths.
@@ -331,8 +376,9 @@ public enum CapabilityEngine {
             let value = grant.value?.resolve(level: level, scores: result.scores, proficiency: result.proficiency) ?? 0
             result.provenance.append(.init(grantID: grant.id, sourceID: owner, level: grant.level ?? 1))
             switch grant.kind {
+            case .abilityCap: break // Already checked in ordered historical replay.
             case .proficiency:
-                let targets = grant.target == "all-skills" ? Array(RulesEngine.skillAbilities.keys) : [grant.target ?? ""]
+                let targets = proficiencyTargets(grant.target)
                 for target in targets { if let rank = grant.rank, rank.bonus(result.proficiency) > (ranks[target] ?? .none).bonus(result.proficiency) { ranks[target] = rank } }
             case .skillAbility: skillAbilities[grant.target ?? ""] = grant.ability
             case .skillBonus: skillBonuses[grant.target ?? "", default: 0] += value
@@ -371,7 +417,7 @@ public enum CapabilityEngine {
         }
         result.proficiencyRanks = ranks
         for (skill, ability) in skillAbilities { result.skillModifiers[skill] = Ability.modifier(result.scores[ability.rawValue, default: 10]) + (ranks[skill] ?? .none).bonus(result.proficiency) + skillBonuses[skill, default: 0] }
-        result.skills = ranks.filter { $0.value == .proficient || $0.value == .expertise }.keys.sorted()
+        result.skills = ranks.filter { RulesEngine.skillAbilities[$0.key] != nil && ($0.value == .proficient || $0.value == .expertise) }.keys.sorted()
         result.spells = pack.spells.filter { spellIDs.contains($0.id) }.sorted { ($0.level, $0.name) < ($1.level, $1.name) }
         return result
     }

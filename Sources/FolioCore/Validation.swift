@@ -38,8 +38,9 @@ public enum PackValidator {
         let spellIDs = Set(pack.spells.map(\.id))
         for spell in pack.spells { try require((0...9).contains(spell.level), "\(spell.name) has an invalid spell level.") }
         for species in pack.species { try require((5...120).contains(species.speed) && (0...10).contains(species.hpPerLevel), "\(species.name) has invalid movement or HP values.") }
+        let maximumLevel = pack.schemaVersion == 2 ? 20 : 5
         for feat in pack.feats {
-            try require(["origin", "general"].contains(feat.category) && (1...5).contains(feat.minimumLevel) && (0...2).contains(feat.abilityPoints) && (0...10).contains(feat.hpPerLevel), "\(feat.name) has unsupported feat rules.")
+            try require(["origin", "general"].contains(feat.category) && (1...maximumLevel).contains(feat.minimumLevel) && (0...2).contains(feat.abilityPoints) && (0...10).contains(feat.hpPerLevel), "\(feat.name) has unsupported feat rules.")
             try require(feat.category != "origin" || feat.abilityPoints == 0, "Origin feats with ability-score choices are not supported yet.")
             try require(feat.abilityPoints == 0 || !feat.abilityOptions.isEmpty, "\(feat.name) needs ability options.")
             try require(feat.skills.allSatisfy { RulesEngine.skillAbilities[$0] != nil }, "\(feat.name) references an unknown skill.")
@@ -55,12 +56,12 @@ public enum PackValidator {
             try require([6, 8, 10, 12].contains(cls.hitDie) && (0...4).contains(cls.skillCount), "\(cls.name) has unsupported hit dice or skill counts.")
             try require(cls.skillPool.count >= cls.skillCount && Set(cls.skillPool).count == cls.skillPool.count && cls.skillPool.allSatisfy { RulesEngine.skillAbilities[$0] != nil }, "\(cls.name) has an invalid skill pool.")
             try require(cls.saves.count == 2 && Set(cls.saves).count == 2, "\(cls.name) must grant two distinct saving throws.")
-            try require((1...5).contains(cls.maxLevel) && cls.progression.map(\.level).sorted() == Array(1...cls.maxLevel), "\(cls.name) must define every supported level, from 1 up to at most 5.")
+            try require((1...maximumLevel).contains(cls.maxLevel) && cls.progression.map(\.level).sorted() == Array(1...cls.maxLevel), "\(cls.name) must define every supported level, from 1 up to at most \(maximumLevel).")
             try require(["unarmored", "vessel-mantle"].contains(cls.armorFormula), "\(cls.name) uses an unsupported armor formula.")
             try require(Set(cls.spellIDs).isSubset(of: spellIDs) && Set(cls.spellIDs).count == cls.spellIDs.count, "\(cls.name) references missing or duplicate spells.")
             try unique(cls.talents.map(\.id), "Class options")
             try unique(cls.subclasses.map(\.id), "Subclasses")
-            try require((1...5).contains(cls.subclassLevel), "Subclass level must be within the supported range.")
+            try require((1...maximumLevel).contains(cls.subclassLevel), "Subclass level must be within the supported range.")
             for talent in cls.talents {
                 try require((1...20).contains(talent.minimumLevel) && talent.skills.allSatisfy { RulesEngine.skillAbilities[$0] != nil }, "\(talent.name) has unsupported prerequisites or skills.")
                 try require(Set(talent.requires).isSubset(of: Set(cls.talents.map(\.id))) && !talent.requires.contains(talent.id), "\(talent.name) references a missing prerequisite or itself.")
@@ -100,10 +101,11 @@ public enum PackValidator {
                 throw FolioError.invalid("Saved capability selections exceed supported bounds.")
             }
         }
-        guard record.schemaVersion == 1, (1...5).contains(b.levels.count),
+        let maximumLevel = b.rulesProfile?.evaluator == 2 ? 20 : 5
+        guard record.schemaVersion == 1, (1...maximumLevel).contains(b.levels.count),
               b.baseScores.values.allSatisfy({ (1...30).contains($0) }),
               b.backgroundBoosts.values.allSatisfy({ (0...2).contains($0) }),
-              b.levels.allSatisfy({ (1...5).contains($0.level) && $0.boosts.values.allSatisfy({ (0...2).contains($0) }) }),
+              b.levels.allSatisfy({ (1...maximumLevel).contains($0.level) && $0.boosts.values.allSatisfy({ (0...2).contains($0) }) }),
               (b.portrait?.count ?? 0) <= 5_000_000 else { throw FolioError.invalid("This character has unsupported data or an oversized portrait.") }
     }
 }
