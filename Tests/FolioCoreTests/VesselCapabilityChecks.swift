@@ -94,7 +94,9 @@ func vesselCapabilityChecks() throws {
     try check(formSummary.size == "Medium" && PrintableSheet(record: .init(pack: pack, build: form)).fields["size"] == "Medium", "Actual Archon size overrides a Small species in sheet projection")
     try check(formSummary.traits.contains("Additional pseudopods: 3"), "Actual Formless pseudopods resolve Charisma")
     form.levels[4].capabilities?.configurations = ["archon"]
-    try check(RulesEngine.evaluate(form, in: pack).armorClass == 12, "Archon bonus cannot leak when no-armor/no-shield condition is undeclared")
+    try check(RulesEngine.evaluate(form, in: pack).armorClass == formSummary.armorClass, "Deprecated manual armor note cannot override actual unarmored equipment state")
+    form.equipment = .init(inventory:[.init(itemID:"vessel-leather",equipped:true)])
+    try check(RulesEngine.evaluate(form,in:pack).armorClass == 13,"Actual worn leather disables Archon unarmored bonuses")
     form = build("the-formless"); form.levels[3].capabilities?.groups?["aspects"] = ["uncanny-strength","spirit-sense","opalescent-armor"]
     let fortifiedGroups = form.levels[3].capabilities?.groups
     form.levels[4].capabilities?.groups = fortifiedGroups

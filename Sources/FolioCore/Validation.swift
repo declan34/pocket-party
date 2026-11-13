@@ -10,6 +10,7 @@ public enum PackValidator {
     }
 
     public static func validate(_ pack: ContentPack) throws {
+        try EquipmentEngine.validate(pack)
         func require(_ condition: Bool, _ message: String) throws {
             guard condition else { throw FolioError.invalid(message) }
         }
@@ -23,7 +24,7 @@ public enum PackValidator {
         try require(!pack.id.isEmpty && !pack.version.isEmpty && !pack.name.isEmpty, "Pack ID, version, and name are required.")
         let combined = pack.sources != nil
         try require(pack.classes.count <= (combined ? 100 : 20) && pack.species.count <= (combined ? 1000 : 100) && pack.backgrounds.count <= (combined ? 2000 : 200) && pack.spells.count <= (combined ? 10000 : 2000) && pack.feats.count <= (combined ? 5000 : 500), "This content exceeds supported limits.")
-        try require(!pack.classes.isEmpty || !pack.species.isEmpty || !pack.backgrounds.isEmpty || !pack.feats.isEmpty || !pack.spells.isEmpty || !pack.languages.isEmpty, "This content pack is empty.")
+        try require(!pack.classes.isEmpty || !pack.species.isEmpty || !pack.backgrounds.isEmpty || !pack.feats.isEmpty || !pack.spells.isEmpty || !pack.languages.isEmpty || !(pack.items ?? []).isEmpty, "This content pack is empty.")
         if let sources = pack.sources {
             try require(!sources.isEmpty && sources.count <= 100, "A library snapshot must contain 1–100 sources.")
             try require(Set(sources.map { [$0.id, $0.version] }).count == sources.count, "Duplicate source revisions in snapshot.")
@@ -87,6 +88,10 @@ public enum PackValidator {
         try validate(record.pack)
         guard try LibraryStorage.encoder.encode(record).count <= 20_000_000 else { throw FolioError.invalid("Character files must be smaller than 20 MB.") }
         let b = record.build
+        if let equipment=b.equipment {
+            guard b.rulesProfile?.evaluator == 2,record.pack.capabilities?.required.contains("equipment") == true else { throw FolioError.invalid("Inventory requires a pinned equipment-capable evaluator.") }
+            try EquipmentEngine.validate(equipment)
+        }
         let classIDs=Set(b.levels.map { $0.classID ?? b.classID })
         if classIDs.count > 1 { try CapabilityValidation.validateTrackOwnership(record.pack,classIDs:classIDs) }
         if b.levels.contains(where: { $0.classID != nil }) {

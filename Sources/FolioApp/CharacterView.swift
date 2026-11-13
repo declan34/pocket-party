@@ -64,6 +64,9 @@ struct CharacterView: View {
                             }
                         }
                     }
+                    if record.build.rulesProfile?.evaluator == 2 && record.pack.capabilities?.required.contains("equipment") == true {
+                        EquipmentEditor(build:$record.build,pack:record.pack)
+                    }
                     validation
                 } else if section == "Sheet" {
                     Picker("Sheet format",selection:$sheetStyle) {
@@ -210,7 +213,7 @@ struct CharacterView: View {
         }
     }
     private var validation: some View {
-        FolioPanel(title: summary.isValid ? "Ready for the next chapter" : "Finish these choices", subtitle: "These checks cover the supported build rules. Inventory and combat are not evaluated.") {
+        FolioPanel(title: summary.isValid ? "Ready for the next chapter" : "Finish these choices", subtitle: record.build.equipment == nil ? "These checks cover the supported build rules. Inventory and combat are not evaluated." : "These checks cover supported build rules and tracked equipment. Combat rolls and expenditure remain manual.") {
             if !(record.build.upgradeReview ?? []).isEmpty {
                 Text("This is an explicit rules-copy review. Check all choices and calculated values before acknowledging.")
                 Button("I reviewed this copy's rules and choices") { record.build.upgradeReview = nil }
@@ -384,12 +387,12 @@ struct CharacterSheet: View {
     var summary: CharacterSummary
     var body: some View {
         VStack(spacing: 20) {
-            FolioPanel(title: "At a glance", subtitle: "Fixed-average hit points. Armor values assume no equipped armor or shield.") {
+            FolioPanel(title: "At a glance", subtitle: summary.equipment == nil ? "Fixed-average hit points. Armor values assume no equipped armor or shield." : "Fixed-average hit points. Armor and attacks reflect the tracked loadout.") {
                 Text(summary.classLevels.map { "\($0.name) \($0.level)\($0.subclassName.isEmpty ? "" : " · " + $0.subclassName)" }.joined(separator:"\n")).font(.subheadline)
                 Text("Hit dice: " + summary.hitDice.keys.sorted().map { "\(summary.hitDice[$0]!)d\($0)" }.joined(separator:" + ")).font(.subheadline)
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 95))]) {
                     StatView(value: "\(summary.hitPoints)", label: "Maximum HP")
-                    StatView(value: "\(summary.armorClass)", label: "Unarmored AC")
+                    StatView(value: "\(summary.armorClass)", label: summary.equipment == nil ? "Unarmored AC" : "Loadout AC")
                     if let ac = summary.mantleArmorClass { StatView(value: "\(ac)", label: "Mantle AC") }
                     StatView(value: signed(summary.proficiency), label: "Proficiency")
                     StatView(value: signed(summary.initiative), label: "Initiative")
@@ -400,6 +403,14 @@ struct CharacterSheet: View {
                     ForEach(Ability.allCases) { ability in
                         StatView(value: "\(summary.scores[ability.rawValue, default: 10]) (\(signed(Ability.modifier(summary.scores[ability.rawValue, default: 10]))))", label: ability.name)
                     }
+                }
+            }
+            if let equipment=summary.equipment {
+                FolioPanel(title:"Equipment & attacks",subtitle:"Formulas only; no rolls or automatic expenditure.") {
+                    ForEach(equipment.attacks) { Text($0.description).font(.subheadline) }
+                    ForEach(Array(equipment.inventory.enumerated()),id:\.offset) { _, text in Text(text).font(.subheadline) }
+                    Text("Carried \(equipment.weight.formatted()) / \(equipment.capacity.formatted()) lb · attuned \(equipment.attuned)/\(equipment.attunementLimit)")
+                    ForEach(Array(equipment.notes.enumerated()),id:\.offset) { _, text in Text(text).font(.caption) }
                 }
             }
             if summary.slots > 0 || !summary.castingSources.isEmpty || !summary.spellPools.isEmpty {

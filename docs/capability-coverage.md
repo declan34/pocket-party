@@ -1,6 +1,26 @@
 # Rules capability and content coverage
 
-This inventory was established before implementation on 2026-11-12. No row is verified merely because the class exists in a menu. I1–I5 correspond to the five approved deliveries. I1–I4 mechanism checks and source exceptions are recorded below; I5 remains pending.
+This inventory was established before implementation on 2026-11-12. No row is verified merely because the class exists in a menu. I1–I5 correspond to the five approved deliveries. I1–I5 mechanism checks and source exceptions are recorded below. Generic mechanism evidence is distinct from full official-content certification.
+
+## I5 equipment evidence
+
+Registered equipment checks cover the matrix's shared mechanisms. These are original fixtures except the explicitly private Vessel gate; they do not certify imported official class/subclass packs.
+
+| Owned matrix obligation | Executed scenario / asserted boundary |
+| --- | --- |
+| Barbarian, Sorcerer alternate defense restrictions | `equipmentDefenseChecks`, `equipmentDefenseSelectionChecks`, `equipmentRuleAndHistoryChecks`: alternative AC15 vs ordinary12; armor replaces unarmored, no-shield restriction removes formula even for an untrained 2024 shield; formula choice is explicit and nonstacking |
+| Bard, Cleric, Paladin, Wizard training; earlier/class entry | `equipmentRuleAndHistoryChecks`, `equipmentEdgeAndMatrixChecks`, `vesselMulticlassChecks`: attack4 before training vs6 after, earlier projection4; martial category includes specific weapon training; actual Vessel initial/later training differs |
+| Druid form, Monk movement/unarmed restrictions | `equipmentRuleAndHistoryChecks`, `equipmentEdgeAndMatrixChecks`: authored unarmed formula is removed with an equipped weapon; no-armor/no-shield movement40 becomes30 with shield; actual physical state controls predicates |
+| Fighter, Paladin, Ranger mastery/weapons | `equipmentAttackAndLoadChecks`, `equipmentRuleAndHistoryChecks`: finesse one chosen ability, versatile d6/d8, trained/untrained attack, selected mastery label/limit, incompatible hands rejected; combat mastery execution remains manual |
+| Rogue item/attunement exceptions | `equipmentAttunementChecks`, `equipmentExceptionsAndApplicationsChecks`: baseline3, explicit4, prerequisite bypass, duplicate canonical item rejection, no prerequisite self-grant, nonstacking item modifiers |
+| Warlock conditional/bound weapon | `equipmentBoundWeaponChecks`: two owned weapons remain attack2/3 respectively when only the second is bound to the CHA substitution; inactive/missing binding is a draft issue |
+| Artificer known recipes versus active items | `equipmentRuleAndHistoryChecks`, `equipmentExceptionsAndApplicationsChecks`, `equipmentPublicSmokeChecks`: independent known recipe and current application; target eligibility, limits, recipe removal, item/recipe canonical nonstacking; public Trail Artisan is original, official source remains absent |
+| Actual Vessel gear/strikes/defense | `vesselEquipmentChecks`, `vesselCapabilityChecks`, `vesselHighLevelSourceChecks`: starting three choices + fixed gear with no gold; leatherAC13 versus cloak14 at level1; untrained shieldAC12 suppresses cloak; actual CHA radiant dice d6/d8/d10/d12 at1/5/11/17; all prior exact source blockers retained |
+| All inventory/edition/persistence/PDF boundaries | `equipmentArmorContractChecks`, `equipmentCatalogChecks`, `equipmentStartingAndSheetChecks`, `equipmentEdgeAndMatrixChecks`: old blank compatibility, item-only sources, source-qualified same-name entries, bounded imports, Codable/save roundtrip, ammo/coins/worn weight, Tiny capacity, Heavy edition differences, separate armor speed; native PDF tests assert editableAC18 and 100 stored inventory rows without lost overflow |
+
+The new private converter is 0.7.0: 240 spells, 26 Aspect variants, six subclasses and 24 existing diagnostics. It maps original Vessel equipment categories to explicitly revised 2024 YAML, records hashes/provenance in ignored conversion evidence, and represents containers and nested contents separately exactly once. Revised waterskin is 1 lb empty plus four 1 lb water pints; no loaded aggregate is double-counted. Quarterstaff/spear versatile d8 comes from the primary revised weapon table because the extracted YAML's alternate denomination is zero. The deprecated no-armor configuration is retained as a non-authoritative note; actual inventory owns defense. Older saved snapshots are not rewritten.
+
+Not automated: dice rolls, target damage, mastery combat actions, ammunition expenditure, spell/component handling, rest/transformation lifecycle, shopping or crafting economy. Unknown required sheet mechanics block validated output rather than being inferred from prose. Public fixtures contain original material only; private source definitions and exports stay ignored. Mac build/native PDFKit evidence does not establish iOS/device, live AI or third-party reader-editing compatibility.
 
 ## Source inventory
 
@@ -91,11 +111,11 @@ Inherited descriptions contain interleaved/truncated text, incomplete high-level
 | Monk | Conditional alternate AC, movement, focus capacity and declared focus die |
 | Paladin | Style versus two granted cantrips, healing/channel capacities and additional oath grant |
 | Ranger | Expertise/language, style and configurable tracking trait; edition casting details remain I3 |
-| Rogue | Expertise and calculated language grant; item exceptions remain I5 |
+| Rogue | Expertise and calculated language grant; I5 item exceptions now exercised by original equipment checks |
 | Sorcerer | Metamagic selection, resource capacity, per-level HP, conditional AC/affinity and extra spell |
 | Warlock | Prerequisite removal, repeatable invocation occurrences, pact track and bounded expanded list |
 | Wizard | Expertise, acquired spellbook versus prepared subset, rejection outside the acquired book |
-| Artificer | Dependent item-recipe selections and declared preparation; official source absent, active items remain I5 |
+| Artificer | Dependent item-recipe selections and declared preparation; I5 active items/limits now exercised; official source absent |
 
 Original names and numbers are mechanism examples, **not conversions/certification of every official subclass**. Tiered full/half/fractional/pact casting progression belongs to I3, even when the early selection mechanism passes here.
 
@@ -109,4 +129,4 @@ The adapter imports exported Sealed Magic entries including affinity fields, exp
 
 Current input produces 106 spell identities and ten unresolved diagnostics: four LL-only class-list choices (Glitterbeam, Otherworldly Grasp, Ethereal Anchor, Flame Whip) and six standard-only subclass references (Elemental Blade, Beckon Air, Control Flame, Torrent, Flame Whip, Ethereal Anchor). LL and standard references remain separate. Selecting an unavailable class-list choice blocks completion; automatic unresolved grants block the corresponding subclass/affinity/level. Ascended, Formless and Trickster acceptance builds pass through 5; Cursed/Fallen/Cataclysm checks assert the expected source blockers rather than a false clean build.
 
-Exact source file hashes, module revision/version, original PDF hash/pages and Wizard journal ID stay in `PrivatePacks/conversion-report.json` and `vessel-source-review.json`. Starting equipment is present in Mortal Vessel prose; structured equipment remains I5. Combat rolls, transformation lifecycle on a battle map, companion turns, expenditure/rest simulation and crafting economies are outside this builder roadmap.
+Exact source file hashes, module revision/version, original PDF hash/pages and Wizard journal ID stay in `PrivatePacks/conversion-report.json` and `vessel-source-review.json`. I5 now represents the original starting categories and integrates actual equipped gear with defenses/strikes. Combat rolls, transformation lifecycle on a battle map, companion turns, expenditure/rest simulation and crafting economies are outside this builder roadmap.

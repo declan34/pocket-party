@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "original.capability-lab",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "name": "Trail Warden · capability laboratory",
   "ruleset": "2024",
   "isPrivate": false,
@@ -9,7 +9,7 @@
   "coverageNotes": [
     "Original mechanism fixtures; names do not certify official subclasses.",
     "Summit Warden and Notebook Keeper support explicit levels 1–20 and declared multiclass entry policies. Early laboratories retain their authored 1–5 limits and do not opt into multiclassing.",
-    "Notebook Keeper demonstrates tiered ordinary capacity, a separate custom pool, two casting abilities and editable book preparation. Equipment remains pending."
+    "Notebook Keeper demonstrates tiered ordinary capacity, a separate custom pool, two casting abilities and editable book preparation. Original equipment and Trail Artisan recipes demonstrate inventory, mastery labels and active item applications; combat resolution is manual."
   ],
   "languages": [
     "Dwarvish",
@@ -329,7 +329,7 @@
       ],
       "subclassLevel": 3,
       "talentLabel": "Practices",
-      "equipment": "A walking staff and a lantern. This demo records equipment as notes; it does not calculate purchases or armor.",
+      "equipment": "Original practice equipment is available in the catalog. Owned, carried and equipped states are edited separately; purchases and combat expenditure are manual.",
       "armorFormula": "unarmored",
       "features": [
         {
@@ -727,7 +727,7 @@
       ],
       "subclassLevel": 3,
       "talentLabel": "Practices",
-      "equipment": "A walking staff and a lantern. This demo records equipment as notes; it does not calculate purchases or armor.",
+      "equipment": "Original practice equipment is available in the catalog. Owned, carried and equipped states are edited separately; purchases and combat expenditure are manual.",
       "armorFormula": "unarmored",
       "features": [],
       "talents": [],
@@ -886,7 +886,7 @@
       ],
       "subclassLevel": 3,
       "talentLabel": "Practices",
-      "equipment": "A walking staff and a lantern. This demo records equipment as notes; it does not calculate purchases or armor.",
+      "equipment": "Original practice equipment is available in the catalog. Owned, carried and equipped states are edited separately; purchases and combat expenditure are manual.",
       "armorFormula": "unarmored",
       "features": [],
       "talents": [],
@@ -1062,7 +1062,7 @@
       ],
       "subclassLevel": 3,
       "talentLabel": "Practices",
-      "equipment": "A walking staff and a lantern. This demo records equipment as notes; it does not calculate purchases or armor.",
+      "equipment": "Original practice equipment is available in the catalog. Owned, carried and equipped states are edited separately; purchases and combat expenditure are manual.",
       "armorFormula": "unarmored",
       "features": [],
       "talents": [],
@@ -1273,7 +1273,7 @@
       ],
       "subclassLevel": 3,
       "talentLabel": "Practices",
-      "equipment": "A walking staff and a lantern. This demo records equipment as notes; it does not calculate purchases or armor.",
+      "equipment": "Original practice equipment is available in the catalog. Owned, carried and equipped states are edited separately; purchases and combat expenditure are manual.",
       "armorFormula": "unarmored",
       "features": [],
       "talents": [],
@@ -1493,7 +1493,7 @@
       ],
       "subclassLevel": 3,
       "talentLabel": "Practices",
-      "equipment": "A walking staff and a lantern. This demo records equipment as notes; it does not calculate purchases or armor.",
+      "equipment": "Original practice equipment is available in the catalog. Owned, carried and equipped states are edited separately; purchases and combat expenditure are manual.",
       "armorFormula": "unarmored",
       "features": [],
       "talents": [],
@@ -1681,7 +1681,7 @@
       ],
       "subclassLevel": 3,
       "talentLabel": "Practices",
-      "equipment": "A walking staff and a lantern. This demo records equipment as notes; it does not calculate purchases or armor.",
+      "equipment": "Original practice equipment is available in the catalog. Owned, carried and equipped states are edited separately; purchases and combat expenditure are manual.",
       "armorFormula": "unarmored",
       "features": [],
       "talents": [],
@@ -1851,7 +1851,7 @@
       ],
       "subclassLevel": 3,
       "talentLabel": "Practices",
-      "equipment": "A walking staff and a lantern. This demo records equipment as notes; it does not calculate purchases or armor.",
+      "equipment": "Original practice equipment is available in the catalog. Owned, carried and equipped states are edited separately; purchases and combat expenditure are manual.",
       "armorFormula": "unarmored",
       "features": [],
       "talents": [],
@@ -2080,7 +2080,7 @@
       ],
       "subclassLevel": 3,
       "talentLabel": "Practices",
-      "equipment": "A walking staff and a lantern. This demo records equipment as notes; it does not calculate purchases or armor.",
+      "equipment": "Original practice equipment is available in the catalog. Owned, carried and equipped states are edited separately; purchases and combat expenditure are manual.",
       "armorFormula": "unarmored",
       "features": [],
       "talents": [],
@@ -2300,7 +2300,7 @@
       ],
       "subclassLevel": 3,
       "talentLabel": "Practices",
-      "equipment": "A walking staff and a lantern. This demo records equipment as notes; it does not calculate purchases or armor.",
+      "equipment": "Original practice equipment is available in the catalog. Owned, carried and equipped states are edited separately; purchases and combat expenditure are manual.",
       "armorFormula": "unarmored",
       "features": [],
       "talents": [],
@@ -2426,7 +2426,7 @@
       ],
       "subclassLevel": 3,
       "talentLabel": "Practices",
-      "equipment": "A walking staff and a lantern. This demo records equipment as notes; it does not calculate purchases or armor.",
+      "equipment": "Original practice equipment is available in the catalog. Owned, carried and equipped states are edited separately; purchases and combat expenditure are manual.",
       "armorFormula": "unarmored",
       "features": [],
       "talents": [],
@@ -2664,7 +2664,7 @@
       ],
       "subclassLevel": 3,
       "talentLabel": "Practices",
-      "equipment": "A walking staff and a lantern. This demo records equipment as notes; it does not calculate purchases or armor.",
+      "equipment": "Original practice equipment is available in the catalog. Owned, carried and equipped states are edited separately; purchases and combat expenditure are manual.",
       "armorFormula": "unarmored",
       "features": [],
       "talents": [],
@@ -2950,7 +2950,7 @@
       ],
       "subclassLevel": 3,
       "talentLabel": "Practices",
-      "equipment": "A walking staff and a lantern. This demo records equipment as notes; it does not calculate purchases or armor.",
+      "equipment": "Original practice equipment is available in the catalog. Owned, carried and equipped states are edited separately; purchases and combat expenditure are manual.",
       "armorFormula": "unarmored",
       "features": [],
       "talents": [],
@@ -3110,7 +3110,7 @@
       ],
       "subclassLevel": 3,
       "talentLabel": "Practices",
-      "equipment": "A walking staff and a lantern. This demo records equipment as notes; it does not calculate purchases or armor.",
+      "equipment": "Original practice equipment is available in the catalog. Owned, carried and equipped states are edited separately; purchases and combat expenditure are manual.",
       "armorFormula": "unarmored",
       "features": [],
       "talents": [],
@@ -3305,7 +3305,7 @@
       ],
       "subclassLevel": 3,
       "talentLabel": "Practices",
-      "equipment": "A walking staff and a lantern. This demo records equipment as notes; it does not calculate purchases or armor.",
+      "equipment": "Original practice equipment is available in the catalog. Owned, carried and equipped states are edited separately; purchases and combat expenditure are manual.",
       "armorFormula": "unarmored",
       "features": [
         {
@@ -3525,7 +3525,7 @@
       ],
       "subclassLevel": 3,
       "talentLabel": "Practices",
-      "equipment": "A walking staff and a lantern. This demo records equipment as notes; it does not calculate purchases or armor.",
+      "equipment": "Original practice equipment is available in the catalog. Owned, carried and equipped states are edited separately; purchases and combat expenditure are manual.",
       "armorFormula": "unarmored",
       "features": [],
       "talents": [],
@@ -3785,6 +3785,35 @@
               "base": 4
             },
             "level": 20
+          },
+          {
+            "id": "summit-equipment-training-0",
+            "kind": "proficiency",
+            "target": "armor.medium",
+            "rank": "proficient"
+          },
+          {
+            "id": "summit-equipment-training-1",
+            "kind": "proficiency",
+            "target": "armor.shield",
+            "rank": "proficient"
+          },
+          {
+            "id": "summit-equipment-training-2",
+            "kind": "proficiency",
+            "target": "weapon.simple",
+            "rank": "proficient"
+          },
+          {
+            "id": "summit-mastery",
+            "kind": "equipment",
+            "equipment": {
+              "kind": "masteryLimit"
+            },
+            "value": {
+              "base": 1
+            },
+            "text": "Weapon mastery choices"
           }
         ]
       },
@@ -3811,7 +3840,31 @@
           "poolIDs": [],
           "reciprocalSlotUse": false
         }
-      }
+      },
+      "startingEquipment": [
+        {
+          "id": "summit-start",
+          "name": "Starting expedition",
+          "options": [
+            {
+              "id": "summit-gear",
+              "name": "Coat, blade and trail guard",
+              "items": {
+                "ridge-coat": 1,
+                "trail-blade": 1,
+                "trail-guard": 1
+              },
+              "gold": 0
+            },
+            {
+              "id": "summit-money",
+              "name": "25 gold pieces",
+              "items": {},
+              "gold": 25
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "notebook-keeper",
@@ -3835,7 +3888,7 @@
       ],
       "subclassLevel": 3,
       "talentLabel": "Practices",
-      "equipment": "A walking staff and a lantern. This demo records equipment as notes; it does not calculate purchases or armor.",
+      "equipment": "Original practice equipment is available in the catalog. Owned, carried and equipped states are edited separately; purchases and combat expenditure are manual.",
       "armorFormula": "unarmored",
       "features": [],
       "talents": [],
@@ -4430,6 +4483,454 @@
           "reciprocalSlotUse": false
         }
       }
+    },
+    {
+      "id": "trail-artisan",
+      "name": "Trail Artisan",
+      "summary": "Original level-20 martial progression laboratory.",
+      "hitDie": 8,
+      "primaryAbility": "cha",
+      "spellAbility": null,
+      "saves": [
+        "wis",
+        "cha"
+      ],
+      "skillCount": 2,
+      "skillPool": [
+        "Arcana",
+        "Insight",
+        "Medicine",
+        "Persuasion",
+        "Religion",
+        "Survival"
+      ],
+      "subclassLevel": 3,
+      "talentLabel": "Practices",
+      "equipment": "Original practice equipment is available in the catalog. Owned, carried and equipped states are edited separately; purchases and combat expenditure are manual.",
+      "armorFormula": "unarmored",
+      "features": [],
+      "talents": [],
+      "subclasses": [
+        {
+          "id": "waylight",
+          "name": "Waylight",
+          "text": "You lead the lost toward a place they can call home.",
+          "features": [],
+          "spells": []
+        },
+        {
+          "id": "memory-keeper",
+          "name": "Memory Keeper",
+          "text": "You preserve the stories carried by abandoned places.",
+          "features": [],
+          "spells": []
+        }
+      ],
+      "progression": [
+        {
+          "level": 1,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 2,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 3,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 4,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": true
+        },
+        {
+          "level": 5,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 6,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": true
+        },
+        {
+          "level": 7,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 8,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 9,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 10,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": true
+        },
+        {
+          "level": 11,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 12,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 13,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 14,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": true
+        },
+        {
+          "level": 15,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 16,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 17,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 18,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 19,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": true
+        },
+        {
+          "level": 20,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        }
+      ],
+      "spellIDs": [],
+      "capabilities": {
+        "edition": "2024",
+        "grants": [
+          {
+            "id": "artisan-summit-resolve",
+            "kind": "resource",
+            "target": "Resolve",
+            "value": {
+              "table": [
+                1,
+                1,
+                2,
+                2,
+                2,
+                3,
+                3,
+                3,
+                4,
+                4,
+                4,
+                5,
+                5,
+                5,
+                6,
+                6,
+                6,
+                7,
+                7,
+                8
+              ]
+            },
+            "recovery": "long rest"
+          },
+          {
+            "id": "artisan-summit-wisdom-save",
+            "kind": "proficiency",
+            "target": "save.wis",
+            "rank": "proficient",
+            "level": 14
+          },
+          {
+            "id": "artisan-summit-strength-cap",
+            "kind": "abilityCap",
+            "target": "str",
+            "value": {
+              "base": 24
+            },
+            "level": 20
+          },
+          {
+            "id": "artisan-summit-strength",
+            "kind": "abilityScore",
+            "target": "str",
+            "value": {
+              "base": 4
+            },
+            "level": 20
+          },
+          {
+            "id": "artisan-summit-equipment-training-0",
+            "kind": "proficiency",
+            "target": "armor.medium",
+            "rank": "proficient"
+          },
+          {
+            "id": "artisan-summit-equipment-training-1",
+            "kind": "proficiency",
+            "target": "armor.shield",
+            "rank": "proficient"
+          },
+          {
+            "id": "artisan-summit-equipment-training-2",
+            "kind": "proficiency",
+            "target": "weapon.simple",
+            "rank": "proficient"
+          },
+          {
+            "id": "artisan-summit-mastery",
+            "kind": "equipment",
+            "equipment": {
+              "kind": "masteryLimit"
+            },
+            "value": {
+              "base": 1
+            },
+            "text": "Weapon mastery choices"
+          },
+          {
+            "id": "artisan-applications",
+            "kind": "equipment",
+            "equipment": {
+              "kind": "applicationLimit"
+            },
+            "value": {
+              "base": 1
+            },
+            "text": "Active applications"
+          },
+          {
+            "id": "artisan-bonds",
+            "kind": "equipment",
+            "equipment": {
+              "kind": "attunementLimit"
+            },
+            "value": {
+              "base": 4
+            },
+            "level": 6,
+            "text": "Expanded bonds"
+          },
+          {
+            "id": "artisan-eligibility",
+            "kind": "equipment",
+            "equipment": {
+              "kind": "attunementEligibility",
+              "training": "Arcana"
+            },
+            "level": 6,
+            "text": "Arcane item familiarity"
+          }
+        ],
+        "groups": [
+          {
+            "id": "artisan-recipes",
+            "name": "Known recipes",
+            "counts": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "options": [
+              {
+                "id": "artisan-sharpen",
+                "name": "True edge recipe",
+                "text": "An original practice recipe.",
+                "grants": [
+                  {
+                    "id": "artisan-edge-recipe",
+                    "kind": "equipment",
+                    "equipment": {
+                      "kind": "recipe",
+                      "itemKind": "weapon",
+                      "modifiers": [
+                        {
+                          "id": "artisan-edge",
+                          "kind": "attack",
+                          "amount": 1
+                        }
+                      ]
+                    },
+                    "text": "True edge"
+                  }
+                ]
+              },
+              {
+                "id": "artisan-ward",
+                "name": "Ward recipe",
+                "text": "An original practice recipe.",
+                "grants": [
+                  {
+                    "id": "artisan-ward-recipe",
+                    "kind": "equipment",
+                    "equipment": {
+                      "kind": "recipe",
+                      "itemKind": "armor",
+                      "modifiers": [
+                        {
+                          "id": "artisan-ward",
+                          "kind": "armor",
+                          "amount": 1
+                        }
+                      ]
+                    },
+                    "text": "Ward lining"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "multiclass": {
+        "canonicalID": "original.trail-artisan",
+        "prerequisites": {
+          "kind": "ability",
+          "key": "con",
+          "minimum": 13
+        },
+        "laterProficiencies": [
+          {
+            "id": "summit-later-training",
+            "kind": "proficiency",
+            "target": "simple weapons",
+            "rank": "proficient"
+          }
+        ],
+        "casting": {
+          "kind": "none",
+          "divisor": 1,
+          "rounding": "down",
+          "startsAt": 1,
+          "poolIDs": [],
+          "reciprocalSlotUse": false
+        }
+      }
     }
   ],
   "capabilities": {
@@ -4445,7 +4946,76 @@
       "configuration",
       "languages",
       "spell-pools",
-      "multiclass"
+      "multiclass",
+      "equipment"
     ]
-  }
+  },
+  "items": [
+    {
+      "id": "ridge-coat",
+      "name": "Ridge coat",
+      "edition": "2024",
+      "kind": "armor",
+      "weight": 20,
+      "cost": 1000,
+      "training": "armor.medium",
+      "armorBase": 14,
+      "dexterityCap": 2,
+      "stealthDisadvantage": true
+    },
+    {
+      "id": "trail-guard",
+      "name": "Trail guard",
+      "edition": "2024",
+      "kind": "shield",
+      "weight": 6,
+      "cost": 500,
+      "training": "armor.shield",
+      "armorBase": 2
+    },
+    {
+      "id": "trail-blade",
+      "name": "Trail blade",
+      "edition": "2024",
+      "kind": "weapon",
+      "weight": 3,
+      "cost": 200,
+      "training": "weapon.simple",
+      "properties": [
+        "finesse",
+        "versatile"
+      ],
+      "damageDice": 1,
+      "damageSides": 6,
+      "versatileSides": 8,
+      "damageType": "slashing",
+      "mastery": "Trail push",
+      "text": "Original mechanism fixture. Mastery combat resolution is manual."
+    },
+    {
+      "id": "trail-shafts",
+      "name": "Trail shafts",
+      "edition": "2024",
+      "kind": "ammunition",
+      "weight": 0.05,
+      "cost": 5
+    },
+    {
+      "id": "ward-band",
+      "name": "Ward band",
+      "edition": "2024",
+      "kind": "gear",
+      "weight": 1,
+      "cost": 0,
+      "attunement": true,
+      "attunementTraining": "Arcana",
+      "modifiers": [
+        {
+          "id": "ward-band-defense",
+          "kind": "armor",
+          "amount": 1
+        }
+      ]
+    }
+  ]
 }

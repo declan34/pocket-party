@@ -39,7 +39,8 @@ private typealias SheetColor = UIColor
         }
         if let note=widgets.first(where:{$0.fieldName == "Text55"}) {
             let spellNotice=sheet.fields["spell.30.name"] == nil ? "" : "\n\nSpell list continues in the Complete spell roster supplement."
-            fill(note,value:(sheet.isDraft ? "DRAFT - NOT A VALIDATED BUILD\n\n" : "")+"AC assumes no armor or shield.\n\nSee the following pages for full feature text, conditional rules and build limitations.\n\nBlank combat and inventory fields are for manual completion."+spellNotice,title:"Sheet notes",overflow:&overflow)
+            let equipmentNote=sheet.supplements.contains { $0.title == "Equipment and loadout" } ? "AC reflects tracked equipment. Inventory, coins and attack formulas appear in the Equipment and loadout supplement. No combat expenditure is automated." : "AC assumes no armor or shield. Blank combat and inventory fields are for manual completion."
+            fill(note,value:(sheet.isDraft ? "DRAFT - NOT A VALIDATED BUILD\n\n" : "")+equipmentNote+"\n\nSee the following pages for full feature text, conditional rules and build limitations."+spellNotice,title:"Sheet notes",overflow:&overflow)
         }
         let uniqueOverflow=overflow.filter { part in !sheet.supplements.contains(where: { $0.text == part.text }) }
         let supplement=try supplementPDF(sheet.supplements+uniqueOverflow,name:sheet.fields["name"] ?? "Character",draft:sheet.isDraft)

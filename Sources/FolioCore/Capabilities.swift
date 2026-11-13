@@ -41,7 +41,7 @@ public struct RuleValue: Codable, Sendable, Hashable {
 }
 
 public struct RulePredicate: Codable, Sendable, Hashable {
-    public enum Kind: String, Codable, Sendable { case all, any, not, level, ability, selection, proficiency, configuration, subclass }
+    public enum Kind: String, Codable, Sendable { case all, any, not, level, ability, selection, proficiency, configuration, subclass, equipment }
     public var kind: Kind
     public var key: String?
     public var minimum: Int?
@@ -52,11 +52,12 @@ public struct RulePredicate: Codable, Sendable, Hashable {
 }
 
 public struct CapabilityGrant: Codable, Sendable, Hashable, Identifiable {
+    public var equipment: EquipmentRule? = nil
     public enum SpellMode: String, Codable, Sendable { case granted, prepared, atWill, limited, ritual }
     public var spellMode: SpellMode? = nil
     public enum Kind: String, Codable, Sendable {
         case proficiency, skillAbility, skillBonus, armorFormula, armorBonus, hitPoints, initiative, speed, speedBase, abilityScore
-        case trait, resource, spell, size, language, abilityCap, unsupported, manual
+        case trait, resource, spell, size, language, abilityCap, unsupported, manual, equipment
     }
     public var id: String
     public var kind: Kind

@@ -69,6 +69,7 @@ public struct Progression: Codable, Sendable, Hashable, Identifiable {
 }
 
 public struct ClassDefinition: Codable, Sendable, Hashable, Identifiable {
+    public var startingEquipment: [EquipmentChoice]? = nil
     public var multiclass: MulticlassPolicy? = nil
     public var capabilities: DefinitionCapabilities? = nil
     public var id: String
@@ -104,6 +105,7 @@ public struct Species: Codable, Sendable, Hashable, Identifiable {
 }
 
 public struct Background: Codable, Sendable, Hashable, Identifiable {
+    public var startingEquipment: [EquipmentChoice]? = nil
     public var capabilities: DefinitionCapabilities? = nil
     public var id: String
     public var name: String
@@ -144,6 +146,7 @@ public struct ContentSource: Codable, Sendable, Hashable {
 }
 
 public struct ContentPack: Codable, Sendable, Hashable, Identifiable {
+    public var items: [ItemDefinition]? = nil
     public var capabilities: PackCapabilities? = nil
     public var schemaVersion: Int
     public var id: String
@@ -220,6 +223,7 @@ public struct LevelChoice: Codable, Sendable, Hashable, Identifiable {
 }
 
 public struct CharacterBuild: Codable, Sendable, Hashable, Identifiable {
+    public var equipment: EquipmentLoadout? = nil
     /// Current preparation keyed by pinned, source-qualified casting policy ID.
     /// Nil/key absence uses legacy history as a non-destructive initial loadout.
     public var castingLoadouts: [String:[String]]? = nil

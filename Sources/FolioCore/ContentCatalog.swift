@@ -32,7 +32,7 @@ public struct ContentCatalog {
         guard classes.contains(where: { $0.id == classKey }), let first = packs.first else { throw FolioError.invalid("Choose an installed class.") }
         var result = first
         result.id = "folio-library"; result.version = "1"; result.name = "Character library"
-        result.classes=[]; result.species=[]; result.backgrounds=[]; result.feats=[]; result.spells=[]; result.languages=[]
+        result.classes=[]; result.species=[]; result.backgrounds=[]; result.feats=[]; result.spells=[]; result.languages=[]; result.items=nil
         result.sources=[]; result.sourceLabels=[:]; result.sourceCoverageNotes=[:]; result.coverageNotes=[]; result.attribution=""; result.isPrivate=false
         for pack in packs { Self.append(pack, to:&result) }
         result.ruleset = classes.first { $0.id == classKey }?.edition ?? "2024"
@@ -42,6 +42,13 @@ public struct ContentCatalog {
     public func addingChoices(to record: CharacterRecord) throws -> CharacterRecord {
         var copy = record
         if copy.pack.sources == nil {
+            // Preserve local IDs and saved choices while giving the original
+            // items the same revision-independent identity as appended copies.
+            copy.pack.items=copy.pack.items?.map { value in
+                var item=value
+                if item.canonicalID == nil { item.canonicalID=Self.canonicalItemID(record.pack,value.id) }
+                return item
+            }
             copy.pack.sources = [ContentSource(pack:record.pack)]
             copy.pack.sourceLabels = [:]
             copy.pack.sourceCoverageNotes = [:]
@@ -61,10 +68,22 @@ public struct ContentCatalog {
         return "lib-" + SHA256.hash(data:data).map { String(format:"%02x",$0) }.joined()
     }
     private static func ids(_ pack: ContentPack) -> [String] {
-        pack.classes.map(\.id) + pack.species.map(\.id) + pack.backgrounds.map(\.id) + pack.feats.map(\.id) + pack.spells.map(\.id)
+        pack.classes.map(\.id) + pack.species.map(\.id) + pack.backgrounds.map(\.id) + pack.feats.map(\.id) + pack.spells.map(\.id) + (pack.items ?? []).map(\.id)
+    }
+    private static func canonicalItemID(_ pack:ContentPack,_ id:String) -> String {
+        var stable=pack;stable.version="canonical"
+        return key(stable,"item",id)
     }
     private static func append(_ original: ContentPack, to result: inout ContentPack) {
         var p = original
+        func modifier(_ value:ItemModifier) -> ItemModifier { var copy=value; copy.id=key(original,"item-modifier",value.id);return copy }
+        func starting(_ groups:[EquipmentChoice]?) -> [EquipmentChoice]? {
+            groups?.map { value in var group=value;group.id=key(original,"equipment-choice",value.id)
+                group.options=group.options.map { value in var option=value;option.id=key(original,"equipment-option",value.id);option.items=Dictionary(uniqueKeysWithValues:value.items.map { (key(original,"item",$0.key),$0.value) });return option };return group }
+        }
+        p.items=p.items?.map { value in var item=value;item.id=key(original,"item",value.id)
+            if item.canonicalID == nil { item.canonicalID=canonicalItemID(original,value.id) }
+            item.modifiers=item.modifiers?.map(modifier);return item }
         if original.schemaVersion == 2 { result.schemaVersion = 2; result.capabilities = .init(required: Array(Set((result.capabilities?.required ?? []) + (original.capabilities?.required ?? []))).sorted()) }
         func qualify(_ data: DefinitionCapabilities?) -> DefinitionCapabilities? {
             guard var data else { return nil }
@@ -78,6 +97,7 @@ public struct ContentCatalog {
             func grant(_ originalGrant: CapabilityGrant) -> CapabilityGrant {
                 var g = originalGrant
                 g.id = identity(g.id); g.condition = predicate(g.condition)
+                if var rule=g.equipment { rule.modifiers=rule.modifiers?.map(modifier);g.equipment=rule }
                 if g.kind == .spell, let target = g.target { g.target = key(original, "spell", target) }
                 return g
             }
@@ -103,9 +123,10 @@ public struct ContentCatalog {
         p.spells = p.spells.map { var x=$0; x.id=key(original,"spell",x.id); return x }
         p.feats = p.feats.map { var x=$0; x.id=key(original,"feat",x.id); x.capabilities=qualify(x.capabilities) ?? .init(edition: original.ruleset); return x }
         p.species = p.species.map { var x=$0; x.id=key(original,"species",x.id); x.capabilities=qualify(x.capabilities) ?? .init(edition: original.ruleset); return x }
-        p.backgrounds = p.backgrounds.map { var x=$0; x.id=key(original,"background",x.id); if !x.originFeatID.isEmpty { x.originFeatID=key(original,"feat",x.originFeatID) }; x.capabilities=qualify(x.capabilities) ?? .init(edition: original.ruleset); return x }
+        p.backgrounds = p.backgrounds.map { var x=$0; x.id=key(original,"background",x.id); x.startingEquipment=starting(x.startingEquipment); if !x.originFeatID.isEmpty { x.originFeatID=key(original,"feat",x.originFeatID) }; x.capabilities=qualify(x.capabilities) ?? .init(edition: original.ruleset); return x }
         p.classes = p.classes.map { cls in
             var c=cls; c.id=key(original,"class",c.id)
+            c.startingEquipment=starting(c.startingEquipment)
             if var policy=c.multiclass {
                 if var casting=policy.casting { casting.poolIDs=casting.poolIDs.map { key(original,"capability",$0) }; policy.casting=casting }
                 policy.laterProficiencies=policy.laterProficiencies.map { var g=$0; g.id=key(original,"capability",g.id); return g }
@@ -122,6 +143,7 @@ public struct ContentCatalog {
         }
         result.classes += p.classes; result.species += p.species; result.backgrounds += p.backgrounds
         result.feats += p.feats; result.spells += p.spells
+        if let items=p.items { result.items=(result.items ?? [])+items }
         result.languages=Array(Set(result.languages+p.languages)).sorted()
         result.coverageNotes=Array(Set(result.coverageNotes+p.coverageNotes)).sorted()
         result.sources?.append(ContentSource(pack:original))

@@ -75,6 +75,12 @@ public struct PrintableSheet: Sendable {
         if b.rulesProfile != nil {
             notes = "Build capacities only; values reflect selected configurations, not tracked combat state. Spell classifications follow the declared casting policy (including preparation or spellbook where modeled). Current HP, expenditure, attacks, equipment and coins remain untracked. Active configurations: \((b.levels.last?.capabilities?.configurations ?? []).joined(separator: ", "))."
         }
+        if let equipment=s.equipment,let loadout=b.equipment {
+            notes="Build capacities and explicitly tracked equipment only. AC and attacks reflect this loadout and selected configurations. Current HP, spent dice/slots, combat actions and ammunition expenditure remain untracked."
+            let coins=["cp","sp","ep","gp","pp"].map { "\(loadout.currency[$0,default:0]) \($0)" }.joined(separator:", ")
+            let attacks=isDraft ? "Attack totals withheld for this draft." : equipment.attacks.map(\.description).joined(separator:"\n")
+            supplements.append(.init(title:"Equipment and loadout",text:equipment.inventory.joined(separator:"\n")+"\nCoins: "+coins+"\nCarried: \(equipment.weight) lb / \(equipment.capacity) lb capacity. Attunement: \(equipment.attuned)/\(equipment.attunementLimit).\n"+attacks+"\n"+equipment.notes.joined(separator:"\n")))
+        }
         notes += "\n" + p.coverageNotes(for: b).joined(separator:"\n")
         supplements.append(SheetSection(title:"Reading this sheet",text:notes))
         if s.classLevels.count > 1 { supplements.append(.init(title:"Class levels and hit dice",text:s.classLevels.map { "\($0.name) \($0.level)\($0.subclassName.isEmpty ? "" : " — " + $0.subclassName)" }.joined(separator:"\n") + "\nHit dice: " + s.hitDice.keys.sorted().map { "\(s.hitDice[$0]!)d\($0)" }.joined(separator:" + ") + ". Capacity only; spent dice are not tracked.")) }

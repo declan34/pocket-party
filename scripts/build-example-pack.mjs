@@ -146,5 +146,24 @@ capable.capabilities.required.push('multiclass');
 capable.version='1.5.0';
 capable.feats.find(f=>f.id==='ability-improvement').repeatable=true;
 capable.coverageNotes=['Original mechanism fixtures; names do not certify official subclasses.','Summit Warden and Notebook Keeper support explicit levels 1–20 and declared multiclass entry policies. Early laboratories retain their authored 1–5 limits and do not opt into multiclassing.','Notebook Keeper demonstrates tiered ordinary capacity, a separate custom pool, two casting abilities and editable book preparation. Equipment remains pending.'];
+capable.version='1.6.0';
+capable.capabilities.required.push('equipment');
+capable.items=[
+  {id:'ridge-coat',name:'Ridge coat',edition:'2024',kind:'armor',weight:20,cost:1000,training:'armor.medium',armorBase:14,dexterityCap:2,stealthDisadvantage:true},
+  {id:'trail-guard',name:'Trail guard',edition:'2024',kind:'shield',weight:6,cost:500,training:'armor.shield',armorBase:2},
+  {id:'trail-blade',name:'Trail blade',edition:'2024',kind:'weapon',weight:3,cost:200,training:'weapon.simple',properties:['finesse','versatile'],damageDice:1,damageSides:6,versatileSides:8,damageType:'slashing',mastery:'Trail push',text:'Original mechanism fixture. Mastery combat resolution is manual.'},
+  {id:'trail-shafts',name:'Trail shafts',edition:'2024',kind:'ammunition',weight:0.05,cost:5},
+  {id:'ward-band',name:'Ward band',edition:'2024',kind:'gear',weight:1,cost:0,attunement:true,attunementTraining:'Arcana',modifiers:[{id:'ward-band-defense',kind:'armor',amount:1}]}];
+summit.startingEquipment=[{id:'summit-start',name:'Starting expedition',options:[{id:'summit-gear',name:'Coat, blade and trail guard',items:{'ridge-coat':1,'trail-blade':1,'trail-guard':1},gold:0},{id:'summit-money',name:'25 gold pieces',items:{},gold:25}]}];
+summit.capabilities.grants.push(...['armor.medium','armor.shield','weapon.simple'].map((target,i)=>({id:'summit-equipment-training-'+i,kind:'proficiency',target,rank:'proficient'})),{id:'summit-mastery',kind:'equipment',equipment:{kind:'masteryLimit'},value:{base:1},text:'Weapon mastery choices'});
+// Original item-maker fixture: historical recipe ownership is independent of
+// current applications. No unsupplied official Artificer content is claimed.
+const itemMaker=structuredClone(summit);itemMaker.id='trail-artisan';itemMaker.name='Trail Artisan';itemMaker.startingEquipment=undefined;itemMaker.multiclass.canonicalID='original.trail-artisan';
+itemMaker.capabilities.groups=[{id:'artisan-recipes',name:'Known recipes',counts:summitLevels.map(()=>1),options:[{id:'artisan-sharpen',name:'True edge recipe',text:'An original practice recipe.',grants:[{id:'artisan-edge-recipe',kind:'equipment',equipment:{kind:'recipe',itemKind:'weapon',modifiers:[{id:'artisan-edge',kind:'attack',amount:1}]},text:'True edge'}]},{id:'artisan-ward',name:'Ward recipe',text:'An original practice recipe.',grants:[{id:'artisan-ward-recipe',kind:'equipment',equipment:{kind:'recipe',itemKind:'armor',modifiers:[{id:'artisan-ward',kind:'armor',amount:1}]},text:'Ward lining'}]}]}];
+itemMaker.capabilities.grants=structuredClone(summit.capabilities.grants).map(g=>({...g,id:'artisan-'+g.id}));
+itemMaker.capabilities.grants.push({id:'artisan-applications',kind:'equipment',equipment:{kind:'applicationLimit'},value:{base:1},text:'Active applications'},{id:'artisan-bonds',kind:'equipment',equipment:{kind:'attunementLimit'},value:{base:4},level:6,text:'Expanded bonds'},{id:'artisan-eligibility',kind:'equipment',equipment:{kind:'attunementEligibility',training:'Arcana'},level:6,text:'Arcane item familiarity'});
+capable.classes.push(itemMaker);
+for(const cls of capable.classes) cls.equipment='Original practice equipment is available in the catalog. Owned, carried and equipped states are edited separately; purchases and combat expenditure are manual.';
+capable.coverageNotes[2]='Notebook Keeper demonstrates tiered ordinary capacity, a separate custom pool, two casting abilities and editable book preparation. Original equipment and Trail Artisan recipes demonstrate inventory, mastery labels and active item applications; combat resolution is manual.';
 writeFileSync(new URL('../Sources/FolioCore/Resources/capability-pack.json',import.meta.url), JSON.stringify(capable,null,2)+'\n');
 console.log('Built original schema-2 capability fixture.');

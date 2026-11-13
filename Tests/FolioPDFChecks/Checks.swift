@@ -149,6 +149,24 @@ import AppKit
         try check(mixedText.contains("SummitWarden2") && mixedText.contains("NotebookKeeper2") && mixedText.contains("2d6+2d12") && mixedText.contains("Notebookslots") && mixedText.contains("Notebookstudy"),"mixed class labels, separate hit dice, pool and casting source survive native rendering")
         try mixedData.write(to:output.appendingPathComponent("multiclass-2024.pdf"))
         }
+        do {
+            let equipmentPack=try ContentPack.capabilitySample()
+            var equipped=CharacterBuild(classID:"summit-warden");equipped.rulesProfile = .init(edition:"2024");equipped.name="Equipment acceptance"
+            equipped.speciesID="roadfolk";equipped.backgroundID="night-guide";equipped.backgroundBoosts=["cha":2,"con":1];equipped.classSkills=["Arcana","Religion"];equipped.languages=["Elvish","Dwarvish"]
+            equipped.equipment = .init(inventory:[.init(itemID:"ridge-coat",equipped:true),.init(itemID:"trail-guard",equipped:true),.init(itemID:"trail-blade",equipped:true,mode:.oneHanded,ability:.dex)],currency:["gp":25])
+            for i in 0..<100 { equipped.equipment?.inventory.append(.init(id:"overflow-\(i)",itemID:"trail-shafts",quantity:1,carried:false)) }
+            let sheet=PrintableSheet(record:.init(pack:equipmentPack,build:equipped))
+            try check(!sheet.isDraft && sheet.fields["ac"] == "18","tracked armor/shield AC projects to native form")
+            let data=try SheetPDF.render(sheet,template:template),doc=PDFDocument(data:data)!
+            let widgets=(0..<doc.pageCount).flatMap { doc.page(at:$0)!.annotations }
+            try check(widgets.first { $0.fieldName == "Text13" }?.widgetStringValue == "18","tracked AC remains editable widget value")
+            try check(widgets.first { $0.fieldName == "Text14" }?.widgetStringValue?.isEmpty != false,"equipment never writes current HP")
+            let text=(doc.string ?? "").filter { !$0.isWhitespace }
+            try check(text.contains("Equipmentandloadout") && text.contains("25gp") && text.contains("1d6+2") && text.contains("Trailblade"),"inventory coins and attack formula survive native PDF rendering")
+            try check(text.contains("Stealth") && text.contains("disadvantage"),"armor Stealth disadvantage survives native PDF presentation")
+            try check(doc.pageCount > 3 && text.components(separatedBy:"Trailshafts").count >= 100,"all inventory overflow rows survive native PDF pagination")
+            try data.write(to:output.appendingPathComponent("equipment-2024.pdf"))
+        }
         #if os(macOS)
         for i in 0..<doc.pageCount {
             let p=doc.page(at:i)!, bounds=doc.page(at:i)!.bounds(for:.mediaBox)

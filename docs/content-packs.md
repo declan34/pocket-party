@@ -10,7 +10,7 @@ Use `content-pack.schema.json` for structural tooling, and the bundled `example-
 
 A pack has `schemaVersion: 1`, `ruleset: "2024"`, a stable `id`, a nonempty `version`, `name`, `attribution`, `isPrivate`, and explicit `coverageNotes`. Bump `version` when changing content. Characters embed a snapshot of their original pack; installing a newer pack never changes existing characters. Importing different content with the same ID/version is rejected.
 
-All collection IDs are unique within their collection. References are local IDs, not Foundry UUIDs. Abilities are `str`, `dex`, `con`, `int`, `wis`, `cha`; skills use the standard English names. Spell descriptions and feature text are plain text. Tool/equipment strings are informational.
+All collection IDs are unique within their collection. References are local IDs, not Foundry UUIDs. Abilities are `str`, `dex`, `con`, `int`, `wis`, `cha`; skills use the standard English names. Spell descriptions and feature text are plain text. Legacy tool/equipment strings are informational. Schema-2 `equipment` contracts add bounded item catalogs, structured starting alternatives, replay-owned equipment effects and saved inventory; see [the I5 contract](capability-interface.md#equipment-contract-i5). An item-only pack is a supported partial source. Cost is per-unit copper, weight is per-unit pounds; loaded containers must not duplicate their separately listed contents.
 
 Packs may be partial (for example, only species or feats). Keep the required collection keys, using empty arrays for absent kinds; at least one record or language is required. References must still resolve inside that source pack. Cross-pack UUID-style dependencies are not supported.
 

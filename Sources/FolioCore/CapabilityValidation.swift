@@ -1,7 +1,7 @@
 import Foundation
 
 public enum CapabilityValidation {
-    public static let supported: Set<String> = ["choices", "modifiers", "casting", "editions", "resources", "traits", "proficiencies", "configuration", "languages", "spell-pools", "multiclass"]
+    public static let supported: Set<String> = ["choices", "modifiers", "casting", "editions", "resources", "traits", "proficiencies", "configuration", "languages", "spell-pools", "multiclass", "equipment"]
 
     /// Old class-local IDs remain valid for single-class snapshots. New authored
     /// multiclass policies must be unambiguous; combined libraries are checked
@@ -135,6 +135,7 @@ public enum CapabilityValidation {
                 case .ability: try require(Ability(rawValue: p.key ?? "") != nil && (1...30).contains(p.minimum ?? 0), "Invalid ability prerequisite.")
                 case .selection: try require(known[p.key ?? ""] != nil, "Missing selection prerequisite.")
                 case .configuration: try require(configs.contains(p.key ?? ""), "Unknown configuration predicate.")
+                case .equipment: try require(caps.required.contains("equipment") && ["unarmored","noShield","unarmed"].contains(p.key ?? ""), "Unknown equipment condition.")
                 case .proficiency: try require(RulesEngine.skillAbilities[p.key ?? ""] != nil, "Unknown proficiency prerequisite.")
                 case .subclass: try require(pack.classes.contains { $0.subclasses.contains { $0.id == p.key } }, "Unknown subclass prerequisite.")
                 }
@@ -164,9 +165,22 @@ public enum CapabilityValidation {
                 try ruleValue(g.value)
                 if [.proficiency, .skillAbility, .skillBonus].contains(g.kind) {
                     let saveTarget = g.kind == .proficiency && (g.target == "all-saves" || Ability.allCases.contains { "save." + $0.rawValue == g.target })
-                    try require(RulesEngine.skillAbilities[g.target ?? ""] != nil || g.target == "all-skills" || saveTarget, "Unknown skill target.")
+                    try require(RulesEngine.skillAbilities[g.target ?? ""] != nil || g.target == "all-skills" || saveTarget || (g.kind == .proficiency && EquipmentEngine.trainingKeys.contains(g.target ?? "")), "Unknown skill or equipment training target.")
                 }
                 if g.kind == .proficiency { try require(g.rank != nil, "Proficiency grant needs a rank.") }
+                if g.kind == .equipment || g.equipment != nil {
+                    try require(caps.required.contains("equipment") && g.kind == .equipment && g.equipment != nil,"Equipment rules require the equipment capability.")
+                    try EquipmentEngine.validateRule(g.equipment!)
+                    if g.equipment?.kind == .unarmed {
+                        let value=g.value ?? .init()
+                        let applicable=(g.level ?? 1)...max(g.level ?? 1,owner?.maxLevel ?? 20)
+                        let complete=applicable.allSatisfy { at in
+                            (value.table == nil || value.table!.indices.contains(at - 1))
+                                && [4,6,8,10,12].contains(value.resolve(level:at,scores:[:],proficiency:0))
+                        }
+                        try require((value.abilities ?? []).isEmpty && (value.levelMultiplier ?? 0) == 0 && (value.proficiencyMultiplier ?? 0) == 0 && value.minimum == nil && complete,"Unarmed dice must explicitly resolve to supported die sides at every applicable supported level.")
+                    }
+                }
                 if g.kind == .skillAbility { try require(g.ability != nil, "Skill substitution needs an ability.") }
                 if g.kind == .abilityScore || g.kind == .abilityCap { try require(Ability(rawValue: g.target ?? "") != nil, "Unknown ability target.") }
                 if g.kind == .abilityCap {

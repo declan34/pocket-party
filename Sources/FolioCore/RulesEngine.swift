@@ -8,6 +8,10 @@ public struct BuildIssue: Identifiable, Equatable, Sendable {
 }
 
 public struct CharacterSummary: Sendable {
+    public var equipment: EquipmentSummary? = nil
+    public var equipmentRules: [ActiveEquipmentRule] = []
+    public var equipmentArmorBonus: Int = 0
+    public var equipmentDefenses: [EquipmentSummary.Defense] = []
     public var classLevels: [ClassLevelSummary] = []
     public var hitDice: [Int:Int] = [:]
     public var spellPools: [SpellPoolSummary] = []
@@ -64,7 +68,7 @@ public enum RulesEngine {
     ]
 
     public static func evaluate(_ build: CharacterBuild, in pack: ContentPack, through requestedLevel: Int? = nil) -> CharacterSummary {
-        if build.rulesProfile != nil || build.castingLoadouts != nil || build.levels.contains(where: { $0.classID != nil }) || (pack.schemaVersion == 2 && pack.classes.first(where: { $0.id == build.classID })?.capabilities != nil) {
+        if build.rulesProfile != nil || build.equipment != nil || build.castingLoadouts != nil || build.levels.contains(where: { $0.classID != nil }) || (pack.schemaVersion == 2 && pack.classes.first(where: { $0.id == build.classID })?.capabilities != nil) {
             return CapabilityEngine.evaluate(build, in: pack, through: requestedLevel)
         }
         var result = evaluateLegacy(build, in: pack, through: requestedLevel)

@@ -201,7 +201,8 @@ func vesselHighLevelSourceChecks() throws {
         return b
     }
     for sub in c.subclasses {
-        let b = build(sub.id), s = RulesEngine.evaluate(b,in:p)
+        var b = build(sub.id); b.equipment = .init()
+        let s = RulesEngine.evaluate(b,in:p)
         let unresolvedTargets: Set<String> = Set([
             "the-ascended":["spell.minute-meteors"],
             "the-cataclysm":["spell.elemental-blade","spell.pillars-of-earth"],
@@ -213,6 +214,10 @@ func vesselHighLevelSourceChecks() throws {
         try check(Set(s.issues.map(\.code)) == Set(unresolvedTargets.map { "cap-grant-source-"+$0 }), "Only exact unresolved selected source grants block \(sub.id): \(s.issues)")
         try check(s.slots == 4 && s.slotLevel == 5 && s.proficiency == 6 && s.hitPoints == 224, "Source HP/PB/uniform pool at 20 for \(sub.id): HP \(s.hitPoints)")
         try check(s.traits.contains("Iridescent Strike die sides: 12"), "Actual high-level die scaling")
+        for (level,die) in [(1,6),(5,8),(11,10),(17,12)] {
+            let attack=RulesEngine.evaluate(b,in:p,through:level).equipment?.attacks.first { $0.id == "iridescent-attack" }
+            try check(attack?.damage == "1d\(die) +2 radiant","Actual \(sub.id) Iridescent Strike at class level \(level)")
+        }
         try check(s.resources.filter { $0.name.hasPrefix("Minor Magick") }.count == 2, "Repeatable Minor Magick retains two distinct capacities")
         if sub.id == "the-ascended" { try check(s.traits.contains("fly speed (ft): 30") && s.spellPools.filter { $0.name.hasPrefix("Ascended Arcanum") && $0.kind == .limited && $0.recovery == "long rest" }.count == 2, "Ascended capstone movement and separate limited uses") }
         if sub.id == "the-fallen" { try check(s.traits.contains("fly speed (ft): 60"), "Fallen bonus Wings calculate flight") }

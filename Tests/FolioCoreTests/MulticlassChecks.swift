@@ -360,7 +360,7 @@ func vesselMulticlassChecks() throws {
     var p=try PackValidator.decode(Data(contentsOf:url))
     let vessel=p.classes[0], policy=vessel.multiclass
     try check(policy?.casting?.kind == .independent && policy?.casting?.reciprocalSlotUse == true && policy?.casting?.poolIDs == ["vessel-pact"],"Actual Vessel explicitly does not contribute to ordinary slots")
-    try check(policy?.laterProficiencies.map(\.target)==["light armor","simple weapons"] && policy?.startingProficiencies?.count==4,"Source-reviewed entry versus first training")
+    try check(policy?.laterProficiencies.map(\.target)==["armor.light","weapon.simple"] && policy?.startingProficiencies?.count==4,"Source-reviewed entry versus first training uses equipment keys")
     let (original,_)=try multiclassMartialFixture()
     var guardClass=original.classes[0]; guardClass.id="original-guard"; guardClass.name="Original Guard"; guardClass.subclassLevel=20
     p.classes.append(guardClass)
@@ -369,7 +369,7 @@ func vesselMulticlassChecks() throws {
     b=try RulesEngine.advance(b,in:p,classID:vessel.id)
     b.levels[1].capabilities = .init(groups:["aspects":["uncanny-strength"]],configurations:["no-armor-shield","cloak"],spells:["vessel-cantrips":[],"vessel-known":[]])
     let first=RulesEngine.evaluate(b,in:p)
-    try check(first.isValid && first.proficiencyRanks["scimitars"]==nil && first.proficiencyRanks["light armor"] == .proficient,"Later Vessel grants reduced training: \(first.issues)")
+    try check(first.isValid && first.proficiencyRanks["weapon.scimitar"]==nil && first.proficiencyRanks["armor.light"] == .proficient,"Later Vessel grants reduced training: \(first.issues)")
     b=try RulesEngine.advance(b,in:p,classID:vessel.id)
     let cantrips=vessel.capabilities!.casting!.first { $0.id=="vessel-cantrips" }!.spellIDs.filter { id in p.spells.contains { $0.id==id && $0.unavailableReason==nil } }
     let spells=vessel.capabilities!.casting!.first { $0.id=="vessel-known" }!.spellIDs.filter { id in p.spells.contains { $0.id==id && $0.level==1 && $0.unavailableReason==nil } }

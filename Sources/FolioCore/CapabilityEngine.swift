@@ -155,6 +155,7 @@ public enum CapabilityEngine {
             case .ability: return prerequisiteScores[p.key ?? "", default: 0] >= (p.minimum ?? 0)
             case .selection: return selections.contains(p.key ?? "")
             case .configuration: return config.contains(p.key ?? "")
+            case .equipment: return EquipmentEngine.matches(p.key ?? "", loadout:build.equipment, pack:pack)
             case .subclass: return Multiclassing.classes(build,in:pack,through:at).contains { row in
                 guard row.subclassID == p.key || Multiclassing.scopedSubclassID(row.id,row.subclassID) == p.key, let definition=pack.classes.first(where: { $0.id == row.id }) else { return false }
                 return row.level >= RulesEngine.subclassUnlockLevel(for:definition,build:build,in:pack)
@@ -429,8 +430,12 @@ public enum CapabilityEngine {
                 for target in targets { if let rank = grant.rank, rank.bonus(result.proficiency) > (ranks[target] ?? .none).bonus(result.proficiency) { ranks[target] = rank } }
             case .skillAbility: skillAbilities[grant.target ?? ""] = grant.ability
             case .skillBonus: skillBonuses[grant.target ?? "", default: 0] += value
-            case .armorFormula: result.armorClass = max(result.armorClass, value)
-            case .armorBonus: result.armorClass += value
+            case .armorFormula:
+                result.armorClass = max(result.armorClass, value)
+                result.equipmentDefenses.append(.init(id:grant.id,name:grant.text ?? grant.id,value:value))
+            case .armorBonus: result.armorClass += value; result.equipmentArmorBonus += value
+            case .equipment:
+                if let rule=grant.equipment { result.equipmentRules.append(.init(id:grant.id,name:grant.text ?? grant.id,rule:rule,value:value)) }
             case .hitPoints: result.hitPoints += value
             case .initiative: result.initiative += value
             case .speed: result.speed += value
@@ -520,6 +525,12 @@ public enum CapabilityEngine {
         for i in result.classLevels.indices {
             let id=result.classLevels[i].id
             result.classLevels[i].castingSourceIDs=result.castingSources.filter { $0.sourceID == id || $0.sourceID.hasPrefix(id+":") }.map(\.id)
+        }
+        if let loadout=build.equipment {
+            result.size = result.size ?? species?.size
+            let equipment=EquipmentEngine.evaluate(loadout,in:pack,summary:result,edition:edition)
+            result.equipment=equipment; result.armorClass=equipment.armorClass; result.speed=equipment.speed
+            result.issues += equipment.issues
         }
         return result
     }

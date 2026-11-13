@@ -1,5 +1,13 @@
 # Engineering notes
 
+## I5 equipment and isolated smoke
+
+`Equipment.swift` owns typed items/loadouts, bounded validation and a pure projection after `CapabilityEngine`'s existing chronology. Accepted equipment grants retain class-local historical scaling. Neither equipment nor spell loadouts create a second progression evaluator. Catalog identity, starting options and modifier IDs remain source-qualified; old absent equipment stays untracked. Explicit defenses, selected weapon bindings, current recipe applications and mastery labels are data choices. Form/equipment conditions use worn armor/shields even when untrained. Combat actions/expenditure remain manual.
+
+Generate a new original smoke library with `FOLIO_I5_SMOKE_LIBRARY=/absolute/new/directory swift run FolioChecks equipmentPublicSmokeChecks`; it refuses an existing `library.json`. Launch the preview executable with that `FOLIO_LIBRARY_PATH`. Mira starts as Trail Artisan 1, valid AC19, blade +5 /1d6+2, 31.7 lb/150 lb, attuned1/3, selected mastery and one active recipe. Unequip shield: AC17, same weight. Unattune band from baseline: AC18. Two-handed blade with shield is invalid; without shield it shows1d8+2. Clear application: attack+4. Storing20 shafts removes1 lb. Positive equipped quantity and carried state are validated separately. Defense picker can retain an unavailable selection as an explicit draft issue, never silently discard it.
+
+Core checks register equipment behavior, contract, source identity, historical training, bound weapon, canonical nonstacking, attunement exceptions, recipe lifecycle, actual Vessel and printable output scenarios. `bash scripts/check-pdf.sh <approved-template> <disposable-directory>` additionally creates `equipment-2024.pdf`, asserting editableAC18, untracked currentHP, inventory/coin/formula text and100-row overflow. Standard legacy sheet compatibility remains in that same gate. Public generator version1.6.0; private converter0.7.0. Fresh command/native evidence lives in the I5 report; this paragraph is a reproduction guide, not an iOS/live-AI/third-party-reader claim.
+
 ## Architecture
 
 The schema-2 interface is documented in [capability-interface.md](capability-interface.md). `Capabilities.swift`, `CapabilityValidation.swift`, `CapabilityEngine.swift` and `RulesUpgrade.swift` separate typed contracts, bounded validation, replay and explicit review-copy migration. `CapabilityEditor.swift` edits declarative choices; legacy `RulesEngine` replay remains the schema-1 boundary. The [coverage matrix](capability-coverage.md) distinguishes original mechanism evidence from actual private adapter acceptance and unresolved source blockers.

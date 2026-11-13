@@ -121,7 +121,7 @@ const sourceReview=read(reviewPath);
 const pred=(kind,key)=>({kind,key});
 const together=(...children)=>({kind:'all',children});
 const cloaked={kind:'any',children:[pred('configuration','cloak'),pred('configuration','archon')]};
-const unarmored=together(cloaked,pred('configuration','no-armor-shield'));
+const unarmored=together(cloaked,pred('equipment','unarmored'),pred('equipment','noShield'));
 const grant=(id,kind,extras={})=>({id,kind,...extras});
 const note=(id,text,condition)=>grant(id,'trait',{text,...(condition?{condition}:{})});
 const aspects=talents.map(t=>({id:t.id,name:t.name,text:t.text,exclusiveGroup:t.exclusiveGroup,repeatable:t.id==='minor-magick',prerequisite:t.requires.length?together({kind:'level',minimum:t.minimumLevel},...t.requires.map(id=>pred('selection',id))):{kind:'level',minimum:t.minimumLevel},grants:[note(t.id+'-rules',t.text)]}));
@@ -160,7 +160,7 @@ const knownIDs=spellIDs.filter(id=>spells.get(id).level>0);
 const cantripIDs=spellIDs.filter(id=>spells.get(id).level===0);
 const configurations=[
   {id:'cloak',name:'Spirit Mantle',text:'Declared cloak state; casting requires the cloak, but knowledge is retained when inactive.'},
-  {id:'no-armor-shield',name:'No armor or shield',text:'Declared condition only; equipment state arrives in I5.'},
+  {id:'no-armor-shield',name:'Legacy no-armor note (not authoritative)',text:'Retained for earlier choices. Actual equipped armor and shields determine defense; this note grants nothing.'},
   {id:'archon',name:'Archon Form',text:'Includes Spirit Mantle. Expenditure and transformation duration are not simulated.',prerequisite:{kind:'level',minimum:3}},
   {id:'fortified',name:'Fortified Opalescent Armor',text:'Optional fortification when cloaking.',prerequisite:together(cloaked,pred('selection','opalescent-armor'))}
 ];
@@ -182,6 +182,7 @@ const classCapabilities={edition:'2024',configurations,
     {id:'vessel-known',name:'Vessel spells known',mode:'known',ability:'cha',spellIDs:knownIDs,counts,maximumSpellLevels:maximum,replacementLimits:from(2),condition:{kind:'not',children:[pred('subclass','the-ascended')]}}]};
 classCapabilities.grants=classCapabilities.grants.filter(g=>!g.id.startsWith('iridescent-strike-d'));
 classCapabilities.grants.push(grant('iridescent-die','trait',{text:'Iridescent Strike die sides',value:{table:[6,6,6,6,8,8,8,8,8,8,10,10,10,10,10,10,12,12,12,12]},condition:cloaked}),
+  grant('iridescent-attack','equipment',{text:'Iridescent Strike',equipment:{kind:'unarmed',ability:'cha',damageType:'radiant'},value:{table:[6,6,6,6,8,8,8,8,8,8,10,10,10,10,10,10,12,12,12,12]},condition:cloaked}),
   grant('extra-attack-count','trait',{level:5,text:'Attacks per Attack action',value:{base:2},condition:{kind:'not',children:[together(pred('subclass','the-cursed'),pred('configuration','archon'),{kind:'level',minimum:20})]}}),
   grant('primeval-will-uses','resource',{level:10,target:'Primeval Will',value:{abilities:['cha'],minimum:1},recovery:'long rest'}));
 const bySubclass=new Map(subclasses.map(s=>[s.id,s.capabilities]));
@@ -299,7 +300,7 @@ for(const data of [classCapabilities,...bySubclass.values()]) {
 }
 classFeatures.find(f=>f.id==='unchained-power').text=sourceReview.resolved.find(r=>r.id==='unchained-power').mechanics;
 const progression=levels.map(level=>({level,talents:scaled('aspects-known',level),cantrips:scaled('cantrips-known',level),spells:scaled('spells-known',level),slots:scaled('spell-slots',level),slotLevel:scaled('slot-level',level),improvement:[4,8,12,16,19].includes(level)}));
-const pack={schemaVersion:2,capabilities:{version:1,required:['choices','modifiers','casting','resources','traits','proficiencies','configuration','languages','spell-pools','multiclass']},id:'private.vessel',version:'0.6.0',name:'Vessel · private playtest',ruleset:'2024',isPrivate:true,
+const pack={schemaVersion:2,capabilities:{version:1,required:['choices','modifiers','casting','resources','traits','proficiencies','configuration','languages','spell-pools','multiclass','equipment']},id:'private.vessel',version:'0.7.0',name:'Vessel · private playtest',ruleset:'2024',isPrivate:true,
   attribution:'Private conversion of your corrected LaserLlama Vessel module and existing book/SRD sources. Original authors retain their content. No PDF was re-extracted.',
   coverageNotes:['Levels 1–20, single class, standard array, fixed-average HP. Six supplied subclasses and all 24 Aspects; unresolved source references block affected builds.', 'Standard spells only: revised versions preferred, exact legacy fallback where present. LL spell identities are not silently substituted.', 'Vessel retains its half-speed pact pool. Ascended preparation is editable independently; Arcanum has separate tier-5 and tier-6 long-rest capacities. Minor Magick uses distinct Sealed Magic spell choices at cast time, not slots or permanent selections.', 'Equipment, combat expenditure and lifecycle, and multiclassing remain outside this slice.', 'Inherited descriptions may contain extraction artifacts; verified mechanical corrections are recorded in the private report.'],
   languages:['Dwarvish','Elvish','Giant','Gnomish','Goblin','Halfling','Orc','Draconic','Common Sign Language'],
@@ -308,8 +309,70 @@ const destination=join(root,'PrivatePacks');mkdirSync(destination,{recursive:tru
 // Original PDF p2 (entry/exit and later training), p3 (first-class traits).
 // Independent reciprocal slot use is explicit; no ordinary caster contribution is authored.
 const vesselTraining=targets=>targets.map(target=>grant('vessel-training-'+target.replaceAll(' ','-'),'proficiency',{target,rank:'proficient'}));
-pack.classes[0].multiclass={canonicalID:'laserllama.vessel',prerequisites:{kind:'all',children:[{kind:'ability',key:'con',minimum:13},{kind:'ability',key:'cha',minimum:13}]},startingProficiencies:vesselTraining(['light armor','simple weapons','scimitars','shortswords']),laterProficiencies:vesselTraining(['light armor','simple weapons']),casting:{kind:'independent',divisor:1,rounding:'down',startsAt:2,poolIDs:['vessel-pact'],reciprocalSlotUse:true}};
+pack.classes[0].multiclass={canonicalID:'laserllama.vessel',prerequisites:{kind:'all',children:[{kind:'ability',key:'con',minimum:13},{kind:'ability',key:'cha',minimum:13}]},startingProficiencies:vesselTraining(['armor.light','weapon.simple','weapon.scimitar','weapon.shortsword']),laterProficiencies:vesselTraining(['armor.light','weapon.simple']),casting:{kind:'independent',divisor:1,rounding:'down',startsAt:2,poolIDs:['vessel-pact'],reciprocalSlotUse:true}};
 pack.coverageNotes=pack.coverageNotes.map(note=>note.replace('single class, ','').replace('Equipment, combat expenditure and lifecycle, and multiclassing remain outside this slice.','Declared multiclass entry/exit and training are supported; Vessel pools remain independent. Equipment, combat expenditure and lifecycle remain outside this slice.'));
+// Explicit revised-equipment adapter: original PDF p3 chooses the categories;
+// this pinned 2024 profile uses revised item/bundle records, not mixed editions.
+const equipmentRoot=join(importerRoot,'dnd5e/packs/_source/equipment24');
+const equipmentItems=new Map();
+const propertyMap={fin:'finesse',ver:'versatile',two:'twoHanded',hvy:'heavy',amm:'ammunition',lgt:'light',thr:'thrown'};
+const denominations={cp:1,sp:10,ep:50,gp:100,pp:1000};
+function equipmentItem(path,id,kind,extra={}) {
+  const doc=read(join(equipmentRoot,path)),s=doc.system;
+  if(s.source?.rules!=='2024'||s.weight?.units!=='lb') throw Error('Equipment edition/weight needs review: '+path);
+  const item={id,name:doc.name,edition:'2024',kind,weight:s.weight.value,cost:Math.round(s.price.value*denominations[s.price.denomination]),...extra};
+  if(kind==='weapon') {
+    item.training=s.type.value.startsWith('simple')?'weapon.simple':s.type.baseItem==='scimitar'?'weapon.scimitar':'weapon.martial';
+    item.properties=s.properties.filter(p=>propertyMap[p]).map(p=>propertyMap[p]);
+    if(s.type.value.endsWith('R'))item.properties.push('ranged');
+    item.damageDice=s.damage.base.number;item.damageSides=s.damage.base.denomination;item.damageType=s.damage.base.types[0];
+    if(s.properties.includes('ver')) {
+      // Foundry revised records omit the versatile denomination. SRD 5.2.1
+      // weapon table explicitly supplies d8 for these two source identities.
+      const verified={quarterstaff:8,spear:8};item.versatileSides=s.damage.versatile.denomination||verified[s.type.baseItem];
+      if(!item.versatileSides)throw Error('Unverified versatile damage: '+path);
+    }
+    item.mastery=s.mastery;
+    const manual=s.properties.filter(p=>!propertyMap[p]);
+    if(manual.length){item.support='manual';item.text='Additional weapon properties resolved manually: '+manual.join(', ');}
+  }
+  equipmentItems.set(id,item);return {item,quantity:s.quantity??1};
+}
+const simple=[];
+for(const dir of ['weapons/simple-melee','weapons/simple-ranged'])for(const path of files(join(equipmentRoot,dir))){
+  const relative=path.slice(equipmentRoot.length+1),id='vessel-'+relative.split('/').at(-1).replace('.yml','');
+  const {item}=equipmentItem(relative,id,'weapon');simple.push(item);
+}
+equipmentItem('weapons/martial-melee/scimitar.yml','vessel-scimitar','weapon');
+equipmentItem('armor/light/leather-armor.yml','vessel-leather','armor',{training:'armor.light',armorBase:11});
+equipmentItem('armor/shield.yml','vessel-shield','shield',{training:'armor.shield',armorBase:2});
+equipmentItem('adventuring-gear/ammunition/arrows.yml','vessel-arrows','ammunition',{cost:5});
+function bundle(folder) {
+  const result={};
+  function visit(relative) {
+    for(const e of readdirSync(join(equipmentRoot,relative),{withFileTypes:true}).sort((a,b)=>a.name.localeCompare(b.name))) {
+      const path=relative+'/'+e.name;
+      if(e.isDirectory()){visit(path);continue;}
+      if(!e.name.endsWith('.yml')||e.name==='_folder.yml')continue;
+      const id='vessel-'+slug(path.replace('.yml',''));
+      const {item,quantity}=equipmentItem(path,id,'gear');
+      if(e.name==='_container.yml'&&relative.endsWith(folder)){item.name+=' (empty container)';item.cost=0;item.text='Container-only weight; contents are separate inventory rows. Bundle purchase price is not modeled.';}
+      result[id]=quantity;
+    }
+  }
+  visit('adventuring-gear/'+folder);return result;
+}
+const explorer=bundle('explorers-pack'),priest=bundle('priests-pack');
+const option=(id,name,items)=>({id,name,items,gold:0});
+pack.items=[...equipmentItems.values()];
+pack.classes[0].startingEquipment=[
+  {id:'vessel-start-blades',name:'Starting blades',options:[option('vessel-scimitar-choice','Scimitar',{'vessel-scimitar':1}),option('vessel-daggers-choice','Two daggers',{'vessel-dagger':2})]},
+  {id:'vessel-start-weapon',name:'Starting weapon',options:[...simple.map(item=>option('vessel-choice-'+item.id,item.name,{[item.id]:1})),option('vessel-bow-arrows','Shortbow and twenty arrows',{'vessel-shortbow':1,'vessel-arrows':20})]},
+  {id:'vessel-start-pack',name:'Starting pack (2024 contents)',options:[option('vessel-explorer','Explorer pack',explorer),option('vessel-priest','Priest pack',priest)]},
+  {id:'vessel-start-fixed',name:'Fixed starting equipment',options:[option('vessel-fixed','Leather armor and quarterstaff',{'vessel-leather':1,'vessel-quarterstaff':1})]}];
+pack.classes[0].equipment='Starting choices from original Mortal Vessel page 3; this pinned revised profile uses explicit 2024 equipment and pack contents. No Vessel gold alternative is supplied. Apply choices in Equipment; owned items are not automatically equipped.';
+pack.coverageNotes=pack.coverageNotes.map(note=>note.replace('Equipment, combat expenditure and lifecycle remain outside this slice.','Inventory, starting alternatives and actual armor/shield defense and Iridescent Strike formulas are supported. Combat expenditure and lifecycle remain manual.'));
+sourceReview.equipment={originalPages:[2,3],mapping:'Explicit 2024 item and bundle adapter; source starting categories retained; no gold alternative.',weight:'Separate empty container and all nested contents exactly once. Waterskin: 1 lb empty plus four 1 lb water pints. No aggregate loaded bundle row.',versatile:'Quarterstaff/spear d8 from SRD 5.2.1 weapon table; extracted revised YAML has zero versatile die.',defense:'Ethereal Armor follows equipped armor/shield, not the retained legacy configuration note.',attacks:'Iridescent Strike CHA radiant d6/d8/d10/d12 at class levels 1/5/11/17. No rolls/expenditure.'};
 writeFileSync(join(destination,'vessel-pack.json'),JSON.stringify(pack,null,2)+'\n');
 const moduleInfo=read(join(moduleRoot,'module.json'));
 const revision=execFileSync('git',['-C',moduleRoot,'rev-parse','HEAD'],{encoding:'utf8'}).trim();
