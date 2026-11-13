@@ -57,14 +57,17 @@ public struct LibraryStorage: Sendable {
 public enum StoryPrompt {
     public static func make(record: CharacterRecord, kind: String) -> String {
         let build = record.build
-        let cls = record.pack.classes.first { $0.id == build.classID }
         let species = record.pack.species.first { $0.id == build.speciesID }
         let background = record.pack.backgrounds.first { $0.id == build.backgroundID }
+        let summary=RulesEngine.evaluate(build,in:record.pack)
         // Keep imported descriptions out of instructions and the context bounded.
         let facts: [String: String] = [
             "name": String(build.name.prefix(120)), "pronouns": String(build.pronouns.prefix(60)),
-            "class": cls?.name ?? "Unchosen", "species": species?.name ?? "Unchosen",
+            "class": Multiclassing.classes(build,in:record.pack).map { "\($0.name) \($0.level)" }.joined(separator:" / "), "species": species?.name ?? "Unchosen",
             "background": background?.name ?? "Unchosen", "level": String(build.level),
+            "hitDice": summary.hitDice.keys.sorted().map { "\(summary.hitDice[$0]!)d\($0)" }.joined(separator:" + "),
+            "castingSources": String(summary.castingSources.map { "\($0.name): \($0.ability.name), access tier \($0.maximumSpellLevel)" }.joined(separator:"; ").prefix(600)),
+            "buildStatus": summary.isValid ? "complete" : "draft; mechanical choices need review",
             "creativeDirection": String(build.concept.prefix(1200)),
             "existingAppearance": String(build.appearance.prefix(600))
         ]

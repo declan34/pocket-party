@@ -8,6 +8,8 @@ public struct BuildIssue: Identifiable, Equatable, Sendable {
 }
 
 public struct CharacterSummary: Sendable {
+    public var classLevels: [ClassLevelSummary] = []
+    public var hitDice: [Int:Int] = [:]
     public var spellPools: [SpellPoolSummary] = []
     public var castingSources: [CastingSourceSummary] = []
     public var languages: [String] = []
@@ -62,7 +64,7 @@ public enum RulesEngine {
     ]
 
     public static func evaluate(_ build: CharacterBuild, in pack: ContentPack, through requestedLevel: Int? = nil) -> CharacterSummary {
-        if build.rulesProfile != nil || build.castingLoadouts != nil || (pack.schemaVersion == 2 && pack.classes.first(where: { $0.id == build.classID })?.capabilities != nil) {
+        if build.rulesProfile != nil || build.castingLoadouts != nil || build.levels.contains(where: { $0.classID != nil }) || (pack.schemaVersion == 2 && pack.classes.first(where: { $0.id == build.classID })?.capabilities != nil) {
             return CapabilityEngine.evaluate(build, in: pack, through: requestedLevel)
         }
         var result = evaluateLegacy(build, in: pack, through: requestedLevel)
@@ -86,6 +88,7 @@ public enum RulesEngine {
             issues.append(BuildIssue(code: code, message: message, level: at))
         }
         let definition = pack.classes.first { $0.id == build.classID }
+        if let first=build.levels.first?.classID, first != build.classID { issue("starting-class","The starting-class identity must match level one.",1) }
         let species = pack.species.first { $0.id == build.speciesID }
         let background = pack.backgrounds.first { $0.id == build.backgroundID }
         if definition == nil { issue("class", "Choose a class from this content pack.") }
@@ -126,25 +129,44 @@ public enum RulesEngine {
         }
         var feats: [Feat] = []
         if let id = background?.originFeatID, let feat = pack.feats.first(where: { $0.id == id }) { feats.append(feat) }
-        var previous: LevelChoice?
+        var previousByClass: [String:LevelChoice] = [:]
+        var counts: [String:Int] = [:]
+        var talentsByClass: [String:[Talent]] = [:]
+        var subclassesByClass: [String:Subclass] = [:]
+        var grantsByClass: [String:Set<String>] = [:]
         var grantedIDs = Set<String>()
         var activeTalents: [Talent] = []
         var activeSubclass: Subclass?
         for choice in build.levels.prefix(level) {
+            let classID = choice.classID ?? build.classID
+            counts[classID, default:0] += 1
+            let classLevel = counts[classID]!
+            let previous = previousByClass[classID]
+            let priorClassLevel = classLevel - 1
             if choice.level > (build.rulesProfile?.evaluator == 2 ? 20 : 5) {
                 issue("unsupported-level", "This evaluator does not support level \(choice.level).", choice.level); continue
             }
-            guard let definition, let progression = definition.at(choice.level) else {
+            guard let definition = pack.classes.first(where: { $0.id == classID }), let progression = definition.at(classLevel) else {
                 issue("unsupported-level", "This pack does not support level \(choice.level).", choice.level); continue
             }
-            if choice.level >= definition.subclassLevel {
+            if classLevel == 1 && choice.level > 1 {
+                let picked=choice.multiclassSkills ?? [], needed=definition.multiclass?.laterSkillCount ?? 0
+                if picked.count != needed || Set(picked).count != picked.count || picked.contains(where: { !definition.skillPool.contains($0) || skills.contains($0) }) { issue("multiclass-skills","Choose \(needed) new skills from \(definition.name)'s class list.",choice.level) }
+                skills.formUnion(picked.filter { definition.skillPool.contains($0) })
+            } else if !(choice.multiclassSkills ?? []).isEmpty { issue("multiclass-skills","Later-class skill choices belong only to that class's entry level.",choice.level) }
+            if classLevel >= definition.subclassLevel {
                 activeSubclass = definition.subclasses.first { $0.id == choice.subclassID }
                 if activeSubclass == nil { issue("subclass", "Choose your subclass.", choice.level) }
-                if let previous, previous.level >= definition.subclassLevel, previous.subclassID != choice.subclassID {
+                if let previous, priorClassLevel >= definition.subclassLevel, previous.subclassID != choice.subclassID {
                     issue("subclass-change", "Your subclass must match your earlier level choice.", choice.level)
                 }
-            } else if !choice.subclassID.isEmpty { issue("early-subclass", "Your subclass is chosen at level \(definition.subclassLevel).", choice.level) }
-            grantedIDs = Set((activeSubclass?.spells ?? []).filter { $0.level <= choice.level }.flatMap(\.spellIDs))
+            } else {
+                activeSubclass = nil
+                if !choice.subclassID.isEmpty { issue("early-subclass", "Your subclass is chosen at class level \(definition.subclassLevel).", choice.level) }
+            }
+            subclassesByClass[classID] = activeSubclass
+            grantedIDs = Set((activeSubclass?.spells ?? []).filter { $0.level <= classLevel }.flatMap(\.spellIDs))
+            grantsByClass[classID] = grantedIDs
             for id in grantedIDs {
                 if let spell = pack.spells.first(where: { $0.id == id }) {
                     if let reason = spell.unavailableReason { issue("unresolved-grant-\(id)", "\(spell.name): \(reason)", choice.level) }
@@ -159,13 +181,14 @@ public enum RulesEngine {
             let groups = talents.map(\.exclusiveGroup).filter { !$0.isEmpty }
             if Set(groups).count != groups.count { issue("talent-exclusive", "Different versions of the same option cannot be taken together.", choice.level) }
             for talent in talents {
-                if talent.minimumLevel > choice.level { issue("talent-level-\(talent.id)", "\(talent.name) requires level \(talent.minimumLevel).", choice.level) }
+                if talent.minimumLevel > classLevel { issue("talent-level-\(talent.id)", "\(talent.name) requires class level \(talent.minimumLevel).", choice.level) }
                 if !Set(talent.requires).isSubset(of: Set(choice.talentIDs)) { issue("talent-prereq-\(talent.id)", "\(talent.name) is missing a required option.", choice.level) }
             }
             if let previous, Set(previous.talentIDs).subtracting(choice.talentIDs).count > 1 {
                 issue("talent-replacement", "You may replace at most one earlier option at a level-up.", choice.level)
             }
             activeTalents = talents
+            talentsByClass[classID] = talents
             for (ids, required, cantrip) in [(choice.cantripIDs, progression.cantrips, true), (choice.spellIDs, progression.spells, false)] {
                 let label = cantrip ? "cantrips" : "spells"
                 if ids.count != required || Set(ids).count != ids.count { issue("\(label)-count", "Choose \(required) \(label) in total; subclass grants are additional.", choice.level) }
@@ -205,23 +228,32 @@ public enum RulesEngine {
                 issue("early-improvement", "No feat or ability improvement is granted at this level.", choice.level)
             }
             for (key, value) in scores where value > 20 || value < 1 { issue("score-cap-\(key)", "\(key.uppercased()) must be between 1 and 20.", choice.level) }
-            previous = choice
+            previousByClass[classID] = choice
         }
+        activeTalents = talentsByClass.keys.sorted().flatMap { talentsByClass[$0] ?? [] }
+        grantedIDs = Set(grantsByClass.values.flatMap { $0 })
         for talent in activeTalents { skills.formUnion(talent.skills) }
         for feat in feats { skills.formUnion(feat.skills) }
         let proficiency = 2 + (level - 1) / 4
         let con = Ability.modifier(scores["con", default: 10])
         let dex = Ability.modifier(scores["dex", default: 10])
-        let hitDie = definition?.hitDie ?? 8
         let hpBonus = (species?.hpPerLevel ?? 0) + feats.reduce(0) { $0 + $1.hpPerLevel }
-        let hp = max(1, hitDie + con) + max(0, level - 1) * max(1, hitDie / 2 + 1 + con) + level * hpBonus
-        let lastChoice = build.levels.prefix(level).last
-        let spellIDs = Set((lastChoice?.cantripIDs ?? []) + (lastChoice?.spellIDs ?? [])).union(grantedIDs)
-        let subclassFeatures = activeSubclass?.features.filter { $0.level <= level } ?? []
-        let features = (definition?.features.filter { $0.level <= level } ?? []) + subclassFeatures
+        let hp = Multiclassing.baseHitPoints(build, in:pack, through:level, constitution:con) + level * hpBonus
+        let spellIDs = Set(previousByClass.values.flatMap { $0.cantripIDs + $0.spellIDs }).union(grantedIDs)
+        var featureIDs = Set<String>()
+        let classLevels = Multiclassing.classes(build, in:pack, through:level)
+        let features = classLevels.flatMap { row in
+            let local=(pack.classes.first { $0.id == row.id }?.features.filter { $0.level <= row.level } ?? []) + (subclassesByClass[row.id]?.features.filter { $0.level <= row.level } ?? [])
+            return local.filter { featureIDs.insert($0.canonicalID ?? Multiclassing.scopedSubclassID(row.id,$0.id)).inserted }.map { feature in
+                var copy=feature
+                if classLevels.count > 1 { copy.id=feature.canonicalID ?? Multiclassing.scopedSubclassID(row.id,feature.id) }
+                return copy
+            }
+        }
         let spellMod = definition?.spellAbility.map { Ability.modifier(scores[$0.rawValue, default: 10]) }
         let progression = definition?.at(level)
         return CharacterSummary(
+            classLevels: classLevels, hitDice: Dictionary(classLevels.map { ($0.hitDie,$0.level) }, uniquingKeysWith:+),
             languages: ["Common"] + build.languages,
             scores: scores, proficiency: proficiency, hitPoints: hp, armorClass: 10 + dex,
             mantleArmorClass: definition?.armorFormula == "vessel-mantle" ? 10 + con + Ability.modifier(scores["cha", default: 10]) : nil,
@@ -234,13 +266,28 @@ public enum RulesEngine {
     }
 
     public static func advance(_ build: CharacterBuild, in pack: ContentPack) throws -> CharacterBuild {
+        try advance(build,in:pack,classID:build.levels.last?.classID ?? build.classID)
+    }
+
+    public static func advance(_ build: CharacterBuild, in pack: ContentPack, classID: String) throws -> CharacterBuild {
         let summary = evaluate(build, in: pack)
         guard summary.isValid else { throw FolioError.invalid("Resolve the current build's choices before advancing.") }
-        guard let definition = pack.classes.first(where: { $0.id == build.classID }), build.level < definition.maxLevel else {
+        guard build.level < (build.rulesProfile?.evaluator == 2 ? 20 : 5), let definition = pack.classes.first(where: { $0.id == classID }), Multiclassing.classLevel(classID,build:build,through:build.level) < definition.maxLevel else {
             throw FolioError.invalid("You have reached this pack's supported level limit.")
         }
         var next = build
-        next.levels.append(LevelChoice(level: build.level + 1, previous: build.levels.last))
+        let explicit = pack.capabilities?.required.contains("multiclass") == true && build.rulesProfile?.evaluator == 2
+        if classID != build.classID && !explicit { throw FolioError.invalid("This pinned character does not support multiclass history.") }
+        var row=LevelChoice(level:build.level + 1,previous:build.levels.last { ($0.classID ?? build.classID) == classID })
+        row.capabilities=try Multiclassing.nextChoices(build,in:pack,classID:classID)
+        if explicit {
+            for i in next.levels.indices { next.levels[i].classID = next.levels[i].classID ?? build.classID }
+            row.classID=classID
+        }
+        next.levels.append(row)
+        let issues=Multiclassing.entryIssues(next,in:pack,at:next.level,scores:summary.scores)
+        guard issues.isEmpty else { throw FolioError.invalid(issues.map(\.message).joined(separator:" ")) }
+        try CapabilityValidation.validateTrackOwnership(pack,classIDs:Set(next.levels.map { $0.classID ?? next.classID }))
         next.updatedAt = Date()
         return next
     }

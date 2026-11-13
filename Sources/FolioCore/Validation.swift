@@ -17,6 +17,7 @@ public enum PackValidator {
             try require(ids.count == Set(ids).count && ids.allSatisfy { !$0.isEmpty && $0.count <= 120 }, "\(label) must have unique, nonempty IDs of at most 120 characters.")
         }
         try require([1, 2].contains(pack.schemaVersion), "This pack uses an unsupported schema version.")
+        try require(pack.schemaVersion == 2 || !pack.classes.contains(where: { $0.multiclass != nil }),"Multiclass policies require schema 2.")
         try require(pack.schemaVersion == 1 ? pack.ruleset == "2024" : ["2014", "2024"].contains(pack.ruleset), "Unsupported rules edition.")
         if pack.schemaVersion == 2 { try CapabilityValidation.validate(pack) }
         try require(!pack.id.isEmpty && !pack.version.isEmpty && !pack.name.isEmpty, "Pack ID, version, and name are required.")
@@ -53,6 +54,9 @@ public enum PackValidator {
             try require(!revised || pack.feats.contains { $0.id == background.originFeatID && $0.category == "origin" }, "\(background.name) references a missing origin feat.")
         }
         for cls in pack.classes {
+            for feature in cls.features + cls.subclasses.flatMap(\.features) {
+                if let canonical=feature.canonicalID { try require(pack.schemaVersion == 2 && pack.capabilities?.required.contains("multiclass") == true && !canonical.isEmpty && canonical.count <= 120,"Canonical feature identity requires bounded multiclass support.") }
+            }
             try require([6, 8, 10, 12].contains(cls.hitDie) && (0...4).contains(cls.skillCount), "\(cls.name) has unsupported hit dice or skill counts.")
             try require(cls.skillPool.count >= cls.skillCount && Set(cls.skillPool).count == cls.skillPool.count && cls.skillPool.allSatisfy { RulesEngine.skillAbilities[$0] != nil }, "\(cls.name) has an invalid skill pool.")
             try require(cls.saves.count == 2 && Set(cls.saves).count == 2, "\(cls.name) must grant two distinct saving throws.")
@@ -83,6 +87,14 @@ public enum PackValidator {
         try validate(record.pack)
         guard try LibraryStorage.encoder.encode(record).count <= 20_000_000 else { throw FolioError.invalid("Character files must be smaller than 20 MB.") }
         let b = record.build
+        let classIDs=Set(b.levels.map { $0.classID ?? b.classID })
+        if classIDs.count > 1 { try CapabilityValidation.validateTrackOwnership(record.pack,classIDs:classIDs) }
+        if b.levels.contains(where: { $0.classID != nil }) {
+            guard b.rulesProfile?.evaluator == 2, record.pack.capabilities?.required.contains("multiclass") == true,
+                  b.levels.allSatisfy({ ($0.classID?.isEmpty ?? false) == false && ($0.classID?.count ?? 0) <= 120 }) else {
+                throw FolioError.invalid("Explicit class history requires the multiclass capability and pinned evaluator 2.")
+            }
+        }
         if b.rulesProfile != nil {
             guard b.levels.enumerated().allSatisfy({ $0.element.level == $0.offset + 1 }) else { throw FolioError.invalid("Capability history must contain consecutive levels starting at one.") }
         }
@@ -100,6 +112,7 @@ public enum PackValidator {
             }
         }
         for level in b.levels {
+            guard (level.multiclassSkills?.count ?? 0) <= 4 && (level.multiclassSkills ?? []).allSatisfy({ RulesEngine.skillAbilities[$0] != nil }) else { throw FolioError.invalid("Invalid multiclass skill choices.") }
             guard let choices = level.capabilities else { continue }
             let dictionaries = [choices.groups ?? [:], choices.spells ?? [:], choices.prepared ?? [:]]
             guard (choices.configurations?.count ?? 0) <= 64,

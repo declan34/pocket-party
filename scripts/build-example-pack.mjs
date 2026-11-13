@@ -128,6 +128,7 @@ summit.capabilities={edition:'2024',grants:[
   {id:'summit-strength',kind:'abilityScore',target:'str',value:{base:4},level:20}
 ]};
 capable.classes.push(summit);
+summit.multiclass={canonicalID:'original.summit-warden',prerequisites:{kind:'ability',key:'con',minimum:13},laterProficiencies:[{id:'summit-later-training',kind:'proficiency',target:'simple weapons',rank:'proficient'}],casting:{kind:'none',divisor:1,rounding:'down',startsAt:1,poolIDs:[],reciprocalSlotUse:false}};
 // Common slot arithmetic verified from SRD 5.2.1 p77 / 5.1 p52; original
 // acquisition/content below deliberately does not represent a complete Wizard.
 const fullSlots=[[2],[3],[4,2],[4,3],[4,3,2],[4,3,3],[4,3,3,1],[4,3,3,2],[4,3,3,3,1],[4,3,3,3,2],[4,3,3,3,2,1],[4,3,3,3,2,1],[4,3,3,3,2,1,1],[4,3,3,3,2,1,1],[4,3,3,3,2,1,1,1],[4,3,3,3,2,1,1,1],[4,3,3,3,2,1,1,1,1],[4,3,3,3,3,1,1,1,1],[4,3,3,3,3,2,1,1,1],[4,3,3,3,3,2,2,1,1]];
@@ -139,8 +140,11 @@ notebook.subclasses[0].name='Echo Companion';
 notebook.subclasses[0].capabilities={edition:'2024',spellPools:[{id:'echo-charge',name:'Echo charge',kind:'custom',recovery:'short rest',capacities:summitLevels.map(level=>level<3?{}:{1:1})}],casting:[{id:'echo-voice',name:'Echo voice',mode:'limited',ability:'cha',spellIDs:['little-beacon'],counts:summitLevels.map(level=>level<3?0:1),maximumSpellLevels:summitLevels.map(()=>0),poolIDs:['echo-charge'],loadout:'retained'}]};
 capable.classes.push(notebook);
 notebook.subclasses[0].capabilities.casting[0].legacyClassCasting='preserve';
+notebook.multiclass={canonicalID:'original.notebook-keeper',prerequisites:{kind:'ability',key:'int',minimum:13},laterProficiencies:[],casting:{kind:'ordinary',divisor:1,rounding:'down',startsAt:1,poolIDs:['notebook-slots'],reciprocalSlotUse:false}};
 capable.capabilities.required.push('spell-pools');
+capable.capabilities.required.push('multiclass');
+capable.version='1.5.0';
 capable.feats.find(f=>f.id==='ability-improvement').repeatable=true;
-capable.coverageNotes=['Original mechanism fixtures; names do not certify official subclasses.','Summit Warden and Notebook Keeper support explicit levels 1–20. Early laboratories retain their authored 1–5 limits.','Notebook Keeper demonstrates tiered ordinary capacity, a separate custom pool, two casting abilities and editable book preparation. Multiclass and equipment remain pending.'];
+capable.coverageNotes=['Original mechanism fixtures; names do not certify official subclasses.','Summit Warden and Notebook Keeper support explicit levels 1–20 and declared multiclass entry policies. Early laboratories retain their authored 1–5 limits and do not opt into multiclassing.','Notebook Keeper demonstrates tiered ordinary capacity, a separate custom pool, two casting abilities and editable book preparation. Equipment remains pending.'];
 writeFileSync(new URL('../Sources/FolioCore/Resources/capability-pack.json',import.meta.url), JSON.stringify(capable,null,2)+'\n');
 console.log('Built original schema-2 capability fixture.');

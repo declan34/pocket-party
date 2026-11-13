@@ -18,4 +18,8 @@ check("2014 hides background origin feat", !CharacterPresentation.showsFeat("ori
 check("2024 retains background origin feat", CharacterPresentation.showsFeat("origin", originID: "origin", selectedIDs: [], edition: "2024"))
 check("2014 retains explicitly selected feat", CharacterPresentation.showsFeat("selected", originID: "origin", selectedIDs: ["selected"], edition: "2014"))
 if failed > 0 { exit(1) }
-print("11/11 presentation checks passed")
+check("evaluator 2 terminal copy uses total 20 despite short starting class", CharacterPresentation.terminalLevelLimit(evaluator: 2, startingClassMaximum: 5) == 20)
+check("legacy terminal copy retains authored class boundary", CharacterPresentation.terminalLevelLimit(evaluator: nil, startingClassMaximum: 5) == 5)
+check("legacy missing-class terminal copy retains fallback", CharacterPresentation.terminalLevelLimit(evaluator: nil, startingClassMaximum: nil) == 1)
+if failed > 0 { exit(1) }
+print("14/14 presentation checks passed")

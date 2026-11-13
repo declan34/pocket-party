@@ -1,6 +1,9 @@
 import Foundation
 
 enum CharacterPresentation {
+    static func terminalLevelLimit(evaluator: Int?, startingClassMaximum: Int?) -> Int {
+        evaluator == 2 ? 20 : startingClassMaximum ?? 1
+    }
     static func showsFeat(_ id: String, originID: String?, selectedIDs: [String], edition: String?) -> Bool {
         (edition != "2014" && id == originID) || selectedIDs.contains(id)
     }

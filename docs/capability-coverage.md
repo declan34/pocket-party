@@ -1,6 +1,6 @@
 # Rules capability and content coverage
 
-This inventory was established before implementation on 2026-11-12. No row is verified merely because the class exists in a menu. I1–I5 correspond to the five approved deliveries. I1–I3 mechanism checks and source exceptions are recorded below; I4–I5 remain pending.
+This inventory was established before implementation on 2026-11-12. No row is verified merely because the class exists in a menu. I1–I5 correspond to the five approved deliveries. I1–I4 mechanism checks and source exceptions are recorded below; I5 remains pending.
 
 ## Source inventory
 
@@ -30,6 +30,18 @@ The corrected Vessel module inventory is version 1.11.0, revision `c7b5ac9dbbc2b
 I4 owns entry prerequisites, starting versus later training, class-local advancement, canonical nonstacking identities and explicitly declared caster contributions for every family. Each relevant row must be covered by registered original scenarios before its owning delivery is complete. Unsupplied official subclasses remain unverified content even if their equivalent engine capability passes.
 
 ## Actual Vessel gate
+
+### I4 multiclass evidence
+
+`MulticlassChecks.swift` registers original martial/martial, ordinary/ordinary, ordinary/pact, fractional/custom-policy, global-choice and actual private Vessel scenarios. Assertions cover starting-order HP/training/saves, later skill choice, entry rejection and earlier invalidation, same canonical class across editions, adapters, per-class ASIs/subclasses/value tables, same-local-subclass-ID owner isolation, nonstacking feature/grant identity, source qualification, export and atomic save/reload, unknown contribution diagnostics, historical queries and the total-level-20 boundary. Existing single-class checks remain registered.
+
+Review-round regressions add prior capability-granted entry-skill duplication (including expertise, half proficiency, future grants, and preceding post-ASI conditions), conflicting group/configuration ownership, old single-class ID roundtrips, unrelated combined-library owners, class/common conflicts, intentional shared common tracks and same-local-ID catalog qualification. Explicit opt-in ownership rejection is the chosen contract; no historical ID migration is performed.
+
+The public Summit Warden / Notebook Keeper example declares policies; older laboratories do not claim multiclass content coverage. Generic half/fractional checks exercise declared division and rounding. No official class corpus or actual legacy fractional-subclass pack is supplied/certified. Custom policies and unsupplied Artificer content remain explicitly distinct from official source auditing.
+
+Converter **0.6.0** adds actual Vessel entry/exit CON 13 + CHA 13, first-class versus reduced later training, and explicit independent/nonordinary contribution with reciprocal slot use. The 240 spell identities and 24 unresolved diagnostics remain unchanged. `vesselMulticlassChecks` combines the actual adapter with an original martial fixture and verifies reduced training, class-level pool capacity and historical entry failure. Existing six-subclass source acceptance still runs; new policy support does not resolve missing spell sources.
+
+Native PDF checks render/reopen mixed-class labels, separate hit-die capacities, source casting and ordinary pool widgets. Long class labels remain complete in overflow; a bounded correction preserves the legacy sample's three-page layout. Core/command verification does not prove native interaction, iPhone/device or external-reader editing; those remain separate controller gates.
 
 ### I3 tiered casting evidence
 

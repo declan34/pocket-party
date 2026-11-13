@@ -1,7 +1,33 @@
 import Foundation
 
 public enum CapabilityValidation {
-    public static let supported: Set<String> = ["choices", "modifiers", "casting", "editions", "resources", "traits", "proficiencies", "configuration", "languages", "spell-pools"]
+    public static let supported: Set<String> = ["choices", "modifiers", "casting", "editions", "resources", "traits", "proficiencies", "configuration", "languages", "spell-pools", "multiclass"]
+
+    /// Old class-local IDs remain valid for single-class snapshots. New authored
+    /// multiclass policies must be unambiguous; combined libraries are checked
+    /// against participating classes only when a multiclass history is selected.
+    static func validateTrackOwnership(_ pack: ContentPack, classIDs: Set<String>? = nil) throws {
+        if let classIDs, classIDs.count < 2 { return }
+        let classes=pack.classes.filter { cls in classIDs.map { $0.contains(cls.id) } ?? (cls.multiclass != nil) }
+        var owners:[String:String]=[:]
+        func register(_ data: DefinitionCapabilities, owner: String) throws {
+            let ids=(data.groups ?? []).map(\.id) + (data.configurations ?? []).map(\.id) + (data.casting ?? []).map(\.id)
+            for id in ids {
+                if let prior=owners[id], prior != owner || owner != "shared species/background/feat definitions" {
+                    throw FolioError.invalid("Capability track ownership conflict for '\(id)': \(prior) and \(owner). Give class-owned groups, configurations and casting policies distinct IDs; shared common tracks cannot also belong to a class.")
+                }
+                owners[id]=owner
+            }
+        }
+        for data in pack.species.compactMap(\.capabilities) + pack.backgrounds.compactMap(\.capabilities) + pack.feats.compactMap(\.capabilities) {
+            try register(data,owner:"shared species/background/feat definitions")
+        }
+        for cls in classes {
+            for data in [cls.capabilities].compactMap({ $0 }) + cls.subclasses.compactMap(\.capabilities) {
+                try register(data,owner:"class \(cls.name) [\(cls.id)]")
+            }
+        }
+    }
 
     /// Inspect JSON containers before Codable can recursively instantiate predicates.
     public static func preflight(_ data: Data) throws {
@@ -38,6 +64,28 @@ public enum CapabilityValidation {
         func require(_ condition: Bool, _ message: String) throws { if !condition { throw FolioError.invalid(message) } }
         guard let caps = pack.capabilities else { throw FolioError.invalid("Schema 2 requires a capability contract.") }
         try require(caps.version == 1 && Set(caps.required).isSubset(of: supported), "Unsupported required capability or capability version.")
+        if pack.sources == nil { try validateTrackOwnership(pack) }
+        for cls in pack.classes {
+            guard let policy=cls.multiclass else { continue }
+            try require(caps.required.contains("multiclass") && cls.capabilities != nil,"Multiclass contracts require the multiclass capability and explicit class edition.")
+            try require(!policy.canonicalID.isEmpty && policy.canonicalID.count <= 120,"Multiclass canonical identity is required.")
+            try require((0...4).contains(policy.laterSkillCount ?? 0) && (policy.laterSkillCount ?? 0) <= cls.skillPool.count,"Invalid later-class skill count.")
+            func prerequisite(_ p: RulePredicate, depth: Int = 0) -> Bool {
+                guard depth < 8 else { return false }
+                if p.kind == .ability { return Ability(rawValue:p.key ?? "") != nil && (1...30).contains(p.minimum ?? 0) }
+                return [.all,.any].contains(p.kind) && !(p.children ?? []).isEmpty && (p.children?.count ?? 0) <= 12 && (p.children ?? []).allSatisfy { prerequisite($0,depth:depth+1) }
+            }
+            try require(policy.prerequisites.map { prerequisite($0) } ?? true,"Entry prerequisites must be bounded ability/all/any predicates.")
+            let training=policy.laterProficiencies + (policy.startingProficiencies ?? [])
+            try require(training.count <= 60 && training.allSatisfy { $0.kind == .proficiency && $0.rank == .proficient && $0.condition == nil && $0.value == nil && ($0.level ?? 1) == 1 && !($0.target ?? "").isEmpty && ($0.target?.count ?? 0) <= 120 && !($0.target ?? "").hasPrefix("save.") && $0.target != "all-saves" && !$0.id.isEmpty && $0.id.count <= 120 },"Class training must be fixed proficiency grants, not saving throws or effects.")
+            if let casting=policy.casting {
+                let pools=([cls.capabilities].compactMap { $0 } + cls.subclasses.compactMap(\.capabilities)).flatMap { $0.spellPools ?? [] }
+                try require((1...20).contains(casting.divisor) && (1...20).contains(casting.startsAt) && Set(casting.poolIDs).count == casting.poolIDs.count && Set(casting.poolIDs).isSubset(of:Set(pools.map(\.id))),"Invalid multiclass contribution or pool references.")
+                if casting.kind == .ordinary {
+                    try require(!casting.poolIDs.isEmpty && pools.filter { casting.poolIDs.contains($0.id) }.allSatisfy { $0.kind == .ordinary },"Ordinary contribution must reference ordinary pools.")
+                }
+            }
+        }
         let definitions = pack.classes.compactMap(\.capabilities) + pack.classes.flatMap { $0.subclasses.compactMap(\.capabilities) }
             + pack.species.compactMap(\.capabilities) + pack.backgrounds.compactMap(\.capabilities) + pack.feats.compactMap(\.capabilities)
         var canonicalGrants: [String: CapabilityGrant] = [:]

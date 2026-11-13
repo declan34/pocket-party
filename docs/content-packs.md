@@ -2,6 +2,8 @@
 
 Schema 1 remains supported unchanged. For schema-2 typed engine/editor authoring, see [the capability interface](capability-interface.md). The original `capability-pack.json` installs alongside the legacy example and includes thirteen family mechanism laboratories. Registered behavior checks, actual private-adapter acceptance and unresolved content are distinguished in [coverage](capability-coverage.md).
 
+Schema-2 multiclass authoring additionally requires `multiclass`, a per-class canonical identity/entry policy, first-versus-later training, and an explicit contribution policy for casters. Class levels and spell access remain local to each class; total character level is capped at 20. See the [I4 contract and source boundaries](capability-interface.md#multiclass-contracts-i4). Class-local talent/subclass IDs remain scoped to their owning source-qualified class; canonical class/feature identity intentionally crosses source qualification.
+
 Use `content-pack.schema.json` for structural tooling, and the bundled `example-pack.json` as a complete working template. Import also applies semantic checks in `PackValidator`: duplicate IDs, missing references, progression gaps, unsupported values, and content limits. Schema validity alone is not enough.
 
 ## Identity and versions

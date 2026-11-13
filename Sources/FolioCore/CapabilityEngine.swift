@@ -5,8 +5,12 @@ public enum CapabilityEngine {
         (definition?.edition ?? fallback) == edition || definition?.adapters?.contains(where: { $0.edition == edition }) == true
     }
 
-    public static func evaluate(_ build: CharacterBuild, in pack: ContentPack, through requested: Int? = nil) -> CharacterSummary {
-        do { try PackValidator.validateRecord(.init(pack: pack, build: build)) }
+    public static func evaluate(_ savedBuild: CharacterBuild, in pack: ContentPack, through requested: Int? = nil) -> CharacterSummary {
+        let build: CharacterBuild
+        do {
+            try PackValidator.validateRecord(.init(pack: pack, build: savedBuild))
+            build = try Multiclassing.replayChoices(savedBuild, in:pack)
+        }
         catch {
             return CharacterSummary(scores: [:], proficiency: 0, hitPoints: 0, armorClass: 0, mantleArmorClass: nil, initiative: 0, speed: 0, spellDC: nil, spellAttack: nil, skills: [], features: [], talents: [], spells: [], grantedSpellIDs: [], slots: 0, slotLevel: 0, issues: [.init(code: "cap-invalid-content", message: error.localizedDescription)])
         }
@@ -14,22 +18,23 @@ public enum CapabilityEngine {
         let edition = build.rulesProfile?.edition ?? "2024"
         var basePack = pack, baseBuild = build
         let cls = pack.classes.first { $0.id == build.classID }
-        let currentSubclass = cls?.subclasses.first { $0.id == build.levels.prefix(level).last?.subclassID }
+        let classRows = Multiclassing.classes(build,in:pack,through:level)
         let species = pack.species.first { $0.id == build.speciesID }
         let background = pack.backgrounds.first { $0.id == build.backgroundID }
         // Ownership is pinned on each policy, never inferred from the combined
         // pack's union of required capabilities. Absence retains old semantics.
-        let replacesLegacyCasting = !(cls?.capabilities?.casting ?? []).isEmpty
-            || (currentSubclass?.capabilities?.casting ?? []).contains { $0.legacyClassCasting != .preserve }
         // Reuse the stable creation/HP/ASI validator with capability-owned tracks disabled.
-        if let index = basePack.classes.firstIndex(where: { $0.id == build.classID }) {
+        for index in basePack.classes.indices where classRows.contains(where: { $0.id == basePack.classes[index].id }) {
+            let cls = basePack.classes[index]
+            let currentSubclass = cls.subclasses.first { $0.id == classRows.first(where: { $0.id == cls.id })?.subclassID }
+            let replacesLegacyCasting = !(cls.capabilities?.casting ?? []).isEmpty || (currentSubclass?.capabilities?.casting ?? []).contains { $0.legacyClassCasting != .preserve }
             basePack.classes[index].subclassLevel = RulesEngine.subclassUnlockLevel(for: basePack.classes[index], build: build, in: pack)
-            let hasGroups = !(cls?.capabilities?.groups ?? []).isEmpty
+            let hasGroups = !(cls.capabilities?.groups ?? []).isEmpty
             for i in basePack.classes[index].progression.indices {
                 if hasGroups { basePack.classes[index].progression[i].talents = 0 }
                 if replacesLegacyCasting { basePack.classes[index].progression[i].spells = 0; basePack.classes[index].progression[i].cantrips = 0 }
             }
-            for i in baseBuild.levels.indices {
+            for i in baseBuild.levels.indices where (baseBuild.levels[i].classID ?? build.classID) == cls.id {
                 if hasGroups { baseBuild.levels[i].talentIDs = [] }
                 if replacesLegacyCasting { baseBuild.levels[i].spellIDs = []; baseBuild.levels[i].cantripIDs = [] }
             }
@@ -39,7 +44,6 @@ public enum CapabilityEngine {
             for i in basePack.backgrounds.indices { basePack.backgrounds[i].originFeatID = "" }
         }
         var result = RulesEngine.evaluateLegacy(baseBuild, in: basePack, through: level)
-        let legacyCastingSpells = result.spells
         // Replay these below against historical capability-adjusted, pre-choice scores.
         // All other feat checks (level, duplication, allocation) remain legacy-owned.
         result.issues.removeAll { $0.code.hasPrefix("feat-prereq-") || $0.code.hasPrefix("score-cap-") }
@@ -59,10 +63,28 @@ public enum CapabilityEngine {
         var definitions: [(String, DefinitionCapabilities)] = []
         var unlocks: [String:Int] = [:]
         var featOwners: [String:String] = [:]
-        for (id, data) in [(cls?.id, cls?.capabilities), (species?.id, species?.capabilities), (background?.id, background?.capabilities)] {
+        for (id, data) in [(species?.id, species?.capabilities), (background?.id, background?.capabilities)] {
             guard let id else { continue }
             if !compatible(data, edition: edition, fallback: pack.ruleset) { issue("edition-\(id)", "This definition requires an explicit \(edition) adapter.") }
             if let data { definitions.append((id, data)) }
+        }
+        for row in classRows {
+            guard let definition=pack.classes.first(where: { $0.id == row.id }) else { continue }
+            if !compatible(definition.capabilities,edition:edition,fallback:pack.ruleset) { issue("edition-"+row.id,"This class requires an explicit \(edition) adapter.") }
+            let entry=build.levels.first { ($0.classID ?? build.classID) == row.id }?.level ?? 1
+            if var data=definition.capabilities {
+                let training=entry > 1 ? definition.multiclass?.laterProficiencies ?? [] : definition.multiclass?.startingProficiencies ?? []
+                data.grants = (data.grants ?? []) + training
+                data.adapters=data.adapters?.map { var adapter=$0; adapter.replacementGrants += training; return adapter }
+                definitions.append((row.id,Multiclassing.timeline(data,owner:row.id,build:build))); unlocks[row.id]=entry
+            }
+            if let sub=definition.subclasses.first(where: { $0.id == row.subclassID }), let data=sub.capabilities {
+                let owner=row.id+":"+sub.id
+                definitions.append((owner,Multiclassing.timeline(data,owner:row.id,build:build)))
+                let local=RulesEngine.subclassUnlockLevel(for:definition,build:build,in:pack)
+                unlocks[owner]=build.levels.first { Multiclassing.classLevel(row.id,build:build,through:$0.level) >= local }?.level ?? 21
+                if !compatible(data,edition:edition,fallback:pack.ruleset) { issue("edition-"+sub.id,"This subclass requires an explicit rules-edition adapter.") }
+            }
         }
         for feat in chosenFeats {
             if !compatible(feat.capabilities, edition: edition, fallback: pack.ruleset) { issue("edition-\(feat.id)", "The selected feat is incompatible with the rules profile.") }
@@ -82,10 +104,6 @@ public enum CapabilityEngine {
                     definitions.append((owner,repeated)); unlocks[owner]=acquisition.level; featOwners[owner]=feat.id
                 }
             }
-        }
-        if let sub = currentSubclass, let data = sub.capabilities {
-            definitions.append((sub.id, data)); unlocks[sub.id] = basePack.classes.first { $0.id == build.classID }?.subclassLevel ?? 3
-            if !compatible(data, edition: edition, fallback: pack.ruleset) { issue("edition-\(sub.id)", "This subclass requires an explicit rules-edition adapter.") }
         }
         let groups = definitions.flatMap { $0.1.groups ?? [] }
         typealias ExclusiveOwner = (id: String, track: String, exception: Bool)
@@ -118,6 +136,7 @@ public enum CapabilityEngine {
         var finalConfig = Set<String>()
         var spellIDs = Set(result.spells.map(\.id))
         var ranks = Dictionary(uniqueKeysWithValues: result.skills.map { ($0, ProficiencyRank.proficient) })
+        var priorProficiencyRanks: [String:ProficiencyRank] = [:]
         var prerequisiteScores = result.scores
         var castingAbility = cls?.spellAbility
         func proficiencyTargets(_ target: String?) -> [String] {
@@ -136,12 +155,26 @@ public enum CapabilityEngine {
             case .ability: return prerequisiteScores[p.key ?? "", default: 0] >= (p.minimum ?? 0)
             case .selection: return selections.contains(p.key ?? "")
             case .configuration: return config.contains(p.key ?? "")
-            case .subclass: return subclass == p.key
+            case .subclass: return Multiclassing.classes(build,in:pack,through:at).contains { row in
+                guard row.subclassID == p.key || Multiclassing.scopedSubclassID(row.id,row.subclassID) == p.key, let definition=pack.classes.first(where: { $0.id == row.id }) else { return false }
+                return row.level >= RulesEngine.subclassUnlockLevel(for:definition,build:build,in:pack)
+            }
             case .proficiency: return (ranks[p.key ?? ""] ?? .none).bonus(result.proficiency) >= result.proficiency
             }
         }
         for choice in build.levels.prefix(level) {
             let at = choice.level, selected = choice.capabilities?.groups ?? [:]
+            if at > 1 { result.issues += Multiclassing.entryIssues(build,in:pack,at:at,scores:finalScores) }
+            if at > 1 && Multiclassing.classLevel(choice.classID ?? build.classID,build:build,through:at) == 1 {
+                for skill in choice.multiclassSkills ?? [] where priorProficiencyRanks[skill] == .proficient || priorProficiencyRanks[skill] == .expertise {
+                    issue("multiclass-skill-"+skill,"\(skill) was already proficient before entering this class; choose a new class skill.",at)
+                }
+            }
+            let raw=savedBuild.levels[at-1].capabilities
+            let rawIDs=Set((raw?.groups ?? [:]).keys).union((raw?.spells ?? [:]).keys).union((raw?.prepared ?? [:]).keys).union(raw?.configurations ?? [])
+            let foreign=pack.classes.filter { definition in definition.id != (choice.classID ?? build.classID) && classRows.contains { $0.id == definition.id } }.flatMap { [$0.capabilities].compactMap { $0 } + $0.subclasses.compactMap(\.capabilities) }
+            let foreignIDs=Set(foreign.flatMap { ($0.groups ?? []).map(\.id) + ($0.casting ?? []).map(\.id) + ($0.configurations ?? []).map(\.id) })
+            if !rawIDs.isDisjoint(with:foreignIDs) { issue("foreign-choice","This row retains choices owned by another class. Edit that class's own level or clear these retained choices.",at) }
             var beforeChoice = baseBuild
             beforeChoice.levels[at - 1].boosts = [:]
             let beforeChoiceSummary = RulesEngine.evaluateLegacy(beforeChoice, in: basePack, through: at)
@@ -183,7 +216,9 @@ public enum CapabilityEngine {
                 guard matches(grant.condition, at: at, selections: selectionSet, config: config, subclass: choice.subclassID), scoreGrants.insert(grant.id).inserted else { continue }
                 prerequisiteScores[grant.target ?? "", default: 10] += grant.value?.resolve(level: at, scores: beforeGrantScores, proficiency: beforeChoiceSummary.proficiency) ?? 0
             }
-            if cls?.at(at)?.improvement == true,
+            let advancingID=choice.classID ?? build.classID
+            let advancingClass=pack.classes.first { $0.id == advancingID }
+            if advancingClass?.at(Multiclassing.classLevel(advancingID,build:build,through:at))?.improvement == true,
                let feat = pack.feats.first(where: { $0.id == choice.featID && $0.category == "general" }) {
                 for (key, minimum) in feat.abilityMinimums where prerequisiteScores[key, default: 0] < minimum {
                     result.issues.append(.init(code: "feat-prereq-\(key)", message: "\(feat.name) requires \(key.uppercased()) \(minimum) before taking it.", level: at))
@@ -348,6 +383,17 @@ public enum CapabilityEngine {
             for (key, value) in rowScores where value < 1 || value > rowCaps[key, default: 20] {
                 issue("score-cap-\(key)", "\(key.uppercased()) must be between 1 and \(rowCaps[key, default: 20]) at this level.", at)
             }
+            // Entry at the following row sees accepted grants with this row's
+            // final scores/configuration, not just legacy skills or pre-ASI ranks.
+            let replayRanks=ranks, replayScores=prerequisiteScores
+            prerequisiteScores=rowScores; ranks=baselineRanks
+            for _ in 0...grants.count {
+                let previousRanks=ranks
+                deriveRanks(grants,selections:eligibleSelections)
+                if ranks == previousRanks { break }
+            }
+            priorProficiencyRanks=ranks
+            ranks=replayRanks; prerequisiteScores=replayScores
             previousGroups = selected; previousSpells = choice.capabilities?.spells ?? [:]
             finalGrants = grants; finalSelections = eligibleSelections; finalConfig = config
             finalScores = rowScores; finalScoreProvenance = rowScoreProvenance
@@ -364,8 +410,7 @@ public enum CapabilityEngine {
             return (order[lhs.1.kind] ?? 2, lhs.1.id) < (order[rhs.1.kind] ?? 2, rhs.1.id)
         }
         let con = Ability.modifier(result.scores["con", default: 10]), oldCon = Ability.modifier(originalScores["con", default: 10])
-        let die = cls?.hitDie ?? 8
-        result.hitPoints += max(1, die + con) - max(1, die + oldCon) + max(0, level - 1) * (max(1, die / 2 + 1 + con) - max(1, die / 2 + 1 + oldCon))
+        result.hitPoints += Multiclassing.baseHitPoints(build,in:pack,through:level,constitution:con) - Multiclassing.baseHitPoints(build,in:pack,through:level,constitution:oldCon)
         let dexDelta = Ability.modifier(result.scores["dex", default: 10]) - Ability.modifier(originalScores["dex", default: 10])
         result.armorClass += dexDelta; result.initiative += dexDelta
         if result.mantleArmorClass != nil { result.mantleArmorClass = 10 + con + Ability.modifier(result.scores["cha", default: 10]) }
@@ -437,8 +482,17 @@ public enum CapabilityEngine {
             (data.spellPools ?? []).filter { level >= unlocks[owner, default:1] && matches($0.condition, at:level, selections:finalSelections, config:finalConfig, subclass:build.levels.prefix(level).last?.subclassID ?? "") }.map { (owner,$0) }
         }
         let activePolicies = definitions.flatMap { owner, data in (data.casting ?? []).filter { result.activePolicyIDs.contains($0.id) }.map { (owner,$0) } }
+        for row in classRows {
+        guard let cls=pack.classes.first(where: { $0.id == row.id }) else { continue }
+        let history=build.levels.prefix(level).last { ($0.classID ?? build.classID) == row.id }
+        let sub=cls.subclasses.first { $0.id == row.subclassID }
+        let replaced = !(cls.capabilities?.casting ?? []).isEmpty || (sub?.capabilities?.casting ?? []).contains { $0.legacyClassCasting != .preserve }
+        let ids=Set((history?.spellIDs ?? []) + (history?.cantripIDs ?? []) + (sub?.spells.filter { $0.level <= row.level }.flatMap(\.spellIDs) ?? []))
+        let legacyCastingSpells=pack.spells.filter { ids.contains($0.id) }
+        let progression=cls.at(row.level)
+        let slots=progression?.slots ?? 0, slotLevel=progression?.slotLevel ?? 0
         var legacyPoolIDs:[String]=[]
-        if let cls, result.slots > 0, !activePools.isEmpty,
+        if slots > 0, !activePools.isEmpty || classRows.count > 1,
            (cls.capabilities?.spellPools ?? []).isEmpty,
            !(cls.capabilities?.casting ?? []).contains(where: { !($0.poolIDs ?? []).isEmpty }) {
             // A separate species/subclass pool does not replace legacy class
@@ -450,16 +504,23 @@ public enum CapabilityEngine {
             let base=cls.id+":legacy-slots"
             var id=base, suffix=1
             while authoredIDs.contains(id) { id=base+"#\(suffix)"; suffix += 1 }
-            result.spellPools.append(.init(id:id,sourceID:cls.id,name:cls.name+" (legacy slots)",kind:.custom,recovery:"Unspecified (legacy source)",capacities:[result.slotLevel:result.slots]))
+            result.spellPools.append(.init(id:id,sourceID:cls.id,name:cls.name+" (legacy slots)",kind:.custom,recovery:"Unspecified (legacy source)",capacities:[slotLevel:slots]))
             legacyPoolIDs=[id]
         }
-        if let cls, let ability=cls.spellAbility, !legacyCastingSpells.isEmpty, !replacesLegacyCasting {
+        if let ability=cls.spellAbility, !legacyCastingSpells.isEmpty, !replaced {
             let mod=Ability.modifier(result.scores[ability.rawValue,default:10])
             let ids=legacyCastingSpells.map(\.id)
             let labels=Dictionary(uniqueKeysWithValues:legacyCastingSpells.map { ($0.id,result.grantedSpellIDs.contains($0.id) ? "Granted (legacy)" : "Known (legacy)") })
-            result.castingSources.append(.init(id:cls.id+":legacy",sourceID:cls.id,name:cls.name+" (legacy casting)",ability:ability,dc:8+result.proficiency+mod,attack:result.proficiency+mod,maximumSpellLevel:result.slotLevel,acquisitionPolicy:.known,editableLoadout:false,preparationCount:0,poolIDs:legacyPoolIDs,availableSpellIDs:cls.spellIDs,memberSpellIDs:ids,selectedLoadout:ids,spellLabels:labels))
+            result.castingSources.append(.init(id:cls.id+":legacy",sourceID:cls.id,name:cls.name+" (legacy casting)",ability:ability,dc:8+result.proficiency+mod,attack:result.proficiency+mod,maximumSpellLevel:slotLevel,acquisitionPolicy:.known,editableLoadout:false,preparationCount:0,poolIDs:legacyPoolIDs,availableSpellIDs:cls.spellIDs,memberSpellIDs:ids,selectedLoadout:ids,spellLabels:labels))
         }
+        }
+        if classRows.count > 1 { result.slots=0; result.slotLevel=0 }
         Spellcasting.project(build:build, pack:pack, level:level, policies:activePolicies, pools:activePools, result:&result)
+        Multiclassing.composePools(build,in:pack,level:level,result:&result)
+        for i in result.classLevels.indices {
+            let id=result.classLevels[i].id
+            result.classLevels[i].castingSourceIDs=result.castingSources.filter { $0.sourceID == id || $0.sourceID.hasPrefix(id+":") }.map(\.id)
+        }
         return result
     }
 }

@@ -1,15 +1,15 @@
 {
   "schemaVersion": 2,
   "id": "original.capability-lab",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "name": "Trail Warden · capability laboratory",
   "ruleset": "2024",
   "isPrivate": false,
   "attribution": "Original demonstration content created for Character Folio. This is homebrew sample data, not an official D&D class or spell collection.",
   "coverageNotes": [
     "Original mechanism fixtures; names do not certify official subclasses.",
-    "Summit Warden and Notebook Keeper support explicit levels 1–20. Early laboratories retain their authored 1–5 limits.",
-    "Notebook Keeper demonstrates tiered ordinary capacity, a separate custom pool, two casting abilities and editable book preparation. Multiclass and equipment remain pending."
+    "Summit Warden and Notebook Keeper support explicit levels 1–20 and declared multiclass entry policies. Early laboratories retain their authored 1–5 limits and do not opt into multiclassing.",
+    "Notebook Keeper demonstrates tiered ordinary capacity, a separate custom pool, two casting abilities and editable book preparation. Equipment remains pending."
   ],
   "languages": [
     "Dwarvish",
@@ -3787,6 +3787,30 @@
             "level": 20
           }
         ]
+      },
+      "multiclass": {
+        "canonicalID": "original.summit-warden",
+        "prerequisites": {
+          "kind": "ability",
+          "key": "con",
+          "minimum": 13
+        },
+        "laterProficiencies": [
+          {
+            "id": "summit-later-training",
+            "kind": "proficiency",
+            "target": "simple weapons",
+            "rank": "proficient"
+          }
+        ],
+        "casting": {
+          "kind": "none",
+          "divisor": 1,
+          "rounding": "down",
+          "startsAt": 1,
+          "poolIDs": [],
+          "reciprocalSlotUse": false
+        }
       }
     },
     {
@@ -4386,6 +4410,25 @@
             "text": "Two learned original spells; choose one current preparation. Higher slots do not grant knowledge."
           }
         ]
+      },
+      "multiclass": {
+        "canonicalID": "original.notebook-keeper",
+        "prerequisites": {
+          "kind": "ability",
+          "key": "int",
+          "minimum": 13
+        },
+        "laterProficiencies": [],
+        "casting": {
+          "kind": "ordinary",
+          "divisor": 1,
+          "rounding": "down",
+          "startsAt": 1,
+          "poolIDs": [
+            "notebook-slots"
+          ],
+          "reciprocalSlotUse": false
+        }
       }
     }
   ],
@@ -4401,7 +4444,8 @@
       "proficiencies",
       "configuration",
       "languages",
-      "spell-pools"
+      "spell-pools",
+      "multiclass"
     ]
   }
 }

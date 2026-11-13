@@ -20,6 +20,10 @@ public struct PrintableSheet: Sendable {
         fields["name"]=b.name; fields["class"]=cls?.name; fields["level"]=String(b.level)
         fields["species"]=species?.name; fields["background"]=background?.name
         fields["subclass"]=cls?.subclasses.first { $0.id == b.levels.last?.subclassID }?.name
+        if s.classLevels.count > 1 {
+            fields["class"]=s.classLevels.map { "\($0.name) \($0.level)" }.joined(separator:" / ")
+            fields["subclass"]=s.classLevels.filter { !$0.subclassName.isEmpty }.map { "\($0.name): \($0.subclassName)" }.joined(separator:" / ")
+        }
         fields["appearance"]=b.appearance
         fields["story"]=[b.backstory,b.personality].filter { !$0.isEmpty }.joined(separator:"\n\n")
         fields["languages"] = s.languages.joined(separator:", ")
@@ -73,6 +77,7 @@ public struct PrintableSheet: Sendable {
         }
         notes += "\n" + p.coverageNotes(for: b).joined(separator:"\n")
         supplements.append(SheetSection(title:"Reading this sheet",text:notes))
+        if s.classLevels.count > 1 { supplements.append(.init(title:"Class levels and hit dice",text:s.classLevels.map { "\($0.name) \($0.level)\($0.subclassName.isEmpty ? "" : " — " + $0.subclassName)" }.joined(separator:"\n") + "\nHit dice: " + s.hitDice.keys.sorted().map { "\(s.hitDice[$0]!)d\($0)" }.joined(separator:" + ") + ". Capacity only; spent dice are not tracked.")) }
         if !s.traits.isEmpty { supplements.append(SheetSection(title:"Supported traits",text:s.traits.joined(separator:"\n"))) }
         if !s.resources.isEmpty { supplements.append(SheetSection(title:"Resource capacities",text:s.resources.map { "\($0.name): \($0.maximum); recovery: \($0.recovery). Expenditure not tracked." }.joined(separator:"\n"))) }
         if !s.spellPools.isEmpty { supplements.append(.init(title:"Spell pools",text:s.spellPools.map { "\($0.name) [\($0.kind.rawValue); source \($0.sourceID); pool \($0.id)]: \($0.capacityDescription). Recovery: \($0.recovery). Expenditure not tracked." }.joined(separator:"\n"))) }

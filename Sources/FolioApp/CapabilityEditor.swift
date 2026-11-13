@@ -11,7 +11,8 @@ struct CapabilityEditor: View {
     private var choices: CapabilityChoices { build.levels[index].capabilities ?? .init() }
     private var summary: CharacterSummary { RulesEngine.evaluate(build, in: pack, through: level) }
     private var definitions: [DefinitionCapabilities] {
-        let base = [definition.capabilities, definition.subclasses.first { $0.id == build.levels[index].subclassID }?.capabilities,
+        let local = [definition.capabilities, definition.subclasses.first { $0.id == build.levels[index].subclassID }?.capabilities].compactMap { $0 }.map { Multiclassing.timeline($0,owner:definition.id,build:build) }
+        let base = local + [
          pack.species.first { $0.id == build.speciesID }?.capabilities,
          pack.backgrounds.first { $0.id == build.backgroundID }?.capabilities].compactMap { $0 }
         let origin = build.rulesProfile?.edition == "2014" ? "" : pack.backgrounds.first { $0.id == build.backgroundID }?.originFeatID ?? ""
@@ -54,6 +55,10 @@ struct CapabilityEditor: View {
                 Text(group.locked == true ? "Bonus track: choices cannot be replaced." : "Choices are checked against this track's prerequisites and replacement schedule.").font(.caption).foregroundStyle(Palette.muted)
                 if group.requirementTiming == .acquisition { Text("Required bonus alternatives are checked when first acquired; later edits recheck that history.").font(.caption).foregroundStyle(Palette.muted) }
                 if !(group.exclusiveGroupExceptions ?? []).isEmpty { Text("This track explicitly permits an additional distinct variant from its declared family; duplicate options remain invalid.").font(.caption).foregroundStyle(Palette.muted) }
+                ForEach(Set(values(group.id).wrappedValue).sorted().filter { id in !group.options.contains { $0.id == id } },id:\.self) { id in
+                    Text("Retained unavailable choice: \(id)").font(.caption)
+                    Button("Remove unavailable choice") { values(group.id).wrappedValue.removeAll { $0 == id } }
+                }
                 ForEach(group.options) { option in
                     if option.repeatable == true {
                         Stepper(option.name + " · \(values(group.id).wrappedValue.filter { $0 == option.id }.count)", value: Binding(get: { values(group.id).wrappedValue.filter { $0 == option.id }.count }, set: { count in
@@ -88,9 +93,27 @@ struct CapabilityEditor: View {
                 Text("\(pool.name) · \(pool.capacityDescription) · \(pool.recovery)").font(.subheadline)
             }
             if level == build.level {
+                ForEach(summary.castingSources.filter { source in source.editableLoadout && !definitions.flatMap({ $0.casting ?? [] }).contains(where: { $0.id == source.id }) }) { source in
+                    SpellPicker(title:"\(source.name) · current preparation",count:source.preparationCount,spells:pack.spells.filter { source.memberSpellIDs.contains($0.id) },selection:loadout(source))
+                }
                 ForEach((build.castingLoadouts ?? [:]).keys.sorted().filter { id in !summary.castingSources.contains { $0.id == id && $0.editableLoadout } }, id: \.self) { id in
                     Button("Clear inactive preparation: \(id)") { build.castingLoadouts?.removeValue(forKey:id) }
                 }
+            }
+            let knownGroups=Set(definitions.flatMap { ($0.groups ?? []).map(\.id) })
+            let knownPolicies=Set(definitions.flatMap { ($0.casting ?? []).map(\.id) })
+            ForEach((choices.groups ?? [:]).keys.sorted().filter { !knownGroups.contains($0) },id:\.self) { id in
+                Text("Retained track \(id): \((choices.groups?[id] ?? []).joined(separator:", "))").font(.caption)
+                Button("Clear retained track") { build.levels[index].capabilities?.groups?.removeValue(forKey:id) }
+            }
+            ForEach(Set((choices.spells ?? [:]).keys).union((choices.prepared ?? [:]).keys).sorted().filter { !knownPolicies.contains($0) },id:\.self) { id in
+                Text("Retained casting \(id): \((choices.spells?[id] ?? []).joined(separator:", "))").font(.caption)
+                Button("Clear retained casting") { build.levels[index].capabilities?.spells?.removeValue(forKey:id); build.levels[index].capabilities?.prepared?.removeValue(forKey:id) }
+            }
+            let knownConfigs=Set(definitions.flatMap { ($0.configurations ?? []).map(\.id) })
+            ForEach((choices.configurations ?? []).filter { !knownConfigs.contains($0) },id:\.self) { id in
+                Text("Retained configuration: \(id)").font(.caption)
+                Button("Clear retained configuration") { build.levels[index].capabilities?.configurations?.removeAll { $0 == id } }
             }
         }
     }

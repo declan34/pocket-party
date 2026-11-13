@@ -106,6 +106,12 @@ public struct ContentCatalog {
         p.backgrounds = p.backgrounds.map { var x=$0; x.id=key(original,"background",x.id); if !x.originFeatID.isEmpty { x.originFeatID=key(original,"feat",x.originFeatID) }; x.capabilities=qualify(x.capabilities) ?? .init(edition: original.ruleset); return x }
         p.classes = p.classes.map { cls in
             var c=cls; c.id=key(original,"class",c.id)
+            if var policy=c.multiclass {
+                if var casting=policy.casting { casting.poolIDs=casting.poolIDs.map { key(original,"capability",$0) }; policy.casting=casting }
+                policy.laterProficiencies=policy.laterProficiencies.map { var g=$0; g.id=key(original,"capability",g.id); return g }
+                policy.startingProficiencies=policy.startingProficiencies?.map { var g=$0; g.id=key(original,"capability",g.id); return g }
+                c.multiclass=policy
+            }
             c.capabilities=qualify(c.capabilities)
             c.spellIDs=c.spellIDs.map { key(original,"spell",$0) }
             c.subclasses=c.subclasses.map { sub in

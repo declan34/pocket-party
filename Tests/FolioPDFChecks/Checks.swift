@@ -124,6 +124,31 @@ import AppKit
             let page=(2..<tierDoc.pageCount).first { (tierDoc.page(at:$0)?.string ?? "").filter { !$0.isWhitespace }.contains(heading) }
             try check(page != nil && (tierDoc.page(at:page!)?.string ?? "").contains("BodyForNote\(i):"),"spell heading \(i) stays with its first body line")
         }
+        do {
+        var mixedPack=try ContentPack.capabilitySample()
+        let martialIndex=mixedPack.classes.firstIndex { $0.id=="summit-warden" }!, casterIndex=mixedPack.classes.firstIndex { $0.id=="notebook-keeper" }!
+        mixedPack.classes[martialIndex].hitDie=12; mixedPack.classes[casterIndex].hitDie=6
+        var mixed=CharacterBuild(classID:"summit-warden")
+        mixed.name="Mira Two Paths"; mixed.rulesProfile = .init(edition:"2024"); mixed.speciesID="roadfolk"; mixed.backgroundID="night-guide"
+        mixed.baseScores=["str":10,"dex":14,"con":13,"int":15,"wis":12,"cha":8]
+        mixed.backgroundBoosts=["cha":2,"con":1]; mixed.classSkills=["Arcana","Religion"]; mixed.languages=["Elvish","Dwarvish"]
+        mixed.levels[0].classID=mixed.classID
+        mixed=try RulesEngine.advance(mixed,in:mixedPack,classID:"notebook-keeper")
+        mixed.levels[1].capabilities = .init(spells:["notebook-study":["sheltering-glow","borrowed-dawn"]],prepared:["notebook-study":["sheltering-glow"]])
+        mixed=try RulesEngine.advance(mixed,in:mixedPack,classID:"notebook-keeper")
+        mixed=try RulesEngine.advance(mixed,in:mixedPack,classID:"summit-warden")
+        let mixedSheet=PrintableSheet(record:.init(pack:mixedPack,build:mixed))
+        try check(!mixedSheet.isDraft,"mixed-class PDF fixture valid")
+        let mixedData=try SheetPDF.render(mixedSheet,template:template), mixedDoc=PDFDocument(data:mixedData)!
+        let mixedWidgets=(0..<mixedDoc.pageCount).flatMap { mixedDoc.page(at:$0)!.annotations }
+        for key in ["hitDice","slots.1"] {
+            try check(mixedWidgets.first { $0.fieldName==SheetPDF.fieldMap[key] }?.widgetStringValue==mixedSheet.fields[key],"mixed-class \(key) editable widget survives reopen")
+        }
+        try check(mixedWidgets.first { $0.fieldName==SheetPDF.fieldMap["class"] }?.widgetStringValue?.hasPrefix("Summit") == true,"mixed-class class widget populated; full long label uses overflow")
+        let mixedText=(mixedDoc.string ?? "").filter { !$0.isWhitespace }
+        try check(mixedText.contains("SummitWarden2") && mixedText.contains("NotebookKeeper2") && mixedText.contains("2d6+2d12") && mixedText.contains("Notebookslots") && mixedText.contains("Notebookstudy"),"mixed class labels, separate hit dice, pool and casting source survive native rendering")
+        try mixedData.write(to:output.appendingPathComponent("multiclass-2024.pdf"))
+        }
         #if os(macOS)
         for i in 0..<doc.pageCount {
             let p=doc.page(at:i)!, bounds=doc.page(at:i)!.bounds(for:.mediaBox)

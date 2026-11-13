@@ -179,6 +179,11 @@
         },
         "level": {
           "type": "integer"
+        },
+        "canonicalID": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
         }
       }
     },
@@ -485,6 +490,9 @@
             "unarmored",
             "vessel-mantle"
           ]
+        },
+        "multiclass": {
+          "$ref": "#/$defs/multiclass"
         },
         "capabilities": {
           "$ref": "#/$defs/definitionCapabilities"
@@ -1233,9 +1241,94 @@
               "proficiencies",
               "configuration",
               "languages",
-              "spell-pools"
+              "spell-pools",
+              "multiclass"
             ]
           }
+        }
+      }
+    },
+    "casterContribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "divisor",
+        "rounding",
+        "startsAt",
+        "poolIDs",
+        "reciprocalSlotUse"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "ordinary",
+            "independent",
+            "none"
+          ]
+        },
+        "divisor": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        },
+        "rounding": {
+          "enum": [
+            "down",
+            "up"
+          ]
+        },
+        "startsAt": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        },
+        "poolIDs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "reciprocalSlotUse": {
+          "type": "boolean"
+        }
+      }
+    },
+    "multiclass": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "canonicalID",
+        "laterProficiencies"
+      ],
+      "properties": {
+        "canonicalID": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "prerequisites": {
+          "$ref": "#/$defs/predicate"
+        },
+        "startingProficiencies": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/capabilityGrant"
+          }
+        },
+        "laterProficiencies": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/capabilityGrant"
+          }
+        },
+        "casting": {
+          "$ref": "#/$defs/casterContribution"
+        },
+        "laterSkillCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4
         }
       }
     }

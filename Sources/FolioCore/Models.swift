@@ -17,6 +17,7 @@ public enum Ability: String, Codable, CaseIterable, Sendable, Identifiable {
 }
 
 public struct Feature: Codable, Sendable, Hashable, Identifiable {
+    public var canonicalID: String? = nil
     public var id: String
     public var name: String
     public var level: Int
@@ -68,6 +69,7 @@ public struct Progression: Codable, Sendable, Hashable, Identifiable {
 }
 
 public struct ClassDefinition: Codable, Sendable, Hashable, Identifiable {
+    public var multiclass: MulticlassPolicy? = nil
     public var capabilities: DefinitionCapabilities? = nil
     public var id: String
     public var name: String
@@ -165,6 +167,7 @@ public struct ContentPack: Codable, Sendable, Hashable, Identifiable {
         guard let scoped = sourceCoverageNotes else { return coverageNotes }
         let background = backgrounds.first { $0.id == build.backgroundID }
         var ids = Set([build.classID, build.speciesID, build.backgroundID] + build.levels.map(\.featID))
+        ids.formUnion(build.levels.compactMap(\.classID))
         if build.rulesProfile?.edition != "2014", let origin = background?.originFeatID { ids.insert(origin) }
         for row in build.levels {
             ids.formUnion(row.spellIDs + row.cantripIDs)
@@ -191,6 +194,9 @@ public struct ContentPack: Codable, Sendable, Hashable, Identifiable {
 }
 
 public struct LevelChoice: Codable, Sendable, Hashable, Identifiable {
+    public var multiclassSkills: [String]? = nil
+    /// Absence in old saves means the original starting class, never the previous row.
+    public var classID: String? = nil
     public var capabilities: CapabilityChoices? = nil
     public var level: Int
     public var subclassID: String
@@ -209,6 +215,7 @@ public struct LevelChoice: Codable, Sendable, Hashable, Identifiable {
         featID = ""
         boosts = [:]
         capabilities = previous?.capabilities
+        classID = previous?.classID
     }
 }
 

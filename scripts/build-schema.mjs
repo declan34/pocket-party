@@ -43,6 +43,12 @@ defs.definitionCapabilities = object({edition:{enum:['2014','2024']},grants:arra
 defs.definitionCapabilities.properties.spellPools={type:'array',maxItems:32,items:ref('spellPool')};
 defs.packCapabilities = object({version:{const:1},required:array({enum:['choices','modifiers','casting','editions','resources','traits','proficiencies','configuration','languages']})});
 defs.packCapabilities.properties.required.items.enum.push('spell-pools');
+defs.packCapabilities.properties.required.items.enum.push('multiclass');
+defs.casterContribution=object({kind:{enum:['ordinary','independent','none']},divisor:{type:'integer',minimum:1,maximum:20},rounding:{enum:['down','up']},startsAt:{type:'integer',minimum:1,maximum:20},poolIDs:array(string),reciprocalSlotUse:bool});
+defs.multiclass=object({canonicalID:{type:'string',minLength:1,maxLength:120},prerequisites:ref('predicate'),startingProficiencies:array(ref('capabilityGrant')),laterProficiencies:array(ref('capabilityGrant')),casting:ref('casterContribution')},['prerequisites','startingProficiencies','casting']);
+defs.class.properties.multiclass=ref('multiclass');
+defs.multiclass.properties.laterSkillCount={type:'integer',minimum:0,maximum:4};
+defs.feature.properties.canonicalID={type:'string',minLength:1,maxLength:120};
 for (const name of ['class','subclass','species','background','feat']) defs[name].properties.capabilities = ref('definitionCapabilities');
 const schema = {$schema:'https://json-schema.org/draft/2020-12/schema',title:'Pocket Party content pack v1/v2',...object({schemaVersion:{enum:[1,2]},capabilities:ref('packCapabilities'),id:string,version:string,name:string,ruleset:{enum:['2014','2024']},isPrivate:bool,attribution:string,coverageNotes:array(string),classes:array(ref('class')),species:array(ref('species')),backgrounds:array(ref('background')),feats:array(ref('feat')),spells:array(ref('spell')),languages:array(string)},['capabilities']),allOf:[{if:{properties:{schemaVersion:{const:1}}},then:{properties:{ruleset:{const:'2024'}}}},{if:{properties:{schemaVersion:{const:2}}},then:{required:['capabilities']}}],$defs:defs};
 // The shared definitions permit v2 high levels; v1 keeps its existing boundary.

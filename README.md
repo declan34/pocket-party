@@ -4,7 +4,7 @@ A native SwiftUI home for character ideas that grow into playable builds. Build 
 
 The project is now called **Pocket Party**. The current Xcode target, preview app, and local save folder still use the development name **Character Folio** to preserve existing builds and saved characters.
 
-This is a local MVP, not a complete D&D character creator yet. Schema-2 builds support **single-class levels 1–20 where the pack supplies explicit rows**, with a pinned 2014 or 2024 profile. Schema-1 saves keep their original level-1–5 2024 conventions. The bundled **Lantern Roads** and **Trail Warden capability laboratory** packs are original demonstrations, not official content or a claim of game balance; **Summit Warden** demonstrates high-level progression and **Notebook Keeper** demonstrates tiered pools and editable book preparation.
+This is a local MVP, not a complete D&D character creator yet. Schema-2 builds support **levels 1–20 where the pack supplies explicit rows**, including multiclassing when each class declares an entry policy, with a pinned 2014 or 2024 profile. Schema-1 saves keep their original level-1–5 2024 conventions. The bundled **Lantern Roads** and **Trail Warden capability laboratory** packs are original demonstrations, not official content or a claim of game balance; **Summit Warden** and **Notebook Keeper** demonstrate multiclass progression, tiered pools and editable book preparation.
 
 ## Try it now on this Mac
 
@@ -34,6 +34,7 @@ Keep PDFs containing private content private. The supported blank PDF revision i
 
 - Standard array; background ability bonuses, skills, tool, and origin feat.
 - Level-by-level choices, subclass grants, feat prerequisites, and ability improvements.
+- Per-level class selection, entry/exit prerequisites, starting versus later-class training, class-local advancement and separate hit-die capacities. Earlier edits retain invalidated choices for correction.
 - Known spells, cantrips, spell-list validation, source-owned ordinary/pact/custom/limited pools and up to nine declared slot tiers; legacy uniform pools remain supported.
 - Editable preparation separate from learned spells and historical acquisition, with source-specific abilities/DCs and labeled PDF overflow. Higher capacity never unlocks higher-level knowledge.
 - Typed independent choices, prerequisite/replacement rules, expertise/partial proficiency, conditional defenses/skills/form size and movement, resource capacities, known/prepared/book policies and explicit cross-list eligibility.
@@ -42,7 +43,7 @@ Keep PDFs containing private content private. The supported blank PDF revision i
 - Local save with a previous-file backup; JSON import/export; pinned content versions.
 - Original public sample content and a repeatable private converter using our already-corrected extracted sources—not the PDFs again.
 
-Not yet supported: multiclassing, every class’s unique choices, equipment purchases/armor loadouts, custom rolled abilities/HP, combat/resource use, cantrip replacement, full conditional feat automation, sync, Foundry export, or AI portrait generation. Narrative feature text is readable but does not imply its mechanics are automated. “Build checks passed” means the implemented checks passed, not that every 2024 rule was evaluated.
+Not yet supported: every class’s unique choices, equipment purchases/armor loadouts, custom rolled abilities/HP, combat/resource use, cantrip replacement, full conditional feat automation, sync, Foundry export, or AI portrait generation. A class without an explicit multiclass policy cannot be combined by guessing its rules. Narrative feature text is readable but does not imply its mechanics are automated. “Build checks passed” means the implemented checks passed, not that every 2024 rule was evaluated.
 
 ## Run and develop
 

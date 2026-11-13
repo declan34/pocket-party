@@ -193,6 +193,7 @@ struct NewCharacterView: View {
                             if let cls = pack.classes.first(where: { $0.id == selectedClass }), let capabilities = cls.capabilities {
                                 build.rulesProfile = .init(edition: capabilities.edition)
                                 build.levels[0].capabilities = .init()
+                                if pack.capabilities?.required.contains("multiclass") == true { build.levels[0].classID=selectedClass }
                             }
                             build.name = name.trimmingCharacters(in: .whitespacesAndNewlines)
                             let record = CharacterRecord(pack: pack, build: build)

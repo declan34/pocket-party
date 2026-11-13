@@ -15,6 +15,7 @@ struct CharacterView: View {
     @State private var removingLevel = false
     @State private var addingLibrary = false
     @State private var sheetStyle = "Summary"
+    @State private var nextClassID = ""
 
     init(store: AppStore, initial: CharacterRecord) {
         self.store = store
@@ -32,7 +33,7 @@ struct CharacterView: View {
                     .pickerStyle(.segmented).labelsHidden()
                 if section == "Build" {
                     creation
-                    if let definition {
+                    if definition != nil {
                         FolioPanel(title: "The path so far", subtitle: "Every level keeps its own choices. Editing an earlier level rechecks the rest of your build.") {
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 10) {
@@ -47,7 +48,19 @@ struct CharacterView: View {
                                 }
                             }
                             if selectedLevel <= record.build.levels.count {
-                                LevelEditor(build: $record.build, pack: record.pack, definition: definition, level: selectedLevel)
+                                if record.build.rulesProfile != nil && record.pack.capabilities?.required.contains("multiclass") == true {
+                                    Picker("Class at level \(selectedLevel)", selection: Binding(get: { Multiclassing.classID(at:selectedLevel,build:record.build) }, set: { id in
+                                        for i in record.build.levels.indices { record.build.levels[i].classID = record.build.levels[i].classID ?? record.build.classID }
+                                        record.build.levels[selectedLevel-1].classID=id
+                                        if selectedLevel == 1 { record.build.classID=id }
+                                    })) {
+                                        ForEach(record.pack.classes) { Text(record.pack.optionName($0.name,id:$0.id)).tag($0.id) }
+                                    }
+                                    Text("Changing a class retains all saved choices. Review invalidated levels below; nothing is silently deleted.").font(.caption).foregroundStyle(Palette.muted)
+                                }
+                                if let selected=record.pack.classes.first(where: { $0.id == Multiclassing.classID(at:selectedLevel,build:record.build) }) {
+                                    LevelEditor(build: $record.build, pack: record.pack, definition: selected, level: selectedLevel)
+                                }
                             }
                         }
                     }
@@ -121,7 +134,7 @@ struct CharacterView: View {
             CharacterAvatar(name: record.build.name, portrait: record.build.portrait, size: 64)
             VStack(alignment: .leading, spacing: 5) {
                 Text(record.build.name).font(.largeTitle.weight(.medium)).foregroundStyle(Palette.ink)
-                Text("Level \(record.build.level) \(definition?.name ?? "character")").foregroundStyle(Palette.muted)
+                Text(summary.classLevels.map { "\($0.name) \($0.level)" }.joined(separator:" / ")).foregroundStyle(Palette.muted)
                 Text(record.build.rulesProfile.map { "\($0.edition) · evaluator \($0.evaluator)" } ?? "Legacy 2024 rules · pinned").font(.caption).foregroundStyle(Palette.muted)
                 Label(summary.isValid ? "Build checks passed" : "\(summary.issues.count) choices to review", systemImage: summary.isValid ? "checkmark.seal.fill" : "pencil.line")
                     .font(.caption.weight(.medium)).foregroundStyle(summary.isValid ? Palette.sea : Palette.brass)
@@ -208,14 +221,20 @@ struct CharacterView: View {
                     Text((issue.level.map { "Level \($0): " } ?? "") + issue.message).font(.subheadline)
                 }
             }
-            if record.build.level < (definition?.maxLevel ?? 1) {
+            if record.build.level < (record.build.rulesProfile == nil ? definition?.maxLevel ?? 1 : 20) {
+                if record.build.rulesProfile != nil && record.pack.capabilities?.required.contains("multiclass") == true {
+                    Picker("Next level's class",selection:$nextClassID) {
+                        Text("Continue current class").tag("")
+                        ForEach(record.pack.classes) { Text(record.pack.optionName($0.name,id:$0.id)).tag($0.id) }
+                    }
+                }
                 Button {
-                    do { record.build = try RulesEngine.advance(record.build, in: record.pack); selectedLevel = record.build.level }
+                    do { record.build = try RulesEngine.advance(record.build, in: record.pack,classID:nextClassID.isEmpty ? record.build.levels.last?.classID ?? record.build.classID : nextClassID); selectedLevel = record.build.level }
                     catch { message = error.localizedDescription }
                 } label: { Text("Advance to level \(record.build.level + 1)").frame(maxWidth: .infinity) }
                     .buttonStyle(FolioButton()).disabled(!summary.isValid)
             } else {
-                Text("You’ve reached the level-\(definition?.maxLevel ?? 1) boundary of this pack. Your character is saved and can be duplicated or exported.").font(.subheadline).foregroundStyle(Palette.muted)
+                Text("You’ve reached the level-\(CharacterPresentation.terminalLevelLimit(evaluator:record.build.rulesProfile?.evaluator,startingClassMaximum:definition?.maxLevel)) boundary of this build. Your character is saved and can be duplicated or exported.").font(.subheadline).foregroundStyle(Palette.muted)
             }
         }
     }
@@ -241,17 +260,37 @@ struct LevelEditor: View {
     let level: Int
     private var index: Int { level - 1 }
     private var current: LevelChoice { build.levels[index] }
+    private var classLevel: Int { Multiclassing.classLevel(definition.id,build:build,through:level) }
     private var summary: CharacterSummary { RulesEngine.evaluate(build, in: pack, through: level) }
     var body: some View {
-        if let progression = definition.at(level) {
+        if let progression = definition.at(classLevel) {
             VStack(alignment: .leading, spacing: 20) {
-                Text("Level \(level) decisions").font(.headline).foregroundStyle(Palette.ink)
-                ForEach(definition.features.filter { $0.level == level }) { feature in
+                Text("Level \(level) · \(definition.name) \(classLevel) decisions").font(.headline).foregroundStyle(Palette.ink)
+                if (classLevel == 1 && level > 1 && (definition.multiclass?.laterSkillCount ?? 0) > 0) || !(current.multiclassSkills ?? []).isEmpty {
+                    Text("Later-class skills · choose \(definition.multiclass?.laterSkillCount ?? 0)").font(.headline)
+                    ForEach(Array(Set(definition.skillPool + (current.multiclassSkills ?? []))).sorted(),id:\.self) { skill in
+                        Toggle(skill,isOn:selection(skill,in:Binding(get:{ current.multiclassSkills ?? [] },set:{ build.levels[index].multiclassSkills=$0 })))
+                    }
+                }
+                if !current.talentIDs.isEmpty && progression.talents == 0 {
+                    Text("Retained options: " + current.talentIDs.joined(separator:", ")).font(.caption)
+                    Button("Clear retained options") { build.levels[index].talentIDs=[] }
+                }
+                ForEach(current.talentIDs.filter { id in !definition.talents.contains { $0.id == id } },id:\.self) { id in
+                    Text("Retained unavailable option: \(id)").font(.caption)
+                    Button("Remove unavailable option") { build.levels[index].talentIDs.removeAll { $0 == id } }
+                }
+                if (!current.spellIDs.isEmpty || !current.cantripIDs.isEmpty) && progression.spells == 0 && progression.cantrips == 0 {
+                    Text("Retained legacy spells: " + (current.cantripIDs + current.spellIDs).joined(separator:", ")).font(.caption)
+                    Button("Clear retained legacy spells") { build.levels[index].spellIDs=[]; build.levels[index].cantripIDs=[] }
+                }
+                ForEach(definition.features.filter { $0.level == classLevel }) { feature in
                     DisclosureGroup(feature.name) { Text(feature.text).font(.subheadline).textSelection(.enabled).padding(.vertical, 8) }
                 }
-                if level >= RulesEngine.subclassUnlockLevel(for: definition, build: build, in: pack) || !current.subclassID.isEmpty {
+                if classLevel >= RulesEngine.subclassUnlockLevel(for: definition, build: build, in: pack) || !current.subclassID.isEmpty {
                     Picker("Subclass", selection: $build.levels[index].subclassID) {
                         Text("Choose subclass").tag("")
+                        if !current.subclassID.isEmpty && !definition.subclasses.contains(where: { $0.id == current.subclassID }) { Text("Retained: \(current.subclassID)").tag(current.subclassID) }
                         ForEach(definition.subclasses) { Text($0.name).tag($0.id) }
                     }
                     if let subclass = definition.subclasses.first(where: { $0.id == current.subclassID }) {
@@ -262,7 +301,7 @@ struct LevelEditor: View {
                     if definition.capabilities?.groups?.isEmpty != false {
                     Text("\(definition.talentLabel) · \(current.talentIDs.count)/\(progression.talents)").font(.headline)
                     Text("Keep your earlier choices, add new ones as granted, or replace at most one at this level.").font(.caption).foregroundStyle(Palette.muted)
-                    ForEach(definition.talents.filter { $0.minimumLevel <= level }) { talent in
+                    ForEach(definition.talents.filter { $0.minimumLevel <= classLevel || current.talentIDs.contains($0.id) }) { talent in
                         ChoiceRow(name: talent.name, text: talent.text, isSelected: selection(talent.id, in: $build.levels[index].talentIDs))
                     }
                     }
@@ -281,7 +320,8 @@ struct LevelEditor: View {
                     }
                     Text("These do not use your known-spell choices.").font(.caption).foregroundStyle(Palette.muted)
                 }
-                if progression.improvement {
+                if progression.improvement || !current.featID.isEmpty || !current.boosts.isEmpty {
+                    if !progression.improvement { Text("This class level does not grant an improvement. Clear the retained choice to resolve it.").font(.caption).foregroundStyle(Palette.brass) }
                     Picker("Feat or ability improvement", selection: Binding(get: { current.featID }, set: { build.levels[index].featID = $0; build.levels[index].boosts = [:] })) {
                         Text("Choose an improvement").tag("")
                         ForEach(pack.feats.filter { $0.category == "general" && $0.minimumLevel <= level }) { Text(pack.optionName($0.name,id:$0.id)).tag($0.id) }
@@ -345,6 +385,8 @@ struct CharacterSheet: View {
     var body: some View {
         VStack(spacing: 20) {
             FolioPanel(title: "At a glance", subtitle: "Fixed-average hit points. Armor values assume no equipped armor or shield.") {
+                Text(summary.classLevels.map { "\($0.name) \($0.level)\($0.subclassName.isEmpty ? "" : " · " + $0.subclassName)" }.joined(separator:"\n")).font(.subheadline)
+                Text("Hit dice: " + summary.hitDice.keys.sorted().map { "\(summary.hitDice[$0]!)d\($0)" }.joined(separator:" + ")).font(.subheadline)
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 95))]) {
                     StatView(value: "\(summary.hitPoints)", label: "Maximum HP")
                     StatView(value: "\(summary.armorClass)", label: "Unarmored AC")
