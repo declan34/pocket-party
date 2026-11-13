@@ -49,8 +49,11 @@ public struct PrintableSheet: Sendable {
                 if trained { checks.insert("skill.\(skill)") }
                 if skill == "Perception" { fields["passivePerception"]=String(10+modifier) }
             }
-            if s.slots > 0 { fields["slots.\(s.slotLevel)"]=String(s.slots) }
-            if let ability=s.castingAbility ?? cls.spellAbility, s.slots > 0 || !s.spells.isEmpty {
+            if s.spellPools.isEmpty, s.slots > 0 { fields["slots.\(s.slotLevel)"]=String(s.slots) }
+            // The form has one ordinary pool only. Never sum independent pools.
+            let ordinary = s.spellPools.filter { $0.kind == .ordinary }
+            if ordinary.count == 1 { for (tier,count) in ordinary[0].capacities { fields["slots.\(tier)"]=String(count) } }
+            if let ability=s.castingAbility ?? (s.castingSources.isEmpty ? cls.spellAbility : nil), s.slots > 0 || !s.spells.isEmpty {
                 if let dc=s.spellDC { fields["spell.dc"]=String(dc) }
                 if let atk=s.spellAttack { fields["spell.attack"]=Self.signed(atk) }
                 fields["spell.ability"]=ability.name
@@ -72,6 +75,11 @@ public struct PrintableSheet: Sendable {
         supplements.append(SheetSection(title:"Reading this sheet",text:notes))
         if !s.traits.isEmpty { supplements.append(SheetSection(title:"Supported traits",text:s.traits.joined(separator:"\n"))) }
         if !s.resources.isEmpty { supplements.append(SheetSection(title:"Resource capacities",text:s.resources.map { "\($0.name): \($0.maximum); recovery: \($0.recovery). Expenditure not tracked." }.joined(separator:"\n"))) }
+        if !s.spellPools.isEmpty { supplements.append(.init(title:"Spell pools",text:s.spellPools.map { "\($0.name) [\($0.kind.rawValue); source \($0.sourceID); pool \($0.id)]: \($0.capacityDescription). Recovery: \($0.recovery). Expenditure not tracked." }.joined(separator:"\n"))) }
+        for source in s.castingSources {
+            let roster = source.spellLabels.keys.sorted().map { id in "\(p.spells.first { $0.id == id }?.name ?? id) [\(id)] — \(source.spellLabels[id]!)" }.joined(separator:"\n")
+            supplements.append(.init(title:"Casting — \(source.name)",text:"Source: \(p.sourceLabels?[source.sourceID] ?? source.sourceID); policy \(source.id). \(source.ability.name); DC \(source.dc); attack \(Self.signed(source.attack)); access through tier \(source.maximumSpellLevel); \(source.acquisitionPolicy.rawValue).\n"+roster))
+        }
         if !s.supportDiagnostics.isEmpty { supplements.append(SheetSection(title:"Manual mechanics",text:s.supportDiagnostics.joined(separator:"\n"))) }
         if !s.spells.isEmpty {
             let roster=s.spells.sorted { ($0.level,$0.name,$0.id) < ($1.level,$1.name,$1.id) }.map { spell in

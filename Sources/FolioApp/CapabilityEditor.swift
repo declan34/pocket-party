@@ -30,6 +30,12 @@ struct CapabilityEditor: View {
             build.levels[index].capabilities = next
         })
     }
+    private func loadout(_ source: CastingSourceSummary) -> Binding<[String]> {
+        Binding(get: { build.castingLoadouts?[source.id] ?? source.selectedLoadout }, set: { ids in
+            if build.castingLoadouts == nil { build.castingLoadouts = [:] }
+            build.castingLoadouts?[source.id] = ids
+        })
+    }
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             Text("\(build.rulesProfile?.edition ?? pack.ruleset) rules · \(pack.sourceLabels?[definition.id] ?? pack.name)").font(.caption).foregroundStyle(Palette.muted)
@@ -60,11 +66,30 @@ struct CapabilityEditor: View {
                 let active = summary.activePolicyIDs.contains(policy.id)
                 let count = active && policy.counts.indices.contains(index) ? policy.counts[index] : 0
                 let maximum = policy.maximumSpellLevels.indices.contains(index) ? policy.maximumSpellLevels[index] : 0
-                SpellPicker(title: "\(policy.name) · \(policy.mode.rawValue.capitalized)", count: count, spells: pack.spells.filter { policy.spellIDs.contains($0.id) && $0.level <= maximum }, selection: values(policy.id, field: "spells"))
+                if !(policy.hasEditableLoadout && policy.mode == .prepared && active) {
+                    SpellPicker(title: "\(policy.name) · \(policy.mode == .book ? "Learned in book" : policy.mode.rawValue.capitalized)", count: count, spells: pack.spells.filter { policy.spellIDs.contains($0.id) && $0.level <= maximum && !(policy.alwaysGrantedSpellIDs ?? []).contains($0.id) }, selection: values(policy.id, field: "spells"))
+                }
                 if !active { Text("Inactive policy. Clear its choices when switching to a replacement policy.").font(.caption).foregroundStyle(Palette.muted) }
                 if let text = policy.text { Text(text).font(.caption).foregroundStyle(Palette.muted) }
-                if policy.mode == .book {
+                if policy.hasEditableLoadout, active, let source=summary.castingSources.first(where: { $0.id == policy.id }) {
+                    Text("\(source.name) · \(source.ability.name) · DC \(source.dc) · access through tier \(source.maximumSpellLevel)").font(.caption).foregroundStyle(Palette.muted)
+                    Text(pack.sourceLabels?[source.sourceID] ?? pack.name).font(.caption).foregroundStyle(Palette.muted)
+                    if level == build.level {
+                        SpellPicker(title:"Current preparation · \(policy.mode == .book ? "from learned book" : "from available list")",count:source.preparationCount,spells:pack.spells.filter { source.memberSpellIDs.contains($0.id) && !(policy.alwaysGrantedSpellIDs ?? []).contains($0.id) },selection:loadout(source))
+                        Text("Preparation can change without rewriting acquired spells or earlier levels. Empty or incomplete choices remain a saved draft.").font(.caption).foregroundStyle(Palette.muted)
+                    } else { Text("Edit current preparation at the latest level. This view retains acquisition history.").font(.caption).foregroundStyle(Palette.muted) }
+                    if !(policy.alwaysGrantedSpellIDs ?? []).isEmpty { Text("Always granted: " + pack.spells.filter { (policy.alwaysGrantedSpellIDs ?? []).contains($0.id) }.map(\.name).joined(separator:", ")).font(.caption) }
+                } else if policy.mode == .book {
                     SpellPicker(title: "Prepared from book", count: policy.preparedCounts.flatMap { $0.indices.contains(index) ? $0[index] : nil } ?? 0, spells: pack.spells.filter { values(policy.id, field: "spells").wrappedValue.contains($0.id) }, selection: values(policy.id, field: "prepared"))
+                }
+                if policy.loadout == .retained { Text("Retained acquisition list: replacements follow the level-up policy, even when the source calls these spells Prepared.").font(.caption).foregroundStyle(Palette.muted) }
+            }
+            ForEach(summary.spellPools) { pool in
+                Text("\(pool.name) · \(pool.capacityDescription) · \(pool.recovery)").font(.subheadline)
+            }
+            if level == build.level {
+                ForEach((build.castingLoadouts ?? [:]).keys.sorted().filter { id in !summary.castingSources.contains { $0.id == id && $0.editableLoadout } }, id: \.self) { id in
+                    Button("Clear inactive preparation: \(id)") { build.castingLoadouts?.removeValue(forKey:id) }
                 }
             }
         }

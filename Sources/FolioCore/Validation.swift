@@ -93,6 +93,12 @@ public enum PackValidator {
         } else if record.pack.classes.first(where: { $0.id == b.classID })?.capabilities != nil || b.levels.contains(where: { $0.capabilities != nil }) {
             throw FolioError.invalid("Capability choices require an explicit rules profile.")
         }
+        if let loadouts = b.castingLoadouts {
+            guard b.rulesProfile?.evaluator == 2, record.pack.capabilities?.required.contains("spell-pools") == true,
+                  loadouts.count <= 64, loadouts.allSatisfy({ !$0.key.isEmpty && $0.key.count <= 120 && $0.value.count <= 100 && $0.value.allSatisfy { !$0.isEmpty && $0.count <= 120 } }) else {
+                throw FolioError.invalid("Casting loadouts require supported bounded source-qualified configuration.")
+            }
+        }
         for level in b.levels {
             guard let choices = level.capabilities else { continue }
             let dictionaries = [choices.groups ?? [:], choices.spells ?? [:], choices.prepared ?? [:]]

@@ -17,18 +17,21 @@ public enum CapabilityEngine {
         let currentSubclass = cls?.subclasses.first { $0.id == build.levels.prefix(level).last?.subclassID }
         let species = pack.species.first { $0.id == build.speciesID }
         let background = pack.backgrounds.first { $0.id == build.backgroundID }
+        // Ownership is pinned on each policy, never inferred from the combined
+        // pack's union of required capabilities. Absence retains old semantics.
+        let replacesLegacyCasting = !(cls?.capabilities?.casting ?? []).isEmpty
+            || (currentSubclass?.capabilities?.casting ?? []).contains { $0.legacyClassCasting != .preserve }
         // Reuse the stable creation/HP/ASI validator with capability-owned tracks disabled.
         if let index = basePack.classes.firstIndex(where: { $0.id == build.classID }) {
             basePack.classes[index].subclassLevel = RulesEngine.subclassUnlockLevel(for: basePack.classes[index], build: build, in: pack)
             let hasGroups = !(cls?.capabilities?.groups ?? []).isEmpty
-            let hasCasting = !(cls?.capabilities?.casting ?? []).isEmpty || !(currentSubclass?.capabilities?.casting ?? []).isEmpty
             for i in basePack.classes[index].progression.indices {
                 if hasGroups { basePack.classes[index].progression[i].talents = 0 }
-                if hasCasting { basePack.classes[index].progression[i].spells = 0; basePack.classes[index].progression[i].cantrips = 0 }
+                if replacesLegacyCasting { basePack.classes[index].progression[i].spells = 0; basePack.classes[index].progression[i].cantrips = 0 }
             }
             for i in baseBuild.levels.indices {
                 if hasGroups { baseBuild.levels[i].talentIDs = [] }
-                if hasCasting { baseBuild.levels[i].spellIDs = []; baseBuild.levels[i].cantripIDs = [] }
+                if replacesLegacyCasting { baseBuild.levels[i].spellIDs = []; baseBuild.levels[i].cantripIDs = [] }
             }
         }
         if edition == "2014" {
@@ -36,6 +39,7 @@ public enum CapabilityEngine {
             for i in basePack.backgrounds.indices { basePack.backgrounds[i].originFeatID = "" }
         }
         var result = RulesEngine.evaluateLegacy(baseBuild, in: basePack, through: level)
+        let legacyCastingSpells = result.spells
         // Replay these below against historical capability-adjusted, pre-choice scores.
         // All other feat checks (level, duplication, allocation) remain legacy-owned.
         result.issues.removeAll { $0.code.hasPrefix("feat-prereq-") || $0.code.hasPrefix("score-cap-") }
@@ -116,7 +120,6 @@ public enum CapabilityEngine {
         var ranks = Dictionary(uniqueKeysWithValues: result.skills.map { ($0, ProficiencyRank.proficient) })
         var prerequisiteScores = result.scores
         var castingAbility = cls?.spellAbility
-        var selectedCastingAbilities = Set<Ability>()
         func proficiencyTargets(_ target: String?) -> [String] {
             if target == "all-skills" { return Array(RulesEngine.skillAbilities.keys) }
             if target == "all-saves" { return Ability.allCases.map { "save." + $0.rawValue } }
@@ -294,28 +297,28 @@ public enum CapabilityEngine {
                 if active && (!policy.counts.indices.contains(at - 1) || (policy.replacementLimits.map { !$0.indices.contains(at - 1) } ?? false) || (policy.preparedCounts.map { !$0.indices.contains(at - 1) } ?? false)) { issue("policy-row-\(policy.id)", "\(policy.name) has no explicit row for this level.", at) }
                 let ids = choice.capabilities?.spells?[policy.id] ?? []
                 let count = active && policy.counts.indices.contains(at - 1) ? policy.counts[at - 1] : 0
-                if ids.count != count || Set(ids).count != ids.count { issue("casting-count-\(policy.id)", "\(policy.name) requires \(count) distinct choices.", at) }
+                let editableList = policy.hasEditableLoadout && policy.mode == .prepared
+                if !editableList && (ids.count != count || Set(ids).count != ids.count) { issue("casting-count-\(policy.id)", "\(policy.name) requires \(count) distinct choices.", at) }
                 let maximum = policy.maximumSpellLevels.indices.contains(at - 1) ? policy.maximumSpellLevels[at - 1] : 0
-                for id in ids {
+                for id in editableList ? [] : ids {
                     guard let spell = pack.spells.first(where: { $0.id == id }), policy.spellIDs.contains(id), spell.level <= maximum else { issue("casting-option-\(id)", "Spell is outside the policy's eligible list or level.", at); continue }
                     if let reason = spell.unavailableReason { issue("casting-source-\(id)", reason, at) }
-                    if [.known, .prepared].contains(policy.mode), grants.contains(where: { _, grant in
+                    if (policy.alwaysGrantedSpellIDs ?? []).contains(id) || ([.known, .prepared].contains(policy.mode) && grants.contains(where: { _, grant in
                         grant.kind == .spell && grant.target == id && matches(grant.condition, at: at, selections: eligibleSelections, config: config, subclass: choice.subclassID)
-                    }) { issue("casting-granted-\(id)", "Additional granted spells do not consume \(policy.name) choices.", at) }
+                    })) { issue("casting-granted-\(id)", "Additional granted spells do not consume \(policy.name) choices.", at) }
                 }
                 let removed = Set(previousSpells[policy.id] ?? []).subtracting(ids)
                 let limit = policy.replacementLimits.flatMap { $0.indices.contains(at - 1) ? $0[at - 1] : nil } ?? 0
-                if active && ![.prepared, .ritual].contains(policy.mode) && removed.count > limit { issue("casting-replacement-\(policy.id)", "Too many replacements for \(policy.name).", at) }
-                if active && policy.mode == .book {
+                if active && (policy.loadout == .retained || ![.prepared, .ritual].contains(policy.mode)) && removed.count > limit { issue("casting-replacement-\(policy.id)", "Too many replacements for \(policy.name).", at) }
+                if active && policy.mode == .book && !policy.hasEditableLoadout {
                     let prepared = choice.capabilities?.prepared?[policy.id] ?? []
                     let needed = policy.preparedCounts.flatMap { $0.indices.contains(at - 1) ? $0[at - 1] : nil } ?? 0
                     if prepared.count != needed || Set(prepared).count != prepared.count || !Set(prepared).isSubset(of: Set(ids)) { issue("preparation-\(policy.id)", "Prepare \(needed) different spells from your book.", at) }
                 }
                 if at == level && active {
-                    spellIDs.formUnion(ids)
+                    if !editableList { spellIDs.formUnion(ids) }
                     for id in ids { result.spellLabels[id] = policy.mode == .book ? ((choice.capabilities?.prepared?[policy.id] ?? []).contains(id) ? "Prepared (book)" : "Spellbook") : policy.mode.rawValue.capitalized }
                     if !ids.isEmpty {
-                        selectedCastingAbilities.insert(policy.ability)
                         castingAbility = policy.ability
                         let mod = Ability.modifier(result.scores[policy.ability.rawValue, default: 10])
                         result.spellDC = 8 + result.proficiency + mod; result.spellAttack = result.proficiency + mod
@@ -350,7 +353,6 @@ public enum CapabilityEngine {
             finalScores = rowScores; finalScoreProvenance = rowScoreProvenance
         }
         var skillAbilities = RulesEngine.skillAbilities, skillBonuses: [String:Int] = [:]
-        if selectedCastingAbilities.count > 1 { issue("casting-abilities", "Simultaneous policies with different casting abilities require a per-policy sheet projection not supported by this evaluator.") }
         prerequisiteScores = result.scores
         let originalScores = result.scores
         var applied = Set(finalScoreProvenance.map(\.grantID))
@@ -411,6 +413,18 @@ public enum CapabilityEngine {
                     }
                     let labels = Set((result.spellLabels[id]?.components(separatedBy: "; ") ?? []) + [label])
                     result.spellLabels[id] = labels.sorted().joined(separator: "; ")
+                    if let ability = grant.ability {
+                        let modifier = Ability.modifier(result.scores[ability.rawValue,default:10])
+                        let mode: CastingPolicy.Mode
+                        switch grant.spellMode ?? .granted {
+                        case .prepared: mode = .prepared
+                        case .atWill: mode = .atWill
+                        case .limited: mode = .limited
+                        case .ritual: mode = .ritual
+                        case .granted: mode = .granted
+                        }
+                        result.castingSources.append(.init(id:grant.id,sourceID:owner,name:grant.text ?? spell.name,ability:ability,dc:8+result.proficiency+modifier,attack:result.proficiency+modifier,maximumSpellLevel:spell.level,acquisitionPolicy:mode,editableLoadout:false,preparationCount:0,poolIDs:[],availableSpellIDs:[id],memberSpellIDs:[id],selectedLoadout:[id],spellLabels:[id:label]))
+                    }
                     if let reason = spell.unavailableReason { issue("grant-source-\(id)", reason) }
                 }
             }
@@ -419,6 +433,33 @@ public enum CapabilityEngine {
         for (skill, ability) in skillAbilities { result.skillModifiers[skill] = Ability.modifier(result.scores[ability.rawValue, default: 10]) + (ranks[skill] ?? .none).bonus(result.proficiency) + skillBonuses[skill, default: 0] }
         result.skills = ranks.filter { RulesEngine.skillAbilities[$0.key] != nil && ($0.value == .proficient || $0.value == .expertise) }.keys.sorted()
         result.spells = pack.spells.filter { spellIDs.contains($0.id) }.sorted { ($0.level, $0.name) < ($1.level, $1.name) }
+        let activePools = definitions.flatMap { owner, data in
+            (data.spellPools ?? []).filter { level >= unlocks[owner, default:1] && matches($0.condition, at:level, selections:finalSelections, config:finalConfig, subclass:build.levels.prefix(level).last?.subclassID ?? "") }.map { (owner,$0) }
+        }
+        let activePolicies = definitions.flatMap { owner, data in (data.casting ?? []).filter { result.activePolicyIDs.contains($0.id) }.map { (owner,$0) } }
+        var legacyPoolIDs:[String]=[]
+        if let cls, result.slots > 0, !activePools.isEmpty,
+           (cls.capabilities?.spellPools ?? []).isEmpty,
+           !(cls.capabilities?.casting ?? []).contains(where: { !($0.poolIDs ?? []).isEmpty }) {
+            // A separate species/subclass pool does not replace legacy class
+            // capacity. Legacy data does not declare a pool kind or recovery;
+            // retain that uncertainty instead of guessing or merging counters.
+            // Reserve inactive declarations too, so toggling a pool condition
+            // cannot rename this fallback or redirect its source reference.
+            let authoredIDs=Set(definitions.flatMap { ($0.1.spellPools ?? []).map(\.id) })
+            let base=cls.id+":legacy-slots"
+            var id=base, suffix=1
+            while authoredIDs.contains(id) { id=base+"#\(suffix)"; suffix += 1 }
+            result.spellPools.append(.init(id:id,sourceID:cls.id,name:cls.name+" (legacy slots)",kind:.custom,recovery:"Unspecified (legacy source)",capacities:[result.slotLevel:result.slots]))
+            legacyPoolIDs=[id]
+        }
+        if let cls, let ability=cls.spellAbility, !legacyCastingSpells.isEmpty, !replacesLegacyCasting {
+            let mod=Ability.modifier(result.scores[ability.rawValue,default:10])
+            let ids=legacyCastingSpells.map(\.id)
+            let labels=Dictionary(uniqueKeysWithValues:legacyCastingSpells.map { ($0.id,result.grantedSpellIDs.contains($0.id) ? "Granted (legacy)" : "Known (legacy)") })
+            result.castingSources.append(.init(id:cls.id+":legacy",sourceID:cls.id,name:cls.name+" (legacy casting)",ability:ability,dc:8+result.proficiency+mod,attack:result.proficiency+mod,maximumSpellLevel:result.slotLevel,acquisitionPolicy:.known,editableLoadout:false,preparationCount:0,poolIDs:legacyPoolIDs,availableSpellIDs:cls.spellIDs,memberSpellIDs:ids,selectedLoadout:ids,spellLabels:labels))
+        }
+        Spellcasting.project(build:build, pack:pack, level:level, policies:activePolicies, pools:activePools, result:&result)
         return result
     }
 }

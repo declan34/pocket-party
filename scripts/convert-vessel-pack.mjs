@@ -185,12 +185,25 @@ classCapabilities.grants.push(grant('iridescent-die','trait',{text:'Iridescent S
   grant('extra-attack-count','trait',{level:5,text:'Attacks per Attack action',value:{base:2},condition:{kind:'not',children:[together(pred('subclass','the-cursed'),pred('configuration','archon'),{kind:'level',minimum:20})]}}),
   grant('primeval-will-uses','resource',{level:10,target:'Primeval Will',value:{abilities:['cha'],minimum:1},recovery:'long rest'}));
 const bySubclass=new Map(subclasses.map(s=>[s.id,s.capabilities]));
+// Actual source half-speed pact progression, NOT the ordinary-half or Warlock
+// progression. Ascended changes spell selection but keeps this same capacity.
+classCapabilities.spellPools=[{id:'vessel-pact',name:'Vessel pact slots',kind:'pact',recovery:'short or long rest',capacities:levels.map(level=>scaled('spell-slots',level)>0?{[scaled('slot-level',level)]:scaled('spell-slots',level)}:{})}];
+classCapabilities.casting.find(p=>p.id==='vessel-known').poolIDs=['vessel-pact'];
 bySubclass.get('the-ascended').casting=[{id:'ascended-prepared',name:'Ascended preparation',mode:'prepared',ability:'cha',spellIDs:[...new Set([...knownIDs,...wizardIDs.filter(id=>spells.get(id).level<=5)])],counts:counts.map((n,i)=>i<2?0:n),maximumSpellLevels:maximum,text:'Prepare from Vessel or verified Wizard list; prepared rituals may be cast as rituals. Sealed Magic is additional.'}];
+bySubclass.get('the-ascended').casting[0].loadout='editable';
+bySubclass.get('the-ascended').casting[0].legacyClassCasting='replace';
+bySubclass.get('the-ascended').casting[0].poolIDs=['vessel-pact'];
+bySubclass.get('the-ascended').spellPools=[];
 for(const [tier,unlock] of [[5,15],[6,20]]) {
   bySubclass.get('the-ascended').casting.push({id:'ascended-arcanum-'+tier,name:'Ascended Arcanum '+tier,mode:'limited',ability:'cha',spellIDs:wizardIDs.filter(id=>spells.get(id).level===tier),counts:from(unlock),maximumSpellLevels:levels.map(()=>tier),replacementLimits:zeros,text:'One selected Wizard spell, cast once per long rest without a slot.'});
   bySubclass.get('the-ascended').grants.push(grant('ascended-arcanum-'+tier+'-uses','resource',{level:unlock,target:'Ascended Arcanum '+tier,value:{base:1},recovery:'long rest'}));
+  bySubclass.get('the-ascended').spellPools.push({id:'ascended-arcanum-'+tier+'-pool',name:'Ascended Arcanum '+tier,kind:'limited',recovery:'long rest',capacities:levels.map(level=>level>=unlock?{[tier]:1}:{})});
+  bySubclass.get('the-ascended').casting.at(-1).poolIDs=['ascended-arcanum-'+tier+'-pool'];
+  bySubclass.get('the-ascended').casting.at(-1).legacyClassCasting='preserve';
 }
 for(const g of bySubclass.get('the-ascended').grants) if(g.kind==='spell') g.spellMode='prepared';
+// New typed pools replace these generic counters; no double-counted allowance.
+bySubclass.get('the-ascended').grants=bySubclass.get('the-ascended').grants.filter(g=>!/^ascended-arcanum-\d+-uses$/.test(g.id));
 bySubclass.get('the-ascended').grants.push(note('ascended-rituals','Prepared spells may be cast as rituals; Ascended Magic is always prepared and does not consume preparation choices.'));
 bySubclass.get('the-cataclysm').groups=[{id:'affinity',name:'Elemental Affinity',counts:from(3),locked:true,options:['air','earth','fire','water'].map((element,i)=>({id:'affinity-'+element,name:element,text:'Select the bound elemental affinity.',grants:[note('affinity-resistance-'+element,'Resistance to '+['thunder','bludgeoning','fire','cold'][i]+'; Iridescent Strikes may deal this damage type.')]}))}];
 bySubclass.get('the-cursed').groups=[{id:'cursed-bonus',name:'Malignant Aura bonus Aspect',counts:from(3),locked:true,requiredOptionIDs:aspects.filter(a=>a.id.startsWith('striking-presence-')).map(a=>a.id),waiveRequiredFamilyIfOwned:true,options:aspects}];
@@ -280,11 +293,15 @@ for(const profile of Object.values(ARCHON_PROFILES)) {
   for(const item of source.items??[]) grants.push(note(profile.profile+'-'+item.system.identifier,plain(item.system.description.value),condition));
 }
 const classFeatures=grantedFeatures(vessel);
+for(const data of [classCapabilities,...bySubclass.values()]) {
+  const grants=[...(data.grants??[]),...(data.groups??[]).flatMap(group=>group.options.flatMap(option=>option.grants))];
+  for(const g of grants) if(g.kind==='spell') g.ability='cha';
+}
 classFeatures.find(f=>f.id==='unchained-power').text=sourceReview.resolved.find(r=>r.id==='unchained-power').mechanics;
 const progression=levels.map(level=>({level,talents:scaled('aspects-known',level),cantrips:scaled('cantrips-known',level),spells:scaled('spells-known',level),slots:scaled('spell-slots',level),slotLevel:scaled('slot-level',level),improvement:[4,8,12,16,19].includes(level)}));
-const pack={schemaVersion:2,capabilities:{version:1,required:['choices','modifiers','casting','resources','traits','proficiencies','configuration','languages']},id:'private.vessel',version:'0.4.0',name:'Vessel · private playtest',ruleset:'2024',isPrivate:true,
+const pack={schemaVersion:2,capabilities:{version:1,required:['choices','modifiers','casting','resources','traits','proficiencies','configuration','languages','spell-pools']},id:'private.vessel',version:'0.5.0',name:'Vessel · private playtest',ruleset:'2024',isPrivate:true,
   attribution:'Private conversion of your corrected LaserLlama Vessel module and existing book/SRD sources. Original authors retain their content. No PDF was re-extracted.',
-  coverageNotes:['Levels 1–20, single class, standard array, fixed-average HP. Six supplied subclasses and all 24 Aspects; unresolved source references block affected builds.', 'Standard spells only: revised versions preferred, exact legacy fallback where present. LL spell identities are not silently substituted.', 'Equipment, combat expenditure and lifecycle, multiclassing and heterogeneous spell pools remain outside this slice.', 'Inherited descriptions may contain extraction artifacts; verified mechanical corrections are recorded in the private report.'],
+  coverageNotes:['Levels 1–20, single class, standard array, fixed-average HP. Six supplied subclasses and all 24 Aspects; unresolved source references block affected builds.', 'Standard spells only: revised versions preferred, exact legacy fallback where present. LL spell identities are not silently substituted.', 'Vessel retains its half-speed pact pool. Ascended preparation is editable independently; Arcanum has separate tier-5 and tier-6 long-rest capacities. Minor Magick uses distinct Sealed Magic spell choices at cast time, not slots or permanent selections.', 'Equipment, combat expenditure and lifecycle, and multiclassing remain outside this slice.', 'Inherited descriptions may contain extraction artifacts; verified mechanical corrections are recorded in the private report.'],
   languages:['Dwarvish','Elvish','Giant','Gnomish','Goblin','Halfling','Orc','Draconic','Common Sign Language'],
   species,backgrounds,feats,spells:[...spells.values()],classes:[{id:'vessel',name:vessel.name,summary:'A sealed spirit. A borrowed power. A life of your own.',hitDie:Number(vessel.system.hd.denomination.slice(1)),primaryAbility:'cha',spellAbility:'cha',saves:traits.flatMap(a=>a.configuration.grants??[]).filter(x=>x.startsWith('saves:')).map(x=>x.split(':')[1]),skillCount:classSkills.count,skillPool:classSkills.pool.map(x=>skillNames[x.split(':')[1]]),subclassLevel:3,talentLabel:'Unsealed Aspects',features:classFeatures,talents,subclasses,progression,spellIDs:[...new Set(spellIDs)],equipment:'Starting equipment choices are present in Mortal Vessel prose. Review those choices with your GM; structured inventory and armor tracking await I5.',armorFormula:'unarmored',capabilities:classCapabilities}]};
 const destination=join(root,'PrivatePacks');mkdirSync(destination,{recursive:true});

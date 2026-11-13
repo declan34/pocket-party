@@ -53,7 +53,7 @@ console.log('Built original example pack.');
 // Separate fixture keeps every old-format byte/choice contract available for characterization.
 const capable = structuredClone(pack);
 capable.schemaVersion = 2;
-capable.id = 'original.capability-lab'; capable.version = '1.3.0'; capable.name = 'Trail Warden · capability laboratory';
+capable.id = 'original.capability-lab'; capable.version = '1.4.0'; capable.name = 'Trail Warden · capability laboratory';
 capable.capabilities = {version:1,required:['choices','modifiers','casting','editions','resources','traits','proficiencies','configuration','languages']};
 capable.classes = [structuredClone(pack.classes[0])];
 const warden = capable.classes[0];
@@ -128,7 +128,19 @@ summit.capabilities={edition:'2024',grants:[
   {id:'summit-strength',kind:'abilityScore',target:'str',value:{base:4},level:20}
 ]};
 capable.classes.push(summit);
+// Common slot arithmetic verified from SRD 5.2.1 p77 / 5.1 p52; original
+// acquisition/content below deliberately does not represent a complete Wizard.
+const fullSlots=[[2],[3],[4,2],[4,3],[4,3,2],[4,3,3],[4,3,3,1],[4,3,3,2],[4,3,3,3,1],[4,3,3,3,2],[4,3,3,3,2,1],[4,3,3,3,2,1],[4,3,3,3,2,1,1],[4,3,3,3,2,1,1],[4,3,3,3,2,1,1,1],[4,3,3,3,2,1,1,1],[4,3,3,3,2,1,1,1,1],[4,3,3,3,3,1,1,1,1],[4,3,3,3,3,2,1,1,1],[4,3,3,3,3,2,2,1,1]];
+const notebook=structuredClone(summit);
+notebook.id='notebook-keeper';notebook.name='Notebook Keeper';notebook.summary='Original book and dual-source casting laboratory, not an official class.';
+notebook.progression.forEach(row=>row.improvement=false);
+notebook.capabilities={edition:'2024',spellPools:[{id:'notebook-slots',name:'Notebook slots',kind:'ordinary',recovery:'long rest',capacities:fullSlots.map(row=>Object.fromEntries(row.map((count,i)=>[i+1,count])))}],casting:[{id:'notebook-study',name:'Notebook study',mode:'book',ability:'int',spellIDs:['sheltering-glow','borrowed-dawn'],counts:summitLevels.map(()=>2),maximumSpellLevels:summitLevels.map(()=>1),preparedCounts:summitLevels.map(()=>1),loadout:'editable',poolIDs:['notebook-slots'],text:'Two learned original spells; choose one current preparation. Higher slots do not grant knowledge.'}]};
+notebook.subclasses[0].name='Echo Companion';
+notebook.subclasses[0].capabilities={edition:'2024',spellPools:[{id:'echo-charge',name:'Echo charge',kind:'custom',recovery:'short rest',capacities:summitLevels.map(level=>level<3?{}:{1:1})}],casting:[{id:'echo-voice',name:'Echo voice',mode:'limited',ability:'cha',spellIDs:['little-beacon'],counts:summitLevels.map(level=>level<3?0:1),maximumSpellLevels:summitLevels.map(()=>0),poolIDs:['echo-charge'],loadout:'retained'}]};
+capable.classes.push(notebook);
+notebook.subclasses[0].capabilities.casting[0].legacyClassCasting='preserve';
+capable.capabilities.required.push('spell-pools');
 capable.feats.find(f=>f.id==='ability-improvement').repeatable=true;
-capable.coverageNotes=['Original mechanism fixtures; names do not certify official subclasses.','Summit Warden supports explicit levels 1–20. Early laboratories retain their authored 1–5 limits.','One class and uniform spell pool only. Tiered pools, multiclass and equipment remain pending.'];
+capable.coverageNotes=['Original mechanism fixtures; names do not certify official subclasses.','Summit Warden and Notebook Keeper support explicit levels 1–20. Early laboratories retain their authored 1–5 limits.','Notebook Keeper demonstrates tiered ordinary capacity, a separate custom pool, two casting abilities and editable book preparation. Multiclass and equipment remain pending.'];
 writeFileSync(new URL('../Sources/FolioCore/Resources/capability-pack.json',import.meta.url), JSON.stringify(capable,null,2)+'\n');
 console.log('Built original schema-2 capability fixture.');

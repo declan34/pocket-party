@@ -61,6 +61,69 @@ import AppKit
         }
         try check(casterWidgets.first(where:{$0.fieldName == "Text112"})?.widgetStringValue?.isEmpty != false,"obsolete level-one slot tier blank")
         try casterData.write(to:output.appendingPathComponent("caster-2024.pdf"))
+        var mixedPack=pack; mixedPack.schemaVersion=2; mixedPack.capabilities = .init(required:["spell-pools"])
+        mixedPack.classes[0].capabilities = .init(edition:"2024")
+        mixedPack.species[0].capabilities = .init(edition:"2024")
+        mixedPack.species[0].capabilities?.spellPools=[.init(id:"native-charge",name:"Native charge",kind:.limited,recovery:"long rest",capacities:Array(repeating:[1:1],count:5))]
+        var mixedBuild=caster; mixedBuild.rulesProfile = .init(edition:"2024")
+        let mixedSheet=PrintableSheet(record:.init(pack:mixedPack,build:mixedBuild))
+        try check(!mixedSheet.isDraft,"mixed legacy and typed pool fixture valid")
+        let mixedData=try SheetPDF.render(mixedSheet,template:template)
+        let mixedText=(PDFDocument(data:mixedData)?.string ?? "").filter { !$0.isWhitespace }
+        try check(mixedText.contains("legacyslots") && mixedText.contains("Tier2:2") && mixedText.contains("Unspecified(legacysource)") && mixedText.contains("Nativecharge") && mixedText.contains("Tier1:1") && mixedText.contains("longrest"),"legacy and typed pool capacities retain distinct source and recovery in PDF")
+        try mixedData.write(to:output.appendingPathComponent("mixed-legacy-pools-2024.pdf"))
+        // A subclass's independent policy must not erase the legacy class roster.
+        mixedPack.classes[0].subclasses[0].capabilities=mixedPack.species[0].capabilities
+        mixedPack.species[0].capabilities=nil
+        var independent=CastingPolicy(id:"sub-innate",name:"Subclass innate",mode:.limited,ability:.wis,spellIDs:["paper-bird"],counts:[0,0,1,1,1],maximumSpellLevels:[0,0,0,0,0])
+        independent.poolIDs=["native-charge"]; independent.legacyClassCasting = .preserve
+        mixedPack.classes[0].subclasses[0].capabilities?.casting=[independent]
+        for index in 2..<mixedBuild.levels.count { mixedBuild.levels[index].capabilities = .init(spells:["sub-innate":["paper-bird"]]) }
+        let subclassSheet=PrintableSheet(record:.init(pack:mixedPack,build:mixedBuild))
+        try check(!subclassSheet.isDraft && subclassSheet.fields["spell.dc"]==nil,"additive subclass source keeps valid distinct abilities")
+        let subclassData=try SheetPDF.render(subclassSheet,template:template)
+        let subclassText=(PDFDocument(data:subclassData)?.string ?? "").filter { !$0.isWhitespace }
+        try check(subclassText.contains("legacycasting") && subclassText.contains("BorrowedDawn") && subclassText.contains("Subclassinnate") && subclassText.contains("Charisma") && subclassText.contains("Wisdom"),"legacy acquired roster and both source abilities survive additive subclass PDF export")
+        try subclassData.write(to:output.appendingPathComponent("additive-subclass-casting-2024.pdf"))
+        // Original dual-source fixture: nine ordinary tiers, independent custom
+        // capacity, different abilities, and more than the form's 30 spell rows.
+        var tierPack=try ContentPack.capabilitySample()
+        let notebookIndex=tierPack.classes.firstIndex { $0.id == "notebook-keeper" }!
+        var notes:[String]=[]
+        for i in 1...35 {
+            var spell=tierPack.spells[0]; spell.id="pdf-note-\(i)"; spell.name="Notebook note \(i)"; spell.level=1
+            spell.text="BodyForNote\(i): Original public PDF overflow fixture."; tierPack.spells.append(spell); notes.append(spell.id)
+        }
+        tierPack.classes[notebookIndex].capabilities?.casting?[0].spellIDs=notes
+        tierPack.classes[notebookIndex].capabilities?.casting?[0].counts=Array(repeating:35,count:20)
+        var tierBuild=b; tierBuild.classID="notebook-keeper"; tierBuild.rulesProfile = .init(edition:"2024")
+        tierBuild.name="Notebook tier and source check"; tierBuild.levels=[]
+        for at in 1...20 {
+            var choice=LevelChoice(level:at)
+            if at>=3 { choice.subclassID=tierPack.classes[notebookIndex].subclasses[0].id }
+            choice.capabilities = .init(spells:["notebook-study":notes],prepared:["notebook-study":[notes[0]]])
+            if at>=3 { choice.capabilities?.spells?["echo-voice"]=["little-beacon"] }
+            tierBuild.levels.append(choice)
+        }
+        tierBuild.castingLoadouts=["notebook-study":[notes[1]]]
+        let tierSheet=PrintableSheet(record:.init(pack:tierPack,build:tierBuild))
+        try check(!tierSheet.isDraft,"tiered dual-source fixture valid")
+        let tierData=try SheetPDF.render(tierSheet,template:template), tierDoc=PDFDocument(data:tierData)!
+        let tierWidgets=(0..<tierDoc.pageCount).flatMap { tierDoc.page(at:$0)!.annotations }
+        for tier in 1...9 {
+            let key="slots.\(tier)", physical=SheetPDF.fieldMap["slots.\(tier)"]!
+            try check(tierWidgets.first { $0.fieldName == physical }?.widgetStringValue == tierSheet.fields[key],"tier \(tier) editable capacity preserved")
+        }
+        try check(tierSheet.fields["spell.dc"] == nil && tierSheet.fields["spell.ability"] == nil,"mixed abilities do not occupy misleading scalar fields")
+        let tierText=(tierDoc.string ?? "").filter { !$0.isWhitespace }
+        for i in 1...35 { try check(tierText.contains("pdf-note-\(i)"),"overflow source member \(i) survives native rendering") }
+        try check(tierText.contains("Echocharge") && tierText.contains("shortrest") && tierText.contains("Notebookstudy") && tierText.contains("Spellbook") && tierText.contains("Intelligence") && tierText.contains("Charisma"),"independent pools, source abilities and spell classifications survive rendering")
+        try tierData.write(to:output.appendingPathComponent("tiered-casting-2024.pdf"))
+        for i in 1...35 {
+            let heading="Notebooknote\(i)(level1)"
+            let page=(2..<tierDoc.pageCount).first { (tierDoc.page(at:$0)?.string ?? "").filter { !$0.isWhitespace }.contains(heading) }
+            try check(page != nil && (tierDoc.page(at:page!)?.string ?? "").contains("BodyForNote\(i):"),"spell heading \(i) stays with its first body line")
+        }
         #if os(macOS)
         for i in 0..<doc.pageCount {
             let p=doc.page(at:i)!, bounds=doc.page(at:i)!.bounds(for:.mediaBox)

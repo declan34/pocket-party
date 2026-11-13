@@ -125,6 +125,18 @@ public struct CapabilityConfiguration: Codable, Sendable, Hashable, Identifiable
 }
 
 public struct CastingPolicy: Codable, Sendable, Hashable, Identifiable {
+    /// Subclass interaction with legacy class acquisition. Absence preserves
+    /// the historical implicit replacement contract of older pinned definitions.
+    public enum LegacyClassCasting: String, Codable, Sendable { case preserve, replace }
+    public var legacyClassCasting: LegacyClassCasting? = nil
+    /// Absent retains historical schema-2 preparation semantics. Retained lists
+    /// (even when their displayed name says Prepared) are not daily loadouts.
+    public enum Loadout: String, Codable, Sendable { case editable, retained }
+    public var loadout: Loadout? = nil
+    public var poolIDs: [String]? = nil
+    public var preparation: RuleValue? = nil
+    /// Automatic additions are separately classified and never spend picks.
+    public var alwaysGrantedSpellIDs: [String]? = nil
     public enum Mode: String, Codable, Sendable { case known, prepared, book, granted, ritual, limited, atWill }
     public var id: String
     public var name: String
@@ -144,6 +156,7 @@ public struct CastingPolicy: Codable, Sendable, Hashable, Identifiable {
 }
 
 public struct DefinitionCapabilities: Codable, Sendable, Hashable {
+    public var spellPools: [SpellPool]? = nil
     public var edition: String
     public var grants: [CapabilityGrant]?
     public var groups: [CapabilityChoiceGroup]?

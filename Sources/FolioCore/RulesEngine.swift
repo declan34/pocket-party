@@ -8,6 +8,8 @@ public struct BuildIssue: Identifiable, Equatable, Sendable {
 }
 
 public struct CharacterSummary: Sendable {
+    public var spellPools: [SpellPoolSummary] = []
+    public var castingSources: [CastingSourceSummary] = []
     public var languages: [String] = []
     public var size: String? = nil
     public var activeGroupIDs: Set<String> = []
@@ -60,7 +62,7 @@ public enum RulesEngine {
     ]
 
     public static func evaluate(_ build: CharacterBuild, in pack: ContentPack, through requestedLevel: Int? = nil) -> CharacterSummary {
-        if build.rulesProfile != nil || (pack.schemaVersion == 2 && pack.classes.first(where: { $0.id == build.classID })?.capabilities != nil) {
+        if build.rulesProfile != nil || build.castingLoadouts != nil || (pack.schemaVersion == 2 && pack.classes.first(where: { $0.id == build.classID })?.capabilities != nil) {
             return CapabilityEngine.evaluate(build, in: pack, through: requestedLevel)
         }
         var result = evaluateLegacy(build, in: pack, through: requestedLevel)
@@ -70,7 +72,7 @@ public enum RulesEngine {
             let subclass = pack.classes.first { $0.id == build.classID }?.subclasses.first { $0.id == choices.last?.subclassID }
             let definitions = [pack.species.first { $0.id == build.speciesID }?.capabilities, background?.capabilities, subclass?.capabilities].compactMap { $0 }
                 + pack.feats.filter { feat in feat.id == background?.originFeatID || choices.contains { $0.featID == feat.id } }.compactMap(\.capabilities)
-            if definitions.contains(where: { $0.edition != "2024" || !($0.grants ?? []).isEmpty || !($0.groups ?? []).isEmpty || !($0.casting ?? []).isEmpty || !($0.configurations ?? []).isEmpty }) || choices.contains(where: { $0.capabilities != nil }) {
+            if definitions.contains(where: { $0.edition != "2024" || !($0.grants ?? []).isEmpty || !($0.groups ?? []).isEmpty || !($0.casting ?? []).isEmpty || !($0.spellPools ?? []).isEmpty || !($0.configurations ?? []).isEmpty }) || choices.contains(where: { $0.capabilities != nil }) || build.castingLoadouts != nil {
                 result.issues.append(.init(code: "cap-upgrade-required", message: "These selected choices require an explicit evaluator-2 review copy. Legacy rules have not been silently upgraded."))
             }
         }

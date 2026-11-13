@@ -213,6 +213,9 @@ public struct LevelChoice: Codable, Sendable, Hashable, Identifiable {
 }
 
 public struct CharacterBuild: Codable, Sendable, Hashable, Identifiable {
+    /// Current preparation keyed by pinned, source-qualified casting policy ID.
+    /// Nil/key absence uses legacy history as a non-destructive initial loadout.
+    public var castingLoadouts: [String:[String]]? = nil
     public var rulesProfile: RulesProfile? = nil
     public var upgradeReview: [String]? = nil
     public var id: UUID

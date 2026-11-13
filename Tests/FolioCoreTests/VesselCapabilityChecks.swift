@@ -85,7 +85,10 @@ func vesselCapabilityChecks() throws {
     prepared.levels[2].capabilities?.spells?["ascended-prepared"] = [wizardOnly!,known[1]]
     try check(RulesEngine.evaluate(prepared, in: pack).isValid, "Actual Wizard-only selection is accepted by Ascended preparation")
     prepared.levels[2].capabilities?.spells?["ascended-prepared"] = ["spell.shield",known[1]]
-    try check(RulesEngine.evaluate(prepared, in: pack).issues.contains { $0.code == "cap-casting-granted-spell.shield" }, "Ascended always-prepared Shield does not consume preparation")
+    try check(RulesEngine.evaluate(prepared, in: pack).issues.contains { $0.code == "cap-loadout-ascended-prepared" }, "Ascended always-prepared Shield does not consume preparation")
+    let acquisition=prepared.levels
+    prepared.castingLoadouts=["ascended-prepared":[wizardOnly!,known[1]]]
+    try check(RulesEngine.evaluate(prepared,in:pack).isValid && prepared.levels==acquisition,"Current Ascended preparation can change without rewriting prior known choices or legacy preparation seed")
     var form = build("the-formless"); form.speciesID = "halfling"
     let formSummary = RulesEngine.evaluate(form, in: pack)
     try check(formSummary.size == "Medium" && PrintableSheet(record: .init(pack: pack, build: form)).fields["size"] == "Medium", "Actual Archon size overrides a Small species in sheet projection")

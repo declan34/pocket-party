@@ -1,10 +1,10 @@
 # Schema-2 capability foundation
 
-The capability engine/editor contract below is exercised by registered original family scenarios and actual private adapter checks; see the precise [coverage and source blockers](capability-coverage.md). It does not certify all official subclasses. Explicit single-class progression supports levels 1–20. Multiclass, tiered slot pools, equipment state and combat simulation remain outside this evaluator.
+The capability engine/editor contract below is exercised by registered original family scenarios and actual private adapter checks; see the precise [coverage and source blockers](capability-coverage.md). It does not certify all official subclasses. Explicit single-class progression supports levels 1–20, source-owned tiered spell pools and editable casting loadouts. Multiclass, equipment state and combat simulation remain outside this evaluator.
 
 ## Version boundary
 
-`schemaVersion: 2` requires `capabilities: {version: 1, required: [...]}`. Supported required names are `choices`, `modifiers`, `casting`, `editions`, `resources`, `traits`, `proficiencies`, `configuration`, `languages`. Unknown required names or versions fail import. Each capability-bearing definition has explicit `edition: "2014" | "2024"`. A schema-2 build pins `rulesProfile: {edition, evaluator: 2}`; absent keys never infer a saved-character upgrade. Classes intended for evaluator 2 should declare `capabilities`, even if only `{edition: "2014"}`.
+`schemaVersion: 2` requires `capabilities: {version: 1, required: [...]}`. Supported required names are `choices`, `modifiers`, `casting`, `editions`, `resources`, `traits`, `proficiencies`, `configuration`, `languages`, `spell-pools`. Unknown required names or versions fail import. Each capability-bearing definition has explicit `edition: "2014" | "2024"`. A schema-2 build pins `rulesProfile: {edition, evaluator: 2}`; absent keys never infer a saved-character upgrade. Classes intended for evaluator 2 should declare `capabilities`, even if only `{edition: "2014"}`.
 
 `RulesEngine.evaluate(_:in:through:)` and `advance(_:in:)` retain their signatures. A legacy class with an absent profile still uses unchanged schema-1 replay, including in a mixed snapshot. `CapabilityEngine.evaluate` validates the supplied record before applying rules; invalid structural data returns `cap-invalid-content` with no calculated totals. Draft choices remain savable: missing picks are evaluation issues, not import errors.
 
@@ -57,6 +57,37 @@ Grant IDs identify nonstacking ownership across tracks. Conflicting grant defini
 
 ## Casting policies
 
+### Source-owned pools and current preparation (I3)
+
+New casting fields require `spell-pools` in the pack's required capabilities; omission fails semantic import validation. Older evaluators reject this required capability instead of silently ignoring mechanics. Old pinned schema-1 and schema-2 snapshots remain readable, including historical preparation. No installed revision rewrites them.
+
+Subclass policies declare `legacyClassCasting: "preserve" | "replace"` to distinguish independent sources from replacement. `preserve` keeps legacy class spell/cantrip acquisition, source abilities and historical validation; `replace` explicitly retains the previous replacement behavior. Absence also retains that historical behavior, so old pinned definitions do not change when unrelated new-capability content is added to a combined library. This optional field requires `spell-pools`, follows the policy through catalog qualification and save/reload, and is not inferred from the combined pack's capability union. If a subclass has multiple policies, all must declare `preserve` to be fully additive; any replacement/default policy retains replacement ownership. Class-owned casting policies still own the class tracks. Ascended explicitly replaces and conditions the existing known policy off while activating its editable preparation policy; independent Arcanum policies declare preserve.
+
+`DefinitionCapabilities.spellPools` is an optional array of `{id, name, kind, recovery, capacities, condition?}`. Kinds are `ordinary`, `pact`, `limited`, `custom`. `capacities` has 1–20 exact level rows of tier-to-capacity objects, for example `[{"1":2}, {"1":3}, {"1":4,"2":2}]`. Tiers are 1–9, capacities 0–100; `{}` means zero capacity, while a missing active row is unsupported. Recovery and stable identity are mandatory. Conditions/unlocks use existing replay facts. Pool IDs are unique and source-qualified in snapshots; pools never merge by name or recovery. Multiple policies can reference the same pool without duplicating capacity. Inactive referenced pools block completion.
+
+Additional `CastingPolicy` fields:
+
+- `poolIDs`: declared pools in the owning definition/class scope. Cantrips and at-will sources need no pool.
+- `loadout: "editable" | "retained"`: editable applies only to book/prepared acquisition. Retained lists obey historical replacement limits even if their displayed name is Prepared. Absence retains old schema-2 semantics.
+- `preparation`: bounded `RuleValue` allowance, instead of `preparedCounts`, e.g. `{abilities:["int"], levelMultiplier:1, minimum:1}`. Source scores resolve after historical ability effects. Prepared-list policies can use `counts` as the allowance.
+- `alwaysGrantedSpellIDs`: unconditional additional spells that never spend acquisition/preparation picks. Prepared/book policies label these always prepared. Use existing spell grants for level-dependent/conditional additions rather than an all-level list.
+
+`CharacterBuild.castingLoadouts` is current configuration keyed by pinned policy ID. Book `LevelChoice.capabilities.spells` remains historical learned membership, validated at every level; loadout edits cannot erase it or legalize earlier mistakes. A prepared-list source chooses from its available list, not a permanent book. Preparation checks duplicates, eligibility and the declared allowance. Empty/incomplete loadouts remain savable drafts. Unknown/inactive keys remain visible for explicit review/clearing; retained sources cannot accept loadouts.
+
+Missing keys seed from historical `prepared` (book) or `spells` (prepared list) without mutating history; explicit empty lists do not fall back. Earlier `through:` evaluation uses historical seeds rather than today's preparation. Native Build edits current preparation only at the latest level; book acquisition remains level-by-level. Found-spell copying beyond authored acquisition counts is not implemented.
+
+`CharacterSummary.spellPools` exposes pool/owning source identity, kind, name, recovery and `[Int:Int]` capacities. `castingSources` exposes policy/source identity, ability, DC/attack, access ceiling, acquisition mode, available/learned membership, selected loadout, allowance, linked pools and classifications. Spell grants with explicit `ability` receive source summaries too. Legacy class casting plus innate casting retains both abilities. Legacy `slots`/`slotLevel` fields remain unchanged; scalar DC/attack become nil when multiple abilities make one number misleading.
+
+Native Sheet/PDF consume these projections. The form's nine tier fields show exactly one ordinary pool, never pact/custom/limited pools or a sum of independent pools. Supplements label every pool/source and preserve all spells/classifications beyond 30 form rows. Legacy-only form output keeps its uniform pool. No spending/rest simulation occurs; higher capacity never unlocks knowledge.
+
+### Verified common arithmetic, not inferred class rules
+
+The original Notebook Keeper uses full ordinary capacity rows verified from [SRD 5.2.1](https://media.dndbeyond.com/compendium-images/srd/5.2/SRD_CC_v5.2.1.pdf), printed page 77, and [SRD 5.1](https://media.wizards.com/2023/downloads/dnd/SRD_CC_v5.1.pdf), page 52. Its two-spell acquisition is deliberately **not** a full Wizard implementation. Registered twenty-row checks also verify half-caster tables (5.2.1 page 53 / 5.1 page 30) and pact tables (5.2.1 page 71 / 5.1 page 46). Revised Paladin has level-one capacity; legacy Paladin does not. Single-class tables are explicit, not multiclass rounding.
+
+Revised Wizard preparation counts are `[4,5,6,7,9,10,11,12,14,15,16,16,17,18,19,21,22,23,24,25]` (5.2.1 page 77); legacy preparation is `max(1, Wizard level + INT modifier)` (5.1 page 53). Book acquisition and preparation stay separate. Revised Warlock's retained list is labeled Prepared but replaces one spell upon gaining a Warlock level (5.2.1 page 72): author retained, not editable. Arcanum is independent limited capacity, not higher pact slots. No class-name switch or automatic full/half/fractional inference exists. Fractional checks use original custom rows; unsupplied commercial subclasses remain uncertified. These sources do not permit publishing private descriptions or claiming complete official content coverage.
+
+### Historical schema-2 behavior
+
 `CastingPolicy` declares `id`, `name`, `mode`, `ability`, exact eligible `spellIDs`, `counts`, `maximumSpellLevels`, optional `replacementLimits`, `preparedCounts`, `condition`, `text`. Modes: known, prepared, book, granted, ritual, limited, atWill. Counts are cumulative; prepared/ritual selections may change without a known-spell replacement charge. Book acquisition (`spells`) and preparation (`prepared`) are independent, and preparation must be a distinct subset of the acquired book.
 
 A policy condition controls whether the selection track is active. To replace class-known casting at subclass unlock, condition the known policy with `not(subclass: id)` and define the prepared policy on that subclass. Historical rows retain their prior known choices; the new row clears the inactive track and fills preparation. Class and policy lists remain separate: adding an expanded list to one policy must not broaden another subclass's list. Temporary casting availability, expenditures and ritual execution are not combat simulation; do not model temporary inability to cast by deleting known choices.
@@ -65,7 +96,7 @@ Additional active spell grants do not consume `known` or `prepared` policy choic
 
 Spell grants may declare `spellMode: granted | prepared | atWill | limited | ritual` (absent means granted). This supplies an explicit roster classification; it never simulates casting or expenditure. Multiple active grants retain their classifications. An always-prepared grant is labeled `Prepared (granted)` and remains additional to preparation counts.
 
-The current printable casting header is a single ability/DC/attack projection. Simultaneous selected policies with different casting abilities explicitly block completion (`cap-casting-abilities`) until a per-policy sheet projection is implemented; the engine does not certify a misleading single total.
+Before I3, simultaneous policies with different casting abilities blocked completion with `cap-casting-abilities`. Current evaluation instead exposes each source's ability/DC/attack and leaves the single form header blank when multiple abilities would make it misleading; see the source-owned contract above.
 
 ## Presentation and copy review
 

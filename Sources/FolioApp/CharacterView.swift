@@ -360,12 +360,24 @@ struct CharacterSheet: View {
                     }
                 }
             }
-            if summary.slots > 0 {
+            if summary.slots > 0 || !summary.castingSources.isEmpty || !summary.spellPools.isEmpty {
                 FolioPanel(title: "Magic", subtitle: "These are build capacities, not a live combat tracker.") {
-                    HStack {
+                    if summary.spellPools.isEmpty { HStack {
                         StatView(value: "\(summary.slots)", label: "Level-\(summary.slotLevel) slots")
-                        StatView(value: "\(summary.spellDC ?? 0)", label: "Spell save DC")
-                        StatView(value: signed(summary.spellAttack ?? 0), label: "Spell attack")
+                        if let dc=summary.spellDC { StatView(value: "\(dc)", label: "Spell save DC") }
+                        if let attack=summary.spellAttack { StatView(value: signed(attack), label: "Spell attack") }
+                    } }
+                    ForEach(summary.spellPools) { pool in
+                        Text("\(pool.name) · \(pool.kind.rawValue.capitalized)").font(.headline)
+                        Text("\(pool.capacityDescription) · \(pool.recovery)").font(.subheadline)
+                    }
+                    ForEach(summary.castingSources) { source in
+                        Text(source.name).font(.headline)
+                        Text("\(source.ability.name) · DC \(source.dc) · attack \(signed(source.attack)) · access tier \(source.maximumSpellLevel)").font(.subheadline)
+                        Text(record.pack.sourceLabels?[source.sourceID] ?? source.sourceID).font(.caption).foregroundStyle(Palette.muted)
+                        ForEach(source.spellLabels.keys.sorted(),id:\.self) { id in
+                            Text("\(record.pack.spells.first { $0.id == id }?.name ?? id) · \(source.spellLabels[id] ?? "")").font(.caption)
+                        }
                     }
                     ForEach(summary.spells) { spell in
                         DisclosureGroup { Text(spell.text).font(.subheadline).padding(.vertical, 8).textSelection(.enabled) } label: {

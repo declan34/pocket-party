@@ -89,7 +89,14 @@ public struct ContentCatalog {
                 group.options = group.options.map { option in var option = option; option.id = identity(option.id); option.exclusiveGroup = option.exclusiveGroup.map(identity); option.prerequisite = predicate(option.prerequisite); option.grants = option.grants.map(grant); return option }; return group
             }
             data.configurations = data.configurations?.map { configuration in var configuration = configuration; configuration.id = identity(configuration.id); configuration.exclusiveGroup = configuration.exclusiveGroup.map(identity); configuration.prerequisite = predicate(configuration.prerequisite); return configuration }
-            data.casting = data.casting?.map { policy in var policy = policy; policy.id = identity(policy.id); policy.condition = predicate(policy.condition); policy.spellIDs = policy.spellIDs.map { key(original, "spell", $0) }; return policy }
+            data.casting = data.casting?.map { policy in
+                var policy = policy; policy.id = identity(policy.id); policy.condition = predicate(policy.condition)
+                policy.spellIDs = policy.spellIDs.map { key(original, "spell", $0) }
+                policy.alwaysGrantedSpellIDs = policy.alwaysGrantedSpellIDs?.map { key(original, "spell", $0) }
+                policy.poolIDs = policy.poolIDs?.map(identity)
+                return policy
+            }
+            data.spellPools = data.spellPools?.map { pool in var pool=pool; pool.id=identity(pool.id); pool.condition=predicate(pool.condition); return pool }
             data.adapters = data.adapters?.map { adapter in var adapter = adapter; adapter.canonicalID = identity(adapter.canonicalID); adapter.replacementGrants = adapter.replacementGrants.map(grant); return adapter }
             return data
         }

@@ -1,15 +1,15 @@
 {
   "schemaVersion": 2,
   "id": "original.capability-lab",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "name": "Trail Warden · capability laboratory",
   "ruleset": "2024",
   "isPrivate": false,
   "attribution": "Original demonstration content created for Character Folio. This is homebrew sample data, not an official D&D class or spell collection.",
   "coverageNotes": [
     "Original mechanism fixtures; names do not certify official subclasses.",
-    "Summit Warden supports explicit levels 1–20. Early laboratories retain their authored 1–5 limits.",
-    "One class and uniform spell pool only. Tiered pools, multiclass and equipment remain pending."
+    "Summit Warden and Notebook Keeper support explicit levels 1–20. Early laboratories retain their authored 1–5 limits.",
+    "Notebook Keeper demonstrates tiered ordinary capacity, a separate custom pool, two casting abilities and editable book preparation. Multiclass and equipment remain pending."
   ],
   "languages": [
     "Dwarvish",
@@ -3788,6 +3788,605 @@
           }
         ]
       }
+    },
+    {
+      "id": "notebook-keeper",
+      "name": "Notebook Keeper",
+      "summary": "Original book and dual-source casting laboratory, not an official class.",
+      "hitDie": 8,
+      "primaryAbility": "cha",
+      "spellAbility": null,
+      "saves": [
+        "wis",
+        "cha"
+      ],
+      "skillCount": 2,
+      "skillPool": [
+        "Arcana",
+        "Insight",
+        "Medicine",
+        "Persuasion",
+        "Religion",
+        "Survival"
+      ],
+      "subclassLevel": 3,
+      "talentLabel": "Practices",
+      "equipment": "A walking staff and a lantern. This demo records equipment as notes; it does not calculate purchases or armor.",
+      "armorFormula": "unarmored",
+      "features": [],
+      "talents": [],
+      "subclasses": [
+        {
+          "id": "waylight",
+          "name": "Echo Companion",
+          "text": "You lead the lost toward a place they can call home.",
+          "features": [],
+          "spells": [],
+          "capabilities": {
+            "edition": "2024",
+            "spellPools": [
+              {
+                "id": "echo-charge",
+                "name": "Echo charge",
+                "kind": "custom",
+                "recovery": "short rest",
+                "capacities": [
+                  {},
+                  {},
+                  {
+                    "1": 1
+                  },
+                  {
+                    "1": 1
+                  },
+                  {
+                    "1": 1
+                  },
+                  {
+                    "1": 1
+                  },
+                  {
+                    "1": 1
+                  },
+                  {
+                    "1": 1
+                  },
+                  {
+                    "1": 1
+                  },
+                  {
+                    "1": 1
+                  },
+                  {
+                    "1": 1
+                  },
+                  {
+                    "1": 1
+                  },
+                  {
+                    "1": 1
+                  },
+                  {
+                    "1": 1
+                  },
+                  {
+                    "1": 1
+                  },
+                  {
+                    "1": 1
+                  },
+                  {
+                    "1": 1
+                  },
+                  {
+                    "1": 1
+                  },
+                  {
+                    "1": 1
+                  },
+                  {
+                    "1": 1
+                  }
+                ]
+              }
+            ],
+            "casting": [
+              {
+                "id": "echo-voice",
+                "name": "Echo voice",
+                "mode": "limited",
+                "ability": "cha",
+                "spellIDs": [
+                  "little-beacon"
+                ],
+                "counts": [
+                  0,
+                  0,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                "maximumSpellLevels": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "poolIDs": [
+                  "echo-charge"
+                ],
+                "loadout": "retained",
+                "legacyClassCasting": "preserve"
+              }
+            ]
+          }
+        },
+        {
+          "id": "memory-keeper",
+          "name": "Memory Keeper",
+          "text": "You preserve the stories carried by abandoned places.",
+          "features": [],
+          "spells": []
+        }
+      ],
+      "progression": [
+        {
+          "level": 1,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 2,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 3,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 4,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 5,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 6,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 7,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 8,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 9,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 10,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 11,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 12,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 13,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 14,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 15,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 16,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 17,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 18,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 19,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        },
+        {
+          "level": 20,
+          "talents": 0,
+          "cantrips": 0,
+          "spells": 0,
+          "slots": 0,
+          "slotLevel": 0,
+          "improvement": false
+        }
+      ],
+      "spellIDs": [],
+      "capabilities": {
+        "edition": "2024",
+        "spellPools": [
+          {
+            "id": "notebook-slots",
+            "name": "Notebook slots",
+            "kind": "ordinary",
+            "recovery": "long rest",
+            "capacities": [
+              {
+                "1": 2
+              },
+              {
+                "1": 3
+              },
+              {
+                "1": 4,
+                "2": 2
+              },
+              {
+                "1": 4,
+                "2": 3
+              },
+              {
+                "1": 4,
+                "2": 3,
+                "3": 2
+              },
+              {
+                "1": 4,
+                "2": 3,
+                "3": 3
+              },
+              {
+                "1": 4,
+                "2": 3,
+                "3": 3,
+                "4": 1
+              },
+              {
+                "1": 4,
+                "2": 3,
+                "3": 3,
+                "4": 2
+              },
+              {
+                "1": 4,
+                "2": 3,
+                "3": 3,
+                "4": 3,
+                "5": 1
+              },
+              {
+                "1": 4,
+                "2": 3,
+                "3": 3,
+                "4": 3,
+                "5": 2
+              },
+              {
+                "1": 4,
+                "2": 3,
+                "3": 3,
+                "4": 3,
+                "5": 2,
+                "6": 1
+              },
+              {
+                "1": 4,
+                "2": 3,
+                "3": 3,
+                "4": 3,
+                "5": 2,
+                "6": 1
+              },
+              {
+                "1": 4,
+                "2": 3,
+                "3": 3,
+                "4": 3,
+                "5": 2,
+                "6": 1,
+                "7": 1
+              },
+              {
+                "1": 4,
+                "2": 3,
+                "3": 3,
+                "4": 3,
+                "5": 2,
+                "6": 1,
+                "7": 1
+              },
+              {
+                "1": 4,
+                "2": 3,
+                "3": 3,
+                "4": 3,
+                "5": 2,
+                "6": 1,
+                "7": 1,
+                "8": 1
+              },
+              {
+                "1": 4,
+                "2": 3,
+                "3": 3,
+                "4": 3,
+                "5": 2,
+                "6": 1,
+                "7": 1,
+                "8": 1
+              },
+              {
+                "1": 4,
+                "2": 3,
+                "3": 3,
+                "4": 3,
+                "5": 2,
+                "6": 1,
+                "7": 1,
+                "8": 1,
+                "9": 1
+              },
+              {
+                "1": 4,
+                "2": 3,
+                "3": 3,
+                "4": 3,
+                "5": 3,
+                "6": 1,
+                "7": 1,
+                "8": 1,
+                "9": 1
+              },
+              {
+                "1": 4,
+                "2": 3,
+                "3": 3,
+                "4": 3,
+                "5": 3,
+                "6": 2,
+                "7": 1,
+                "8": 1,
+                "9": 1
+              },
+              {
+                "1": 4,
+                "2": 3,
+                "3": 3,
+                "4": 3,
+                "5": 3,
+                "6": 2,
+                "7": 2,
+                "8": 1,
+                "9": 1
+              }
+            ]
+          }
+        ],
+        "casting": [
+          {
+            "id": "notebook-study",
+            "name": "Notebook study",
+            "mode": "book",
+            "ability": "int",
+            "spellIDs": [
+              "sheltering-glow",
+              "borrowed-dawn"
+            ],
+            "counts": [
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2
+            ],
+            "maximumSpellLevels": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "preparedCounts": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "loadout": "editable",
+            "poolIDs": [
+              "notebook-slots"
+            ],
+            "text": "Two learned original spells; choose one current preparation. Higher slots do not grant knowledge."
+          }
+        ]
+      }
     }
   ],
   "capabilities": {
@@ -3801,7 +4400,8 @@
       "traits",
       "proficiencies",
       "configuration",
-      "languages"
+      "languages",
+      "spell-pools"
     ]
   }
 }

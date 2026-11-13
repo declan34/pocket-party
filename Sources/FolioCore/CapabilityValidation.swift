@@ -1,7 +1,7 @@
 import Foundation
 
 public enum CapabilityValidation {
-    public static let supported: Set<String> = ["choices", "modifiers", "casting", "editions", "resources", "traits", "proficiencies", "configuration", "languages"]
+    public static let supported: Set<String> = ["choices", "modifiers", "casting", "editions", "resources", "traits", "proficiencies", "configuration", "languages", "spell-pools"]
 
     /// Inspect JSON containers before Codable can recursively instantiate predicates.
     public static func preflight(_ data: Data) throws {
@@ -41,6 +41,14 @@ public enum CapabilityValidation {
         let definitions = pack.classes.compactMap(\.capabilities) + pack.classes.flatMap { $0.subclasses.compactMap(\.capabilities) }
             + pack.species.compactMap(\.capabilities) + pack.backgrounds.compactMap(\.capabilities) + pack.feats.compactMap(\.capabilities)
         var canonicalGrants: [String: CapabilityGrant] = [:]
+        let allPools = definitions.flatMap { $0.spellPools ?? [] }
+        try require(Set(allPools.map(\.id)).count == allPools.count, "Duplicate spell pool identity.")
+        let newCasting = definitions.contains { !($0.spellPools ?? []).isEmpty || ($0.casting ?? []).contains { $0.loadout != nil || $0.poolIDs != nil || $0.preparation != nil || $0.alwaysGrantedSpellIDs != nil || $0.legacyClassCasting != nil } }
+        try require(!newCasting || caps.required.contains("spell-pools"), "Tiered casting requires the spell-pools capability declaration.")
+        if newCasting {
+            let policies=definitions.flatMap { $0.casting ?? [] }
+            try require(Set(policies.map(\.id)).count == policies.count, "Casting policy identities must be unique across source definitions.")
+        }
         for data in definitions {
             for g in (data.grants ?? []) + (data.groups ?? []).flatMap({ $0.options.flatMap(\.grants) }) {
                 if let prior = canonicalGrants[g.id] { try require(prior == g, "Conflicting grant identity across definitions.") }
@@ -95,14 +103,17 @@ public enum CapabilityValidation {
                 for next in references(known[id]?.prerequisite) { try visit(next, path.union([id])) }
                 completed.insert(id)
             }
-            func grant(_ g: CapabilityGrant) throws {
-                try require(identity(g.id) && (1...20).contains(g.level ?? 1), "Invalid grant identity or level.")
-                try predicate(g.condition)
-                if let v = g.value {
+            func ruleValue(_ value: RuleValue?) throws {
+                if let v = value {
                     try require((-1000...1000).contains(v.minimum ?? 0), "Unsafe rule minimum.")
                     try require((-1000...1000).contains(v.base ?? 0) && (-100...100).contains(v.levelMultiplier ?? 0) && (-10...10).contains(v.proficiencyMultiplier ?? 0) && (v.abilities?.count ?? 0) <= 6, "Unsafe rule value.")
                     try require((v.table?.count ?? 0) <= 20 && (v.table ?? []).allSatisfy { (-1000...1000).contains($0) }, "Invalid resource/value table.")
                 }
+            }
+            func grant(_ g: CapabilityGrant) throws {
+                try require(identity(g.id) && (1...20).contains(g.level ?? 1), "Invalid grant identity or level.")
+                try predicate(g.condition)
+                try ruleValue(g.value)
                 if [.proficiency, .skillAbility, .skillBonus].contains(g.kind) {
                     let saveTarget = g.kind == .proficiency && (g.target == "all-saves" || Ability.allCases.contains { "save." + $0.rawValue == g.target })
                     try require(RulesEngine.skillAbilities[g.target ?? ""] != nil || g.target == "all-skills" || saveTarget, "Unknown skill target.")
@@ -171,10 +182,25 @@ public enum CapabilityValidation {
             }
             try require((definition.adapters?.count ?? 0) <= 2 && Set((definition.adapters ?? []).map(\.edition)).count == (definition.adapters?.count ?? 0), "Duplicate or excessive edition adapters.")
             let scopedPolicies = scope.flatMap { $0.casting ?? [] }
+            let scopedPools = scope.flatMap { $0.spellPools ?? [] }
+            try require((definition.spellPools?.count ?? 0) <= 32, "Too many spell pools.")
+            for pool in definition.spellPools ?? [] {
+                try require(identity(pool.id) && !pool.name.isEmpty && pool.name.count <= 200 && !pool.recovery.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty && pool.recovery.count <= 200, "Spell pools require identity, name and recovery.")
+                try require((1...20).contains(pool.capacities.count) && pool.capacities.allSatisfy { $0.count <= 9 && $0.allSatisfy { (1...9).contains($0.key) && (0...100).contains($0.value) } }, "Invalid spell pool tier table.")
+                try predicate(pool.condition)
+            }
             try require(Set(scopedPolicies.map(\.id)).count == scopedPolicies.count, "Duplicate scoped casting policy identity.")
             let policies = definition.casting ?? []
             try require(policies.count <= 32 && Set(policies.map(\.id)).count == policies.count, "Invalid casting policy identities.")
             for policy in policies {
+                try ruleValue(policy.preparation)
+                try require(policy.preparation == nil || policy.hasEditableLoadout, "Preparation expression requires an explicit editable policy.")
+                try require(policy.preparation == nil || policy.preparedCounts == nil, "Choose one preparation allowance representation.")
+                let poolIDs = policy.poolIDs ?? [], additions = policy.alwaysGrantedSpellIDs ?? []
+                try require(Set(poolIDs).count == poolIDs.count && Set(poolIDs).isSubset(of:Set(scopedPools.map(\.id))), "Missing or duplicate casting pool reference.")
+                try require(Set(additions).count == additions.count && additions.count <= 100 && Set(additions).isSubset(of:Set(pack.spells.map(\.id))), "Missing or duplicate automatic spell.")
+                try require(!policy.hasEditableLoadout || [.prepared,.book].contains(policy.mode), "Editable loadouts require prepared or book acquisition.")
+                try require(policy.mode != .book || !policy.hasEditableLoadout || policy.preparedCounts != nil || policy.preparation != nil, "Editable book policy needs a preparation allowance.")
                 try require(identity(policy.id) && (policy.replacementLimits?.count ?? 0) <= 20 && (policy.preparedCounts?.count ?? 0) <= 20, "Invalid casting bounds.")
                 try predicate(policy.condition)
                 try require((1...20).contains(policy.counts.count) && policy.counts.allSatisfy { (0...100).contains($0) }, "Invalid casting counts.")

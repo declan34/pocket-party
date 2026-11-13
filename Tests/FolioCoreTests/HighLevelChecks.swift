@@ -214,7 +214,7 @@ func vesselHighLevelSourceChecks() throws {
         try check(s.slots == 4 && s.slotLevel == 5 && s.proficiency == 6 && s.hitPoints == 224, "Source HP/PB/uniform pool at 20 for \(sub.id): HP \(s.hitPoints)")
         try check(s.traits.contains("Iridescent Strike die sides: 12"), "Actual high-level die scaling")
         try check(s.resources.filter { $0.name.hasPrefix("Minor Magick") }.count == 2, "Repeatable Minor Magick retains two distinct capacities")
-        if sub.id == "the-ascended" { try check(s.traits.contains("fly speed (ft): 30") && s.resources.filter { $0.name.hasPrefix("Ascended Arcanum") }.count == 2, "Ascended capstone movement and separate limited uses") }
+        if sub.id == "the-ascended" { try check(s.traits.contains("fly speed (ft): 30") && s.spellPools.filter { $0.name.hasPrefix("Ascended Arcanum") && $0.kind == .limited && $0.recovery == "long rest" }.count == 2, "Ascended capstone movement and separate limited uses") }
         if sub.id == "the-fallen" { try check(s.traits.contains("fly speed (ft): 60"), "Fallen bonus Wings calculate flight") }
         if sub.id == "the-cataclysm" {
             try check(!s.resources.contains { $0.id == "cataclysmic-eruption-uses" } && s.traits.contains("Cataclysmic Eruption: at will in Archon Form"), "Reviewed Cataclysm20 grants at-will eruption, not a misleading limited capacity")

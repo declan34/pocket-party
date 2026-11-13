@@ -1,6 +1,6 @@
 # Rules capability and content coverage
 
-This inventory was established before implementation on 2026-11-12. No row is verified merely because the class exists in a menu. I1–I5 correspond to the five approved deliveries. I1 and I2 mechanism checks and source exceptions are recorded below; I3–I5 remain pending.
+This inventory was established before implementation on 2026-11-12. No row is verified merely because the class exists in a menu. I1–I5 correspond to the five approved deliveries. I1–I3 mechanism checks and source exceptions are recorded below; I4–I5 remain pending.
 
 ## Source inventory
 
@@ -30,6 +30,14 @@ The corrected Vessel module inventory is version 1.11.0, revision `c7b5ac9dbbc2b
 I4 owns entry prerequisites, starting versus later training, class-local advancement, canonical nonstacking identities and explicitly declared caster contributions for every family. Each relevant row must be covered by registered original scenarios before its owning delivery is complete. Unsupplied official subclasses remain unverified content even if their equivalent engine capability passes.
 
 ## Actual Vessel gate
+
+### I3 tiered casting evidence
+
+Registered `SpellcastingChecks.swift` scenarios cover twenty-row full/half/pact and original fractional/custom tables; nine-tier projection and 35-spell overflow; independent casting abilities; source-qualified pool/policy/spell identity; subclass unlocks; innate grants and limited pools; always-granted versus learned/prepared/book classification; editable versus retained Prepared lists; formula allowances; capability gating/bounds; invalid/empty loadouts; deterministic earlier replay, pinned saves and backups. Common arithmetic citations and authoring boundaries are beside the contract. The generated Notebook Keeper is original content, not an official class.
+
+Converter **0.5.0** retains the actual Vessel half-speed pact table at every level, including four tier-five slots at 20. Ascended retains that pool while replacing known selection with editable preparation from reviewed Vessel/Wizard lists. Level-15 tier-five and level-20 tier-six Arcanum each receive independent once/long-rest pools, never extra pact slots. Previous generic Arcanum counters are replaced, not duplicated. Repeatable Minor Magick remains cast-time distinct-Sealed-Magic-spell capacity, not permanent spell selection or slots. Source spell grants carry Charisma into per-source DC/attack. All 240 private spell identities and 24 unresolved diagnostics remain.
+
+`vesselSpellPoolChecks`, `vesselCapabilityChecks` and `vesselHighLevelSourceChecks` exercise the actual private adapter when present; unresolved source text is not certified. Native PDF checks cover editable nine-tier widgets and complete source/classification overflow with original content. Interactive native verification, third-party PDF-reader editing, iPhone/device and live AI remain separate gates. The I2 notes below describe the previous 0.4.0 delivery, not a rollback of I3.
 
 ### I2 high-level mechanism evidence
 

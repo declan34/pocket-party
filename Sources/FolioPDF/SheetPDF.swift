@@ -54,7 +54,9 @@ private typealias SheetColor = UIColor
             while fontSize > 8 && (value as NSString).size(withAttributes:[.font:SheetFont(name:"Helvetica",size:fontSize)!]).width > box.width { fontSize -= 0.5 }
         }
         // PDFKit's appearance generator clips variable system fonts differently than NSString measurement.
-        // Use a fixed PDF-safe face; Core Text supplies fallback glyphs for non-Latin names.
+        // Fixed Helvetica stabilizes measurements, but widget appearance glyph
+        // fallback is not portable: Poppler can omit non-Latin characters even
+        // when canonical field values and Core Text supplement headers retain them.
         let font=SheetFont(name:"Helvetica",size:fontSize)!
         widget.font=font; widget.fontColor=SheetColor.black; widget.isMultiline=multiline
         widget.alignment = multiline || box.width > 65 ? .left : .center
@@ -80,9 +82,13 @@ private typealias SheetColor = UIColor
     }
     private static func supplementPDF(_ sections:[SheetSection],name:String,draft:Bool) throws -> PDFDocument {
         let text=NSMutableAttributedString(string:"")
+        var headings:[(start:Int,body:Int)]=[]
         let paragraph=NSMutableParagraphStyle(); paragraph.paragraphSpacing=8
         for section in sections where !section.text.isEmpty {
+            let headingStart=text.length
             text.append(NSAttributedString(string:section.title+"\n",attributes:[.font:SheetFont.boldSystemFont(ofSize:13),.paragraphStyle:paragraph]))
+            let firstBodyCharacter=(section.text as NSString).rangeOfCharacter(from:.whitespacesAndNewlines.inverted).location
+            if firstBodyCharacter != NSNotFound { headings.append((headingStart,text.length+firstBodyCharacter)) }
             text.append(NSAttributedString(string:section.text+"\n\n",attributes:[.font:SheetFont.systemFont(ofSize:10.5),.paragraphStyle:paragraph]))
         }
         // A trailing paragraph break can spill onto an otherwise empty extra page.
@@ -102,8 +108,16 @@ private typealias SheetColor = UIColor
             drawLine(header,at:CGPoint(x:36,y:760),size:11,context:context)
             drawLine("Character reference - page \(page)",at:CGPoint(x:36,y:22),size:9,context:context)
             let path=CGPath(rect:CGRect(x:36,y:42,width:540,height:694),transform:nil)
-            let frame=CTFramesetterCreateFrame(framesetter,CFRange(location:offset,length:0),path,nil)
-            let visible=CTFrameGetVisibleStringRange(frame)
+            var frame=CTFramesetterCreateFrame(framesetter,CFRange(location:offset,length:0),path,nil)
+            var visible=CTFrameGetVisibleStringRange(frame)
+            // Core Text fits whole lines but has no keep-with-next paragraph
+            // contract. If a heading fits without its first body line, move that
+            // heading to the next page. Never retry a too-tall heading at page top.
+            if let heading=headings.last(where: { $0.start > offset && $0.start < offset+visible.length }),
+               offset+visible.length <= heading.body {
+                frame=CTFramesetterCreateFrame(framesetter,CFRange(location:offset,length:heading.start-offset),path,nil)
+                visible=CTFrameGetVisibleStringRange(frame)
+            }
             guard visible.length > 0 else { throw FolioError.invalid("Unable to lay out reference text.") }
             context.textMatrix = .identity; CTFrameDraw(frame,context)
             context.endPDFPage(); offset += visible.length; page += 1
